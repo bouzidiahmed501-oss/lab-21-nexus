@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
-    meta: [{ title: "Tableau de bord — LAB 21" }],
+    meta: [{ title: "Tableau de bord — BALIMS" }],
   }),
   component: DashboardPage,
 });
@@ -75,7 +75,7 @@ function DashboardPage() {
           Tableau de bord
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Bienvenue dans votre nouveau LIMS LAB 21 — édition 2026.
+          Bienvenue dans votre plateforme BALIMS.
         </p>
       </header>
 

@@ -23,7 +23,7 @@ export function ModuleStub({ title, description, phase }: ModuleStubProps) {
           </div>
           <p className="mt-4 text-base font-semibold text-foreground">Module en construction</p>
           <p className="mt-1 max-w-md text-sm text-muted-foreground">
-            Ce module sera livré dans la prochaine itération du LIMS LAB 21.
+            Ce module sera livré dans la prochaine itération de BALIMS.
           </p>
           <Badge className="mt-4" variant="secondary">{phase}</Badge>
         </CardContent>
@@ -33,7 +33,7 @@ export function ModuleStub({ title, description, phase }: ModuleStubProps) {
 }
 
 export const Route = createFileRoute("/_authenticated/bons-commande")({
-  head: () => ({ meta: [{ title: "Bons de commande — LAB 21" }] }),
+  head: () => ({ meta: [{ title: "Bons de commande — BALIMS" }] }),
   component: () => (
     <ModuleStub
       title="Bons de commande"

@@ -16,9 +16,9 @@ export function Logo({ className, showText = true, variant = "dark" }: LogoProps
       </div>
       {showText && (
         <div className="flex flex-col leading-tight">
-          <span className={cn("text-base font-bold tracking-tight", textColor)}>LAB 21</span>
+          <span className={cn("text-base font-bold tracking-tight", textColor)}>BALIMS</span>
           <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-            LIMS 2026
+            LIMS Platform
           </span>
         </div>
       )}

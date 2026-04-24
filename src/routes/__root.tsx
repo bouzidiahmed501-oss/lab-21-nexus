@@ -41,17 +41,17 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "LAB 21 — LIMS 2026" },
+      { title: "BALIMS — Plateforme LIMS complète" },
       {
         name: "description",
         content:
-          "Système d'information du laboratoire LAB 21 (Charguia 2, Ariana). Gestion des analyses, bons de commande, facturation Elfatoora et portail client.",
+          "BALIMS — Plateforme LIMS complète : missions, bons de commande, prélèvements, analyses, rapports, facturation, équipements, RH et portail client.",
       },
-      { name: "author", content: "LAB 21" },
-      { property: "og:title", content: "LAB 21 — LIMS 2026" },
+      { name: "author", content: "BALIMS" },
+      { property: "og:title", content: "BALIMS — Plateforme LIMS complète" },
       {
         property: "og:description",
-        content: "Plateforme LIMS complète pour le laboratoire LAB 21.",
+        content: "Plateforme LIMS complète pour la gestion des laboratoires d'analyses.",
       },
       { property: "og:type", content: "website" },
     ],

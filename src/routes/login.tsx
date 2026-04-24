@@ -79,7 +79,7 @@ function LoginPage() {
             </CardTitle>
             <CardDescription>
               {mode === "login"
-                ? "Accédez au système d'information du laboratoire LAB 21."
+                ? "Accédez à votre plateforme BALIMS."
                 : "Création d'un nouveau compte utilisateur."}
             </CardDescription>
           </CardHeader>
@@ -91,7 +91,7 @@ function LoginPage() {
                   id="email"
                   type="email"
                   autoComplete="email"
-                  placeholder="prenom.nom@lab21.tn"
+                  placeholder="prenom.nom@balims.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
