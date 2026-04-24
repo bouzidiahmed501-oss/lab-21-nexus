@@ -12,7 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as PortailRouteImport } from './routes/portail'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
-import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
 import { Route as AuthenticatedRapportsRouteImport } from './routes/_authenticated/rapports'
 import { Route as AuthenticatedProjetsRouteImport } from './routes/_authenticated/projets'
@@ -39,10 +39,10 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthenticatedRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRhRoute = AuthenticatedRhRouteImport.update({
   id: '/rh',
@@ -105,7 +105,7 @@ const AuthenticatedAnalysesRoute = AuthenticatedAnalysesRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AuthenticatedIndexRoute
+  '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/portail': typeof PortailRoute
   '/analyses': typeof AuthenticatedAnalysesRoute
@@ -121,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/rh': typeof AuthenticatedRhRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/portail': typeof PortailRoute
   '/analyses': typeof AuthenticatedAnalysesRoute
@@ -134,10 +135,10 @@ export interface FileRoutesByTo {
   '/projets': typeof AuthenticatedProjetsRoute
   '/rapports': typeof AuthenticatedRapportsRoute
   '/rh': typeof AuthenticatedRhRoute
-  '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/portail': typeof PortailRoute
@@ -152,7 +153,6 @@ export interface FileRoutesById {
   '/_authenticated/projets': typeof AuthenticatedProjetsRoute
   '/_authenticated/rapports': typeof AuthenticatedRapportsRoute
   '/_authenticated/rh': typeof AuthenticatedRhRoute
-  '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -173,6 +173,7 @@ export interface FileRouteTypes {
     | '/rh'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/login'
     | '/portail'
     | '/analyses'
@@ -186,9 +187,9 @@ export interface FileRouteTypes {
     | '/projets'
     | '/rapports'
     | '/rh'
-    | '/'
   id:
     | '__root__'
+    | '/'
     | '/_authenticated'
     | '/login'
     | '/portail'
@@ -203,10 +204,10 @@ export interface FileRouteTypes {
     | '/_authenticated/projets'
     | '/_authenticated/rapports'
     | '/_authenticated/rh'
-    | '/_authenticated/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
   PortailRoute: typeof PortailRoute
@@ -235,12 +236,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/': {
-      id: '/_authenticated/'
+    '/': {
+      id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/rh': {
       id: '/_authenticated/rh'
@@ -334,7 +335,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProjetsRoute: typeof AuthenticatedProjetsRoute
   AuthenticatedRapportsRoute: typeof AuthenticatedRapportsRoute
   AuthenticatedRhRoute: typeof AuthenticatedRhRoute
-  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -349,7 +349,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedProjetsRoute: AuthenticatedProjetsRoute,
   AuthenticatedRapportsRoute: AuthenticatedRapportsRoute,
   AuthenticatedRhRoute: AuthenticatedRhRoute,
-  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -357,6 +356,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
   PortailRoute: PortailRoute,
