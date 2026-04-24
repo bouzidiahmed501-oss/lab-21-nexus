@@ -14,16 +14,205 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          ip_address: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          ip_address?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          ip_address?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      legacy_password_md5: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          legacy_user_id: number | null
+          md5_hash: string
+          rehashed: boolean
+          rehashed_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          legacy_user_id?: number | null
+          md5_hash: string
+          rehashed?: boolean
+          rehashed_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          legacy_user_id?: number | null
+          md5_hash?: string
+          rehashed?: boolean
+          rehashed_at?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          level: string
+          link: string | null
+          message: string | null
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          level?: string
+          link?: string | null
+          message?: string | null
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          level?: string
+          link?: string | null
+          message?: string | null
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          email: string
+          first_name: string | null
+          fonction: string | null
+          id: string
+          is_active: boolean
+          last_login_at: string | null
+          last_name: string | null
+          legacy_user_id: number | null
+          matricule: string | null
+          phone: string | null
+          service: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          email: string
+          first_name?: string | null
+          fonction?: string | null
+          id: string
+          is_active?: boolean
+          last_login_at?: string | null
+          last_name?: string | null
+          legacy_user_id?: number | null
+          matricule?: string | null
+          phone?: string | null
+          service?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string | null
+          fonction?: string | null
+          id?: string
+          is_active?: boolean
+          last_login_at?: string | null
+          last_name?: string | null
+          legacy_user_id?: number | null
+          matricule?: string | null
+          phone?: string | null
+          service?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role:
+        | "admin"
+        | "direction"
+        | "commercial"
+        | "chef_labo"
+        | "technicien"
+        | "qualite"
+        | "comptable"
+        | "rh"
+        | "client"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +339,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: [
+        "admin",
+        "direction",
+        "commercial",
+        "chef_labo",
+        "technicien",
+        "qualite",
+        "comptable",
+        "rh",
+        "client",
+      ],
+    },
   },
 } as const
