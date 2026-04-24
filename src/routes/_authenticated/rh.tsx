@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ModuleStub } from "./bons-commande";
 
 export const Route = createFileRoute("/_authenticated/rh")({
-  head: () => ({ meta: [{ title: "RH & Paie — LAB 21" }] }),
+  head: () => ({ meta: [{ title: "RH & Paie — BALIMS" }] }),
   component: () => (
     <ModuleStub
       title="Ressources humaines & Paie"

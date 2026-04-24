@@ -7,11 +7,11 @@ import { ExternalLink, Lock } from "lucide-react";
 export const Route = createFileRoute("/portail")({
   head: () => ({
     meta: [
-      { title: "Portail client — LAB 21" },
+      { title: "Portail client — BALIMS" },
       {
         name: "description",
         content:
-          "Portail client LAB 21 : suivez vos analyses, téléchargez vos rapports et consultez vos factures en ligne.",
+          "Portail client BALIMS : suivez vos analyses, téléchargez vos rapports et consultez vos factures en ligne.",
       },
     ],
   }),
@@ -38,8 +38,8 @@ function PortailLanding() {
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Le portail client sera livré lors de l'itération 5. En attendant,
-              contactez votre interlocuteur LAB 21 habituel.
+              Le portail client sera livré lors d'une prochaine itération. En attendant,
+              contactez votre interlocuteur BALIMS habituel.
             </p>
             <Button variant="outline" className="w-full" asChild>
               <Link to="/login">

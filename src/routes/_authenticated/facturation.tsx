@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ModuleStub } from "./bons-commande";
 
 export const Route = createFileRoute("/_authenticated/facturation")({
-  head: () => ({ meta: [{ title: "Facturation — LAB 21" }] }),
+  head: () => ({ meta: [{ title: "Facturation — BALIMS" }] }),
   component: () => (
     <ModuleStub
       title="Facturation & Elfatoora"

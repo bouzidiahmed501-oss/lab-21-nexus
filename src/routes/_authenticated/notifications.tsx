@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ModuleStub } from "./bons-commande";
 
 export const Route = createFileRoute("/_authenticated/notifications")({
-  head: () => ({ meta: [{ title: "Notifications — LAB 21" }] }),
+  head: () => ({ meta: [{ title: "Notifications — BALIMS" }] }),
   component: () => (
     <ModuleStub
       title="Centre de notifications"

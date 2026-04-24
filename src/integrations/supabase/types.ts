@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          settings: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          settings?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          settings?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           action: string
@@ -113,6 +140,51 @@ export type Database = {
           read_at?: string | null
           title?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      numbering_sequences: {
+        Row: {
+          code: string
+          created_at: string
+          current_value: number
+          current_year: number
+          format_template: string
+          id: string
+          label: string
+          padding: number
+          prefix: string
+          suffix: string
+          updated_at: string
+          year_reset: boolean
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          current_value?: number
+          current_year?: number
+          format_template?: string
+          id?: string
+          label: string
+          padding?: number
+          prefix?: string
+          suffix?: string
+          updated_at?: string
+          year_reset?: boolean
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          current_value?: number
+          current_year?: number
+          format_template?: string
+          id?: string
+          label?: string
+          padding?: number
+          prefix?: string
+          suffix?: string
+          updated_at?: string
+          year_reset?: boolean
         }
         Relationships: []
       }
