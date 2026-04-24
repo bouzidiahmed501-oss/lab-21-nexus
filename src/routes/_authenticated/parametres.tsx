@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Building2,
@@ -595,7 +595,7 @@ function IntegrationsTab({ canEdit }: { canEdit: boolean }) {
           <CardDescription>Activez les intégrations dont votre laboratoire a besoin.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          {integrations.map((it) => (
+          {INTEGRATIONS_LIST.map((it) => (
             <FieldSwitch
               key={it.key}
               label={it.label}
