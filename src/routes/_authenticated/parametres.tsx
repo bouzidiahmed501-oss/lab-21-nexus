@@ -178,7 +178,7 @@ function useSettingsForm(category: string) {
       if (!row) throw new Error("Catégorie introuvable");
       const { error } = await supabase
         .from("app_settings")
-        .update({ settings: draft, updated_by: user?.id ?? null })
+        .update({ settings: draft as never, updated_by: user?.id ?? null })
         .eq("id", row.id);
       if (error) throw error;
     },
