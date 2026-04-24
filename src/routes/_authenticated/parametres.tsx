@@ -573,19 +573,19 @@ function SecuriteTab({ canEdit }: { canEdit: boolean }) {
   );
 }
 
+const INTEGRATIONS_LIST = [
+  { key: "elfatoora_actif", label: "Elfatoora (TTN)", desc: "Facturation électronique tunisienne" },
+  { key: "google_calendar_actif", label: "Google Calendar", desc: "Synchroniser les missions et tournées" },
+  { key: "outlook_actif", label: "Microsoft Outlook", desc: "Synchroniser les emails et calendrier" },
+  { key: "iso_17025_actif", label: "Conformité ISO 17025", desc: "Activer les contrôles qualité étendus" },
+  { key: "labguard_actif", label: "LabGuard", desc: "Synchronisation des équipements et étalonnages" },
+  { key: "api_externe_actif", label: "API externe (REST)", desc: "Exposer les données via une API publique sécurisée" },
+] as const;
+
 function IntegrationsTab({ canEdit }: { canEdit: boolean }) {
   const { draft, update, save, saving, dirty, isLoading } = useSettingsForm("integrations");
   if (isLoading) return <LoadingCard />;
   const d = !canEdit;
-
-  const integrations = useMemo(() => [
-    { key: "elfatoora_actif", label: "Elfatoora (TTN)", desc: "Facturation électronique tunisienne" },
-    { key: "google_calendar_actif", label: "Google Calendar", desc: "Synchroniser les missions et tournées" },
-    { key: "outlook_actif", label: "Microsoft Outlook", desc: "Synchroniser les emails et calendrier" },
-    { key: "iso_17025_actif", label: "Conformité ISO 17025", desc: "Activer les contrôles qualité étendus" },
-    { key: "labguard_actif", label: "LabGuard", desc: "Synchronisation des équipements et étalonnages" },
-    { key: "api_externe_actif", label: "API externe (REST)", desc: "Exposer les données via une API publique sécurisée" },
-  ], []);
 
   return (
     <div className="space-y-6">
