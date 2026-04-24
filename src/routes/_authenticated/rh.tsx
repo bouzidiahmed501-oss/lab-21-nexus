@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ModuleStub } from "./bons-commande";
+import { ModuleStub } from "@/components/lab/ModuleStub";
 
 export const Route = createFileRoute("/_authenticated/rh")({
   head: () => ({ meta: [{ title: "RH & Paie — BALIMS" }] }),
