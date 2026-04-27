@@ -14,6 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
+      actions_capa: {
+        Row: {
+          audit_id: string | null
+          commentaire_efficacite: string | null
+          cout_estime: number | null
+          cout_reel: number | null
+          created_at: string
+          created_by: string | null
+          date_planifiee: string | null
+          date_realisee: string | null
+          date_verification: string | null
+          description: string
+          efficace: boolean | null
+          id: string
+          nc_id: string | null
+          numero: string
+          preuves: string | null
+          reclamation_id: string | null
+          responsable_id: string | null
+          statut: Database["public"]["Enums"]["capa_statut"]
+          titre: string
+          type: Database["public"]["Enums"]["capa_type"]
+          updated_at: string
+        }
+        Insert: {
+          audit_id?: string | null
+          commentaire_efficacite?: string | null
+          cout_estime?: number | null
+          cout_reel?: number | null
+          created_at?: string
+          created_by?: string | null
+          date_planifiee?: string | null
+          date_realisee?: string | null
+          date_verification?: string | null
+          description: string
+          efficace?: boolean | null
+          id?: string
+          nc_id?: string | null
+          numero: string
+          preuves?: string | null
+          reclamation_id?: string | null
+          responsable_id?: string | null
+          statut?: Database["public"]["Enums"]["capa_statut"]
+          titre: string
+          type?: Database["public"]["Enums"]["capa_type"]
+          updated_at?: string
+        }
+        Update: {
+          audit_id?: string | null
+          commentaire_efficacite?: string | null
+          cout_estime?: number | null
+          cout_reel?: number | null
+          created_at?: string
+          created_by?: string | null
+          date_planifiee?: string | null
+          date_realisee?: string | null
+          date_verification?: string | null
+          description?: string
+          efficace?: boolean | null
+          id?: string
+          nc_id?: string | null
+          numero?: string
+          preuves?: string | null
+          reclamation_id?: string | null
+          responsable_id?: string | null
+          statut?: Database["public"]["Enums"]["capa_statut"]
+          titre?: string
+          type?: Database["public"]["Enums"]["capa_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "actions_capa_nc_id_fkey"
+            columns: ["nc_id"]
+            isOneToOne: false
+            referencedRelation: "non_conformites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "actions_capa_reclamation_id_fkey"
+            columns: ["reclamation_id"]
+            isOneToOne: false
+            referencedRelation: "reclamations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       analyse_resultats: {
         Row: {
           analyse_id: string
@@ -195,6 +282,60 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_constats: {
+        Row: {
+          audit_id: string
+          created_at: string
+          description: string
+          exigence: string | null
+          id: string
+          nc_id: string | null
+          numero_constat: string | null
+          ordre: number
+          preuves: string | null
+          type: Database["public"]["Enums"]["constat_type"]
+        }
+        Insert: {
+          audit_id: string
+          created_at?: string
+          description: string
+          exigence?: string | null
+          id?: string
+          nc_id?: string | null
+          numero_constat?: string | null
+          ordre?: number
+          preuves?: string | null
+          type?: Database["public"]["Enums"]["constat_type"]
+        }
+        Update: {
+          audit_id?: string
+          created_at?: string
+          description?: string
+          exigence?: string | null
+          id?: string
+          nc_id?: string | null
+          numero_constat?: string | null
+          ordre?: number
+          preuves?: string | null
+          type?: Database["public"]["Enums"]["constat_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_constats_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: false
+            referencedRelation: "audits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_constats_nc_id_fkey"
+            columns: ["nc_id"]
+            isOneToOne: false
+            referencedRelation: "non_conformites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string
@@ -228,6 +369,72 @@ export type Database = {
           ip_address?: string | null
           user_email?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      audits: {
+        Row: {
+          audites: string | null
+          auditeur_principal: string | null
+          auditeurs: string | null
+          conclusion: string | null
+          created_at: string
+          created_by: string | null
+          date_debut: string | null
+          date_fin: string | null
+          id: string
+          numero: string
+          organisme: string | null
+          perimetre: string | null
+          rapport_url: string | null
+          referentiel: string | null
+          responsable_id: string | null
+          statut: Database["public"]["Enums"]["audit_statut"]
+          titre: string
+          type: Database["public"]["Enums"]["audit_type"]
+          updated_at: string
+        }
+        Insert: {
+          audites?: string | null
+          auditeur_principal?: string | null
+          auditeurs?: string | null
+          conclusion?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string | null
+          date_fin?: string | null
+          id?: string
+          numero: string
+          organisme?: string | null
+          perimetre?: string | null
+          rapport_url?: string | null
+          referentiel?: string | null
+          responsable_id?: string | null
+          statut?: Database["public"]["Enums"]["audit_statut"]
+          titre: string
+          type?: Database["public"]["Enums"]["audit_type"]
+          updated_at?: string
+        }
+        Update: {
+          audites?: string | null
+          auditeur_principal?: string | null
+          auditeurs?: string | null
+          conclusion?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string | null
+          date_fin?: string | null
+          id?: string
+          numero?: string
+          organisme?: string | null
+          perimetre?: string | null
+          rapport_url?: string | null
+          referentiel?: string | null
+          responsable_id?: string | null
+          statut?: Database["public"]["Enums"]["audit_statut"]
+          titre?: string
+          type?: Database["public"]["Enums"]["audit_type"]
+          updated_at?: string
         }
         Relationships: []
       }
@@ -535,6 +742,66 @@ export type Database = {
           },
         ]
       }
+      indicateurs_qualite: {
+        Row: {
+          annee: number
+          commentaire: string | null
+          created_at: string
+          created_by: string | null
+          delai_moyen_traitement_nc: number | null
+          delai_moyen_traitement_rec: number | null
+          id: string
+          mois: number
+          nb_audits: number
+          nb_nc_cloturees: number
+          nb_nc_ouvertes: number
+          nb_rapports_emis: number
+          nb_reclamations: number
+          nb_reclamations_fondees: number
+          taux_conformite: number | null
+          taux_satisfaction: number | null
+          updated_at: string
+        }
+        Insert: {
+          annee: number
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          delai_moyen_traitement_nc?: number | null
+          delai_moyen_traitement_rec?: number | null
+          id?: string
+          mois: number
+          nb_audits?: number
+          nb_nc_cloturees?: number
+          nb_nc_ouvertes?: number
+          nb_rapports_emis?: number
+          nb_reclamations?: number
+          nb_reclamations_fondees?: number
+          taux_conformite?: number | null
+          taux_satisfaction?: number | null
+          updated_at?: string
+        }
+        Update: {
+          annee?: number
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          delai_moyen_traitement_nc?: number | null
+          delai_moyen_traitement_rec?: number | null
+          id?: string
+          mois?: number
+          nb_audits?: number
+          nb_nc_cloturees?: number
+          nb_nc_ouvertes?: number
+          nb_rapports_emis?: number
+          nb_reclamations?: number
+          nb_reclamations_fondees?: number
+          taux_conformite?: number | null
+          taux_satisfaction?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       legacy_password_md5: {
         Row: {
           created_at: string
@@ -730,6 +997,93 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      non_conformites: {
+        Row: {
+          action_immediate: string | null
+          analyse_id: string | null
+          cause_racine: string | null
+          client_id: string | null
+          commentaire_cloture: string | null
+          created_at: string
+          created_by: string | null
+          date_cloture: string | null
+          date_detection: string
+          description: string
+          detectee_par: string | null
+          efficacite_verifiee: boolean | null
+          equipement_ref: string | null
+          gravite: Database["public"]["Enums"]["nc_gravite"]
+          id: string
+          impact: string | null
+          methode_id: string | null
+          numero: string
+          origine: string | null
+          prelevement_id: string | null
+          responsable_id: string | null
+          service: string | null
+          source: Database["public"]["Enums"]["nc_source"]
+          statut: Database["public"]["Enums"]["nc_statut"]
+          titre: string
+          updated_at: string
+        }
+        Insert: {
+          action_immediate?: string | null
+          analyse_id?: string | null
+          cause_racine?: string | null
+          client_id?: string | null
+          commentaire_cloture?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_cloture?: string | null
+          date_detection?: string
+          description: string
+          detectee_par?: string | null
+          efficacite_verifiee?: boolean | null
+          equipement_ref?: string | null
+          gravite?: Database["public"]["Enums"]["nc_gravite"]
+          id?: string
+          impact?: string | null
+          methode_id?: string | null
+          numero: string
+          origine?: string | null
+          prelevement_id?: string | null
+          responsable_id?: string | null
+          service?: string | null
+          source?: Database["public"]["Enums"]["nc_source"]
+          statut?: Database["public"]["Enums"]["nc_statut"]
+          titre: string
+          updated_at?: string
+        }
+        Update: {
+          action_immediate?: string | null
+          analyse_id?: string | null
+          cause_racine?: string | null
+          client_id?: string | null
+          commentaire_cloture?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_cloture?: string | null
+          date_detection?: string
+          description?: string
+          detectee_par?: string | null
+          efficacite_verifiee?: boolean | null
+          equipement_ref?: string | null
+          gravite?: Database["public"]["Enums"]["nc_gravite"]
+          id?: string
+          impact?: string | null
+          methode_id?: string | null
+          numero?: string
+          origine?: string | null
+          prelevement_id?: string | null
+          responsable_id?: string | null
+          service?: string | null
+          source?: Database["public"]["Enums"]["nc_source"]
+          statut?: Database["public"]["Enums"]["nc_statut"]
+          titre?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -1149,6 +1503,164 @@ export type Database = {
           },
         ]
       }
+      reclamations: {
+        Row: {
+          analyse_id: string | null
+          bc_id: string | null
+          canal: Database["public"]["Enums"]["reclamation_canal"]
+          client_id: string
+          contact_email: string | null
+          contact_nom: string | null
+          contact_telephone: string | null
+          created_at: string
+          created_by: string | null
+          date_accuse: string | null
+          date_cloture: string | null
+          date_reception: string
+          date_reponse: string | null
+          description: string
+          fondee: boolean | null
+          id: string
+          nc_id: string | null
+          numero: string
+          objet: string
+          rapport_id: string | null
+          reponse: string | null
+          responsable_id: string | null
+          satisfaction_client: number | null
+          statut: Database["public"]["Enums"]["reclamation_statut"]
+          updated_at: string
+        }
+        Insert: {
+          analyse_id?: string | null
+          bc_id?: string | null
+          canal?: Database["public"]["Enums"]["reclamation_canal"]
+          client_id: string
+          contact_email?: string | null
+          contact_nom?: string | null
+          contact_telephone?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_accuse?: string | null
+          date_cloture?: string | null
+          date_reception?: string
+          date_reponse?: string | null
+          description: string
+          fondee?: boolean | null
+          id?: string
+          nc_id?: string | null
+          numero: string
+          objet: string
+          rapport_id?: string | null
+          reponse?: string | null
+          responsable_id?: string | null
+          satisfaction_client?: number | null
+          statut?: Database["public"]["Enums"]["reclamation_statut"]
+          updated_at?: string
+        }
+        Update: {
+          analyse_id?: string | null
+          bc_id?: string | null
+          canal?: Database["public"]["Enums"]["reclamation_canal"]
+          client_id?: string
+          contact_email?: string | null
+          contact_nom?: string | null
+          contact_telephone?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_accuse?: string | null
+          date_cloture?: string | null
+          date_reception?: string
+          date_reponse?: string | null
+          description?: string
+          fondee?: boolean | null
+          id?: string
+          nc_id?: string | null
+          numero?: string
+          objet?: string
+          rapport_id?: string | null
+          reponse?: string | null
+          responsable_id?: string | null
+          satisfaction_client?: number | null
+          statut?: Database["public"]["Enums"]["reclamation_statut"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reclamations_nc_id_fkey"
+            columns: ["nc_id"]
+            isOneToOne: false
+            referencedRelation: "non_conformites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      revues_direction: {
+        Row: {
+          axes_amelioration: string | null
+          bilan_audits: string | null
+          bilan_nc: string | null
+          bilan_qualite: string | null
+          bilan_reclamations: string | null
+          bilan_satisfaction: string | null
+          created_at: string
+          created_by: string | null
+          date_revue: string
+          decisions: string | null
+          id: string
+          numero: string
+          ordre_du_jour: string | null
+          participants: string | null
+          responsable_id: string | null
+          ressources_necessaires: string | null
+          statut: Database["public"]["Enums"]["revue_statut"]
+          titre: string
+          updated_at: string
+        }
+        Insert: {
+          axes_amelioration?: string | null
+          bilan_audits?: string | null
+          bilan_nc?: string | null
+          bilan_qualite?: string | null
+          bilan_reclamations?: string | null
+          bilan_satisfaction?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_revue?: string
+          decisions?: string | null
+          id?: string
+          numero: string
+          ordre_du_jour?: string | null
+          participants?: string | null
+          responsable_id?: string | null
+          ressources_necessaires?: string | null
+          statut?: Database["public"]["Enums"]["revue_statut"]
+          titre: string
+          updated_at?: string
+        }
+        Update: {
+          axes_amelioration?: string | null
+          bilan_audits?: string | null
+          bilan_nc?: string | null
+          bilan_qualite?: string | null
+          bilan_reclamations?: string | null
+          bilan_satisfaction?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_revue?: string
+          decisions?: string | null
+          id?: string
+          numero?: string
+          ordre_du_jour?: string | null
+          participants?: string | null
+          responsable_id?: string | null
+          ressources_necessaires?: string | null
+          statut?: Database["public"]["Enums"]["revue_statut"]
+          titre?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       unites: {
         Row: {
           code: string
@@ -1262,6 +1774,18 @@ export type Database = {
         | "comptable"
         | "rh"
         | "client"
+      audit_statut:
+        | "planifie"
+        | "en_cours"
+        | "realise"
+        | "rapport_diffuse"
+        | "cloture"
+      audit_type:
+        | "interne"
+        | "externe"
+        | "fournisseur"
+        | "accreditation"
+        | "suivi"
       bc_statut:
         | "brouillon"
         | "envoye"
@@ -1270,8 +1794,37 @@ export type Database = {
         | "en_cours"
         | "cloture"
         | "annule"
+      capa_statut:
+        | "planifiee"
+        | "en_cours"
+        | "realisee"
+        | "verifiee"
+        | "cloturee"
+        | "abandonnee"
+      capa_type: "corrective" | "preventive" | "immediate" | "amelioration"
+      constat_type:
+        | "ecart_majeur"
+        | "ecart_mineur"
+        | "observation"
+        | "opportunite"
+        | "point_fort"
       fr_statut: "planifiee" | "en_cours" | "terminee" | "annulee"
       mission_statut: "planifiee" | "en_cours" | "terminee" | "annulee"
+      nc_gravite: "mineure" | "majeure" | "critique"
+      nc_source:
+        | "interne"
+        | "client"
+        | "audit"
+        | "fournisseur"
+        | "equipement"
+        | "methode"
+        | "autre"
+      nc_statut:
+        | "ouverte"
+        | "en_traitement"
+        | "en_verification"
+        | "cloturee"
+        | "annulee"
       niveau_validation: "technicien" | "chef_labo" | "qualite"
       prelevement_statut: "planifie" | "effectue" | "recu_labo" | "rejete"
       rapport_statut:
@@ -1280,6 +1833,21 @@ export type Database = {
         | "valide"
         | "envoye"
         | "annule"
+      reclamation_canal:
+        | "email"
+        | "telephone"
+        | "courrier"
+        | "visite"
+        | "portail"
+        | "autre"
+      reclamation_statut:
+        | "recue"
+        | "en_traitement"
+        | "en_attente_client"
+        | "resolue"
+        | "cloturee"
+        | "rejetee"
+      revue_statut: "planifiee" | "tenue" | "cloturee"
       type_matrice:
         | "eau"
         | "sol"
@@ -1436,6 +2004,20 @@ export const Constants = {
         "rh",
         "client",
       ],
+      audit_statut: [
+        "planifie",
+        "en_cours",
+        "realise",
+        "rapport_diffuse",
+        "cloture",
+      ],
+      audit_type: [
+        "interne",
+        "externe",
+        "fournisseur",
+        "accreditation",
+        "suivi",
+      ],
       bc_statut: [
         "brouillon",
         "envoye",
@@ -1445,8 +2027,41 @@ export const Constants = {
         "cloture",
         "annule",
       ],
+      capa_statut: [
+        "planifiee",
+        "en_cours",
+        "realisee",
+        "verifiee",
+        "cloturee",
+        "abandonnee",
+      ],
+      capa_type: ["corrective", "preventive", "immediate", "amelioration"],
+      constat_type: [
+        "ecart_majeur",
+        "ecart_mineur",
+        "observation",
+        "opportunite",
+        "point_fort",
+      ],
       fr_statut: ["planifiee", "en_cours", "terminee", "annulee"],
       mission_statut: ["planifiee", "en_cours", "terminee", "annulee"],
+      nc_gravite: ["mineure", "majeure", "critique"],
+      nc_source: [
+        "interne",
+        "client",
+        "audit",
+        "fournisseur",
+        "equipement",
+        "methode",
+        "autre",
+      ],
+      nc_statut: [
+        "ouverte",
+        "en_traitement",
+        "en_verification",
+        "cloturee",
+        "annulee",
+      ],
       niveau_validation: ["technicien", "chef_labo", "qualite"],
       prelevement_statut: ["planifie", "effectue", "recu_labo", "rejete"],
       rapport_statut: [
@@ -1456,6 +2071,23 @@ export const Constants = {
         "envoye",
         "annule",
       ],
+      reclamation_canal: [
+        "email",
+        "telephone",
+        "courrier",
+        "visite",
+        "portail",
+        "autre",
+      ],
+      reclamation_statut: [
+        "recue",
+        "en_traitement",
+        "en_attente_client",
+        "resolue",
+        "cloturee",
+        "rejetee",
+      ],
+      revue_statut: ["planifiee", "tenue", "cloturee"],
       type_matrice: [
         "eau",
         "sol",

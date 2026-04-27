@@ -16,6 +16,7 @@ import {
   MapPin,
   TestTubes,
   CalendarRange,
+  ShieldCheck,
 } from "lucide-react";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
@@ -82,6 +83,12 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
         to: "/projets",
         icon: Briefcase,
         roles: ["admin", "direction", "chef_labo"],
+      },
+      {
+        label: "Qualité",
+        to: "/qualite",
+        icon: ShieldCheck,
+        roles: ["admin", "direction", "qualite", "chef_labo", "technicien", "commercial"],
       },
     ],
   },
