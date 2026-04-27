@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Pencil, Loader2, FlaskConical, Power, BookOpen, Beaker, Settings2 } from "lucide-react";
+import { Plus, Search, Loader2, FlaskConical, Eye, CheckCircle2 } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 
@@ -12,9 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -24,516 +22,419 @@ import {
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { nextNumero } from "@/lib/numbering";
+import { formatDate } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/analyses")({
   head: () => ({ meta: [{ title: "Analyses — BALIMS" }] }),
-  component: AnalysesHub,
+  component: AnalysesPage,
 });
 
-function AnalysesHub() {
-  return (
-    <div>
-      <PageHeader
-        title="Analyses"
-        description="Référentiel des méthodes, paramètres et accès rapide aux analyses en cours."
-        actions={
-          <Button asChild variant="outline">
-            <Link to="/feuilles-route">Feuilles de route</Link>
-          </Button>
-        }
-      />
-      <div className="p-6">
-        <Tabs defaultValue="parametres">
-          <TabsList>
-            <TabsTrigger value="parametres"><Beaker className="h-4 w-4" /> Paramètres</TabsTrigger>
-            <TabsTrigger value="methodes"><BookOpen className="h-4 w-4" /> Méthodes</TabsTrigger>
-            <TabsTrigger value="encours"><FlaskConical className="h-4 w-4" /> En cours</TabsTrigger>
-            <TabsTrigger value="unites"><Settings2 className="h-4 w-4" /> Unités</TabsTrigger>
-          </TabsList>
-          <TabsContent value="parametres" className="mt-4"><ParametresTab /></TabsContent>
-          <TabsContent value="methodes" className="mt-4"><MethodesTab /></TabsContent>
-          <TabsContent value="encours" className="mt-4"><EnCoursTab /></TabsContent>
-          <TabsContent value="unites" className="mt-4"><UnitesTab /></TabsContent>
-        </Tabs>
-      </div>
-    </div>
-  );
-}
+const STATUTS = ["a_faire", "en_cours", "termine", "valide_tech", "valide_chef", "valide_qualite", "rejete"] as const;
+type Statut = (typeof STATUTS)[number];
 
-// ============== PARAMÈTRES ==============
-const paramSchema = z.object({
-  libelle: z.string().trim().min(2).max(200),
-  code: z.string().trim().max(50).optional().nullable(),
-  unite_id: z.string().uuid().optional().nullable(),
-  methode_id: z.string().uuid().optional().nullable(),
-  seuil_min: z.coerce.number().optional().nullable(),
-  seuil_max: z.coerce.number().optional().nullable(),
-  prix_unitaire: z.coerce.number().min(0).default(0),
-  delai_jours: z.coerce.number().int().min(0).default(5),
-  is_active: z.boolean().default(true),
-});
-type ParamForm = z.infer<typeof paramSchema>;
-interface ParamRow extends ParamForm { id: string }
-
-const EMPTY_PARAM: ParamForm = {
-  libelle: "", code: "", unite_id: null, methode_id: null,
-  seuil_min: null, seuil_max: null, prix_unitaire: 0, delai_jours: 5, is_active: true,
+const VAR: Record<Statut, "default" | "secondary" | "outline" | "destructive"> = {
+  a_faire: "outline", en_cours: "outline", termine: "secondary",
+  valide_tech: "secondary", valide_chef: "default", valide_qualite: "default", rejete: "destructive",
 };
 
-function ParametresTab() {
-  const qc = useQueryClient();
-  const [search, setSearch] = useState("");
-  const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<ParamRow | null>(null);
-  const [form, setForm] = useState<ParamForm>(EMPTY_PARAM);
-
-  const { data = [] } = useQuery({
-    queryKey: ["parametres_analyse"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("parametres_analyse").select("*").order("libelle");
-      if (error) throw error;
-      return data as ParamRow[];
-    },
-  });
-  const { data: unites = [] } = useQuery({
-    queryKey: ["unites"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("unites").select("id,libelle,symbole").order("libelle");
-      if (error) throw error;
-      return data;
-    },
-  });
-  const { data: methodes = [] } = useQuery({
-    queryKey: ["methodes_analyse"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("methodes_analyse").select("id,libelle,code").order("libelle");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    if (!q) return data;
-    return data.filter((p) => [p.libelle, p.code].filter(Boolean).some((v) => v!.toLowerCase().includes(q)));
-  }, [data, search]);
-
-  const save = useMutation({
-    mutationFn: async (input: ParamForm) => {
-      const parsed = paramSchema.parse(input);
-      const payload = {
-        ...parsed,
-        unite_id: parsed.unite_id || null,
-        methode_id: parsed.methode_id || null,
-      };
-      if (editing) {
-        const { error } = await supabase.from("parametres_analyse").update(payload).eq("id", editing.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("parametres_analyse").insert(payload);
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => {
-      toast.success("Paramètre enregistré");
-      qc.invalidateQueries({ queryKey: ["parametres_analyse"] });
-      setOpen(false);
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const toggle = useMutation({
-    mutationFn: async (p: ParamRow) => {
-      const { error } = await supabase.from("parametres_analyse").update({ is_active: !p.is_active }).eq("id", p.id);
-      if (error) throw error;
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["parametres_analyse"] }),
-  });
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="relative max-w-sm flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input className="pl-9" placeholder="Rechercher…" value={search} onChange={(e) => setSearch(e.target.value)} />
-        </div>
-        <Button onClick={() => { setEditing(null); setForm(EMPTY_PARAM); setOpen(true); }}>
-          <Plus className="h-4 w-4" /> Nouveau paramètre
-        </Button>
-      </div>
-
-      {filtered.length === 0 ? (
-        <EmptyState icon={Beaker} title="Aucun paramètre" />
-      ) : (
-        <div className="rounded-lg border border-border/60 bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Libellé</TableHead>
-                <TableHead>Code</TableHead>
-                <TableHead>Unité</TableHead>
-                <TableHead>Méthode</TableHead>
-                <TableHead>Seuils</TableHead>
-                <TableHead className="text-right">Prix</TableHead>
-                <TableHead>Délai</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((p) => {
-                const u = unites.find((x) => x.id === p.unite_id);
-                const m = methodes.find((x) => x.id === p.methode_id);
-                return (
-                  <TableRow key={p.id}>
-                    <TableCell className="font-medium">{p.libelle}</TableCell>
-                    <TableCell className="text-muted-foreground">{p.code || "—"}</TableCell>
-                    <TableCell>{u?.symbole || "—"}</TableCell>
-                    <TableCell className="text-muted-foreground">{m?.code || m?.libelle || "—"}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {p.seuil_min ?? "—"} / {p.seuil_max ?? "—"}
-                    </TableCell>
-                    <TableCell className="text-right">{Number(p.prix_unitaire).toFixed(3)}</TableCell>
-                    <TableCell>{p.delai_jours}j</TableCell>
-                    <TableCell><Badge variant={p.is_active ? "default" : "secondary"}>{p.is_active ? "Actif" : "Inactif"}</Badge></TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" onClick={() => { setEditing(p); setForm({ ...EMPTY_PARAM, ...p }); setOpen(true); }}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => toggle.mutate(p)}>
-                        <Power className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
-      )}
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-xl">
-          <DialogHeader><DialogTitle>{editing ? "Modifier" : "Nouveau"} paramètre</DialogTitle></DialogHeader>
-          <form className="grid gap-4 md:grid-cols-2" onSubmit={(e) => { e.preventDefault(); save.mutate(form); }}>
-            <div className="space-y-2 md:col-span-2">
-              <Label>Libellé *</Label>
-              <Input required value={form.libelle} onChange={(e) => setForm({ ...form, libelle: e.target.value })} />
-            </div>
-            <div className="space-y-2">
-              <Label>Code</Label>
-              <Input value={form.code ?? ""} onChange={(e) => setForm({ ...form, code: e.target.value })} />
-            </div>
-            <div className="space-y-2">
-              <Label>Unité</Label>
-              <Select value={form.unite_id ?? "none"} onValueChange={(v) => setForm({ ...form, unite_id: v === "none" ? null : v })}>
-                <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">— aucune —</SelectItem>
-                  {unites.map((u) => <SelectItem key={u.id} value={u.id}>{u.libelle} ({u.symbole})</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label>Méthode</Label>
-              <Select value={form.methode_id ?? "none"} onValueChange={(v) => setForm({ ...form, methode_id: v === "none" ? null : v })}>
-                <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">— aucune —</SelectItem>
-                  {methodes.map((m) => <SelectItem key={m.id} value={m.id}>{m.code ? `${m.code} — ` : ""}{m.libelle}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Seuil min</Label>
-              <Input type="number" step="0.001" value={form.seuil_min ?? ""} onChange={(e) => setForm({ ...form, seuil_min: e.target.value === "" ? null : Number(e.target.value) })} />
-            </div>
-            <div className="space-y-2">
-              <Label>Seuil max</Label>
-              <Input type="number" step="0.001" value={form.seuil_max ?? ""} onChange={(e) => setForm({ ...form, seuil_max: e.target.value === "" ? null : Number(e.target.value) })} />
-            </div>
-            <div className="space-y-2">
-              <Label>Prix unitaire (TND)</Label>
-              <Input type="number" step="0.001" value={form.prix_unitaire} onChange={(e) => setForm({ ...form, prix_unitaire: Number(e.target.value) })} />
-            </div>
-            <div className="space-y-2">
-              <Label>Délai (jours)</Label>
-              <Input type="number" min="0" value={form.delai_jours} onChange={(e) => setForm({ ...form, delai_jours: Number(e.target.value) })} />
-            </div>
-            <div className="flex items-center gap-3 md:col-span-2">
-              <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
-              <span className="text-sm">Actif</span>
-            </div>
-            <DialogFooter className="md:col-span-2">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>Annuler</Button>
-              <Button type="submit" disabled={save.isPending}>
-                {save.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                Enregistrer
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-// ============== MÉTHODES ==============
-const methodeSchema = z.object({
-  libelle: z.string().trim().min(2).max(200),
-  code: z.string().trim().max(50).optional().nullable(),
-  norme: z.string().trim().max(100).optional().nullable(),
-  type_methode: z.string().trim().max(100).optional().nullable(),
-  accreditee: z.boolean().default(false),
-  description: z.string().trim().max(2000).optional().nullable(),
-  is_active: z.boolean().default(true),
-});
-type MethodeForm = z.infer<typeof methodeSchema>;
-interface MethodeRow extends MethodeForm { id: string }
-
-const EMPTY_METHODE: MethodeForm = {
-  libelle: "", code: "", norme: "", type_methode: "", accreditee: false, description: "", is_active: true,
+const STATUT_LABEL: Record<Statut, string> = {
+  a_faire: "À faire", en_cours: "En cours", termine: "Terminé",
+  valide_tech: "V. Tech", valide_chef: "V. Chef", valide_qualite: "V. Qualité", rejete: "Rejeté",
 };
 
-function MethodesTab() {
+interface Row {
+  id: string; numero: string; statut: Statut;
+  client_id: string; prelevement_id: string;
+  date_debut: string | null; date_fin: string | null;
+  notes: string | null;
+  clients: { raison_sociale: string } | null;
+  prelevements: { numero: string } | null;
+}
+
+function AnalysesPage() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
+  const [statutFilter, setStatutFilter] = useState<string>("all");
   const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<MethodeRow | null>(null);
-  const [form, setForm] = useState<MethodeForm>(EMPTY_METHODE);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-  const { data = [] } = useQuery({
-    queryKey: ["methodes_analyse"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("methodes_analyse").select("*").order("libelle");
-      if (error) throw error;
-      return data as MethodeRow[];
-    },
-  });
-
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    if (!q) return data;
-    return data.filter((m) => [m.libelle, m.code, m.norme].filter(Boolean).some((v) => v!.toLowerCase().includes(q)));
-  }, [data, search]);
-
-  const save = useMutation({
-    mutationFn: async (input: MethodeForm) => {
-      const parsed = methodeSchema.parse(input);
-      if (editing) {
-        const { error } = await supabase.from("methodes_analyse").update(parsed).eq("id", editing.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("methodes_analyse").insert(parsed);
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => {
-      toast.success("Méthode enregistrée");
-      qc.invalidateQueries({ queryKey: ["methodes_analyse"] });
-      setOpen(false);
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="relative max-w-sm flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input className="pl-9" placeholder="Rechercher…" value={search} onChange={(e) => setSearch(e.target.value)} />
-        </div>
-        <Button onClick={() => { setEditing(null); setForm(EMPTY_METHODE); setOpen(true); }}>
-          <Plus className="h-4 w-4" /> Nouvelle méthode
-        </Button>
-      </div>
-      {filtered.length === 0 ? (
-        <EmptyState icon={BookOpen} title="Aucune méthode" />
-      ) : (
-        <div className="rounded-lg border border-border/60 bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Libellé</TableHead>
-                <TableHead>Code</TableHead>
-                <TableHead>Norme</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Accréditée</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((m) => (
-                <TableRow key={m.id}>
-                  <TableCell className="font-medium">{m.libelle}</TableCell>
-                  <TableCell className="text-muted-foreground">{m.code || "—"}</TableCell>
-                  <TableCell>{m.norme || "—"}</TableCell>
-                  <TableCell className="text-muted-foreground">{m.type_methode || "—"}</TableCell>
-                  <TableCell>{m.accreditee && <Badge>Accréditée</Badge>}</TableCell>
-                  <TableCell><Badge variant={m.is_active ? "default" : "secondary"}>{m.is_active ? "Actif" : "Inactif"}</Badge></TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => { setEditing(m); setForm({ ...EMPTY_METHODE, ...m }); setOpen(true); }}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>{editing ? "Modifier" : "Nouvelle"} méthode</DialogTitle></DialogHeader>
-          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); save.mutate(form); }}>
-            <div className="space-y-2">
-              <Label>Libellé *</Label>
-              <Input required value={form.libelle} onChange={(e) => setForm({ ...form, libelle: e.target.value })} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Code</Label>
-                <Input value={form.code ?? ""} onChange={(e) => setForm({ ...form, code: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Norme</Label>
-                <Input value={form.norme ?? ""} onChange={(e) => setForm({ ...form, norme: e.target.value })} placeholder="ISO 17025…" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Type</Label>
-              <Input value={form.type_methode ?? ""} onChange={(e) => setForm({ ...form, type_methode: e.target.value })} placeholder="chimique / microbio / physique…" />
-            </div>
-            <div className="space-y-2">
-              <Label>Description</Label>
-              <Textarea rows={3} value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-            </div>
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <Switch checked={form.accreditee} onCheckedChange={(v) => setForm({ ...form, accreditee: v })} />
-                <span className="text-sm">Accréditée</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
-                <span className="text-sm">Active</span>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>Annuler</Button>
-              <Button type="submit" disabled={save.isPending}>
-                {save.isPending && <Loader2 className="h-4 w-4 animate-spin" />}Enregistrer
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-// ============== UNITÉS ==============
-function UnitesTab() {
-  const qc = useQueryClient();
-  const [code, setCode] = useState(""); const [libelle, setLibelle] = useState(""); const [symbole, setSymbole] = useState("");
-
-  const { data = [] } = useQuery({
-    queryKey: ["unites"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("unites").select("*").order("libelle");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const add = useMutation({
-    mutationFn: async () => {
-      if (!code || !libelle || !symbole) throw new Error("Tous les champs sont requis");
-      const { error } = await supabase.from("unites").insert({ code, libelle, symbole });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Unité ajoutée");
-      setCode(""); setLibelle(""); setSymbole("");
-      qc.invalidateQueries({ queryKey: ["unites"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-end gap-3 rounded-lg border border-border/60 bg-card p-4">
-        <div className="space-y-1.5">
-          <Label className="text-xs">Code</Label>
-          <Input className="w-32" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">Libellé</Label>
-          <Input className="w-64" value={libelle} onChange={(e) => setLibelle(e.target.value)} />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">Symbole</Label>
-          <Input className="w-32" value={symbole} onChange={(e) => setSymbole(e.target.value)} />
-        </div>
-        <Button onClick={() => add.mutate()} disabled={add.isPending}>
-          {add.isPending && <Loader2 className="h-4 w-4 animate-spin" />}<Plus className="h-4 w-4" /> Ajouter
-        </Button>
-      </div>
-      <div className="rounded-lg border border-border/60 bg-card">
-        <Table>
-          <TableHeader><TableRow><TableHead>Code</TableHead><TableHead>Libellé</TableHead><TableHead>Symbole</TableHead></TableRow></TableHeader>
-          <TableBody>
-            {data.map((u) => (
-              <TableRow key={u.id}>
-                <TableCell className="font-mono text-sm">{u.code}</TableCell>
-                <TableCell>{u.libelle}</TableCell>
-                <TableCell>{u.symbole}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
-  );
-}
-
-// ============== EN COURS ==============
-function EnCoursTab() {
-  const { data = [], isLoading } = useQuery({
-    queryKey: ["analyses_encours"],
+  const { data: rows = [], isLoading } = useQuery({
+    queryKey: ["analyses"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("analyses")
-        .select("id,numero,statut,date_debut,client_id,clients(raison_sociale)")
-        .neq("statut", "valide_qualite")
-        .order("created_at", { ascending: false })
-        .limit(100);
+        .select("*, clients(raison_sociale), prelevements(numero)")
+        .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as Array<{ id: string; numero: string; statut: string; date_debut: string | null; client_id: string; clients: { raison_sociale: string } | null }>;
+      return data as unknown as Row[];
     },
   });
 
-  if (isLoading) return <Loader2 className="h-5 w-5 animate-spin" />;
-  if (data.length === 0) return <EmptyState icon={FlaskConical} title="Aucune analyse en cours" description="Les analyses créées depuis les feuilles de route apparaîtront ici." />;
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    return rows.filter((r) => {
+      if (statutFilter !== "all" && r.statut !== statutFilter) return false;
+      if (!q) return true;
+      return [r.numero, r.clients?.raison_sociale, r.prelevements?.numero]
+        .filter(Boolean).some((v) => v!.toLowerCase().includes(q));
+    });
+  }, [rows, search, statutFilter]);
 
   return (
-    <div className="rounded-lg border border-border/60 bg-card">
-      <Table>
-        <TableHeader>
-          <TableRow><TableHead>N° analyse</TableHead><TableHead>Client</TableHead><TableHead>Date début</TableHead><TableHead>Statut</TableHead></TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((a) => (
-            <TableRow key={a.id}>
-              <TableCell className="font-mono text-sm">{a.numero}</TableCell>
-              <TableCell>{a.clients?.raison_sociale ?? "—"}</TableCell>
-              <TableCell>{a.date_debut ?? "—"}</TableCell>
-              <TableCell><Badge variant="outline">{a.statut}</Badge></TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+    <div>
+      <PageHeader
+        title="Analyses & Résultats"
+        description="Saisie des résultats d'analyse, conformité aux seuils et validation multi-niveaux."
+        actions={<Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" /> Nouvelle analyse</Button>}
+      />
+
+      <div className="space-y-4 p-6">
+        <div className="flex flex-wrap gap-3">
+          <div className="relative max-w-sm flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input placeholder="Rechercher…" className="pl-9"
+              value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+          <Select value={statutFilter} onValueChange={setStatutFilter}>
+            <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous statuts</SelectItem>
+              {STATUTS.map((s) => <SelectItem key={s} value={s}>{STATUT_LABEL[s]}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {isLoading ? (
+          <div className="flex justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+        ) : filtered.length === 0 ? (
+          <EmptyState icon={FlaskConical} title="Aucune analyse"
+            description="Créez une analyse depuis un prélèvement reçu au laboratoire."
+            action={<Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" /> Nouvelle analyse</Button>} />
+        ) : (
+          <div className="rounded-lg border border-border/60 bg-card">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>N°</TableHead><TableHead>Client</TableHead>
+                  <TableHead>Prélèvement</TableHead><TableHead>Début</TableHead>
+                  <TableHead>Fin</TableHead><TableHead>Statut</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell className="font-mono text-sm font-medium">{r.numero}</TableCell>
+                    <TableCell>{r.clients?.raison_sociale ?? "—"}</TableCell>
+                    <TableCell className="font-mono text-xs">{r.prelevements?.numero ?? "—"}</TableCell>
+                    <TableCell>{formatDate(r.date_debut)}</TableCell>
+                    <TableCell>{formatDate(r.date_fin)}</TableCell>
+                    <TableCell><Badge variant={VAR[r.statut]}>{STATUT_LABEL[r.statut]}</Badge></TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" onClick={() => setEditingId(r.id)}><Eye className="h-4 w-4" /></Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </div>
+
+      <NewDialog open={open} onClose={() => setOpen(false)} />
+      {editingId && <ResultsDialog id={editingId} onClose={() => setEditingId(null)} />}
     </div>
+  );
+}
+
+function NewDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [prelId, setPrelId] = useState("");
+  const [notes, setNotes] = useState("");
+
+  const { data: prelevements = [] } = useQuery({
+    queryKey: ["prel_recus"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("prelevements")
+        .select("id,numero,client_id,clients(raison_sociale)")
+        .in("statut", ["effectue", "recu_labo"])
+        .order("date_prelevement", { ascending: false }).limit(200);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const create = useMutation({
+    mutationFn: async () => {
+      if (!prelId) throw new Error("Sélectionnez un prélèvement");
+      z.string().max(1000).parse(notes);
+      const prel = prelevements.find((p) => p.id === prelId);
+      if (!prel) throw new Error("Prélèvement introuvable");
+      const numero = await nextNumero("ANA");
+      const { error } = await supabase.from("analyses").insert({
+        numero, prelevement_id: prelId, client_id: prel.client_id,
+        date_debut: new Date().toISOString().split("T")[0],
+        notes: notes || null, statut: "a_faire",
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Analyse créée");
+      qc.invalidateQueries({ queryKey: ["analyses"] });
+      setPrelId(""); setNotes("");
+      onClose();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-xl">
+        <DialogHeader><DialogTitle>Nouvelle analyse</DialogTitle></DialogHeader>
+        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); create.mutate(); }}>
+          <div className="space-y-2">
+            <Label>Prélèvement *</Label>
+            <Select value={prelId} onValueChange={setPrelId}>
+              <SelectTrigger><SelectValue placeholder="Sélectionner…" /></SelectTrigger>
+              <SelectContent>
+                {prelevements.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.numero} — {(p.clients as { raison_sociale: string } | null)?.raison_sociale}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Notes</Label>
+            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} maxLength={1000} />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
+            <Button type="submit" disabled={create.isPending}>
+              {create.isPending && <Loader2 className="h-4 w-4 animate-spin" />} Créer
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+interface ResRow {
+  id?: string;
+  parametre_id: string;
+  valeur: string;
+  valeur_numerique?: number | null;
+  unite_id?: string | null;
+  methode_id?: string | null;
+  conformite?: boolean | null;
+  observations?: string;
+}
+
+function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
+  const qc = useQueryClient();
+
+  const { data: analyse } = useQuery({
+    queryKey: ["analyse", id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("analyses").select("*, clients(raison_sociale), prelevements(numero)").eq("id", id).single();
+      if (error) throw error;
+      return data;
+    },
+  });
+  const { data: existing = [] } = useQuery({
+    queryKey: ["analyse_resultats", id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("analyse_resultats").select("*, parametres_analyse(libelle, seuil_min, seuil_max, unites:unite_id(symbole))").eq("analyse_id", id);
+      if (error) throw error;
+      return data;
+    },
+  });
+  const { data: parametres = [] } = useQuery({
+    queryKey: ["parametres_active"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("parametres_analyse")
+        .select("id,libelle,seuil_min,seuil_max,unite_id,methode_id,unites:unite_id(symbole)")
+        .eq("is_active", true).order("libelle");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const [resultats, setResultats] = useState<ResRow[]>([]);
+  // Init quand existing change
+  useState(() => { setResultats(existing.map((e) => ({
+    id: e.id, parametre_id: e.parametre_id, valeur: e.valeur ?? "",
+    valeur_numerique: e.valeur_numerique, unite_id: e.unite_id, methode_id: e.methode_id,
+    conformite: e.conformite, observations: e.observations ?? "",
+  }))); });
+
+  const addRow = () => setResultats((a) => [...a, { parametre_id: "", valeur: "", observations: "" }]);
+  const removeRow = (i: number) => setResultats((a) => a.filter((_, idx) => idx !== i));
+  const updateRow = (i: number, patch: Partial<ResRow>) => {
+    setResultats((a) => a.map((r, idx) => {
+      if (idx !== i) return r;
+      const next = { ...r, ...patch };
+      if (patch.valeur !== undefined) {
+        const n = Number(patch.valeur);
+        next.valeur_numerique = Number.isFinite(n) ? n : null;
+        const p = parametres.find((p) => p.id === next.parametre_id);
+        if (p && next.valeur_numerique !== null && next.valeur_numerique !== undefined) {
+          const minOk = p.seuil_min === null || next.valeur_numerique >= Number(p.seuil_min);
+          const maxOk = p.seuil_max === null || next.valeur_numerique <= Number(p.seuil_max);
+          next.conformite = minOk && maxOk;
+        }
+      }
+      if (patch.parametre_id) {
+        const p = parametres.find((x) => x.id === patch.parametre_id);
+        if (p) { next.unite_id = p.unite_id; next.methode_id = p.methode_id; }
+      }
+      return next;
+    }));
+  };
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const valid = resultats.filter((r) => r.parametre_id && r.valeur.trim());
+      // Delete then insert all
+      await supabase.from("analyse_resultats").delete().eq("analyse_id", id);
+      if (valid.length > 0) {
+        const { error } = await supabase.from("analyse_resultats").insert(
+          valid.map((r) => ({
+            analyse_id: id,
+            parametre_id: r.parametre_id,
+            valeur: r.valeur,
+            valeur_numerique: r.valeur_numerique ?? null,
+            unite_id: r.unite_id || null,
+            methode_id: r.methode_id || null,
+            conformite: r.conformite ?? null,
+            observations: r.observations || null,
+          })),
+        );
+        if (error) throw error;
+      }
+      // Update statut to termine if not already validated
+      await supabase.from("analyses").update({
+        statut: "termine",
+        date_fin: new Date().toISOString().split("T")[0],
+      }).eq("id", id);
+    },
+    onSuccess: () => {
+      toast.success("Résultats enregistrés");
+      qc.invalidateQueries({ queryKey: ["analyses"] });
+      qc.invalidateQueries({ queryKey: ["analyse_resultats", id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const validate = useMutation({
+    mutationFn: async (niveau: "technicien" | "chef_labo" | "qualite") => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Non authentifié");
+      const { error: e1 } = await supabase.from("validations").insert({
+        entity_type: "analyse", entity_id: id, niveau, decision: "valide", validateur_id: user.id,
+      });
+      if (e1) throw e1;
+      const newStatut: Statut = niveau === "technicien" ? "valide_tech" : niveau === "chef_labo" ? "valide_chef" : "valide_qualite";
+      const { error: e2 } = await supabase.from("analyses").update({ statut: newStatut }).eq("id", id);
+      if (e2) throw e2;
+    },
+    onSuccess: () => {
+      toast.success("Validation enregistrée");
+      qc.invalidateQueries({ queryKey: ["analyses"] });
+      qc.invalidateQueries({ queryKey: ["analyse", id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            Analyse {analyse?.numero} — {(analyse?.clients as { raison_sociale: string } | null)?.raison_sociale ?? ""}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Prélèvement : <span className="font-mono">{(analyse?.prelevements as { numero: string } | null)?.numero ?? "—"}</span>
+              {analyse?.statut && (<> · Statut : <Badge variant={VAR[analyse.statut as Statut]}>{STATUT_LABEL[analyse.statut as Statut]}</Badge></>)}
+            </p>
+            <Button variant="outline" size="sm" onClick={addRow}><Plus className="h-3 w-3" /> Paramètre</Button>
+          </div>
+
+          <div className="rounded-lg border border-border/60">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-56">Paramètre</TableHead>
+                  <TableHead>Valeur</TableHead>
+                  <TableHead className="w-24">Seuils</TableHead>
+                  <TableHead className="w-20">Unité</TableHead>
+                  <TableHead className="w-24">Conformité</TableHead>
+                  <TableHead>Observations</TableHead>
+                  <TableHead className="w-10"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {resultats.length === 0 ? (
+                  <TableRow><TableCell colSpan={7} className="py-6 text-center text-sm text-muted-foreground">
+                    Aucun résultat. Cliquez sur "Paramètre" pour en ajouter.
+                  </TableCell></TableRow>
+                ) : resultats.map((r, i) => {
+                  const p = parametres.find((x) => x.id === r.parametre_id);
+                  return (
+                    <TableRow key={i}>
+                      <TableCell>
+                        <Select value={r.parametre_id} onValueChange={(v) => updateRow(i, { parametre_id: v })}>
+                          <SelectTrigger className="h-8"><SelectValue placeholder="—" /></SelectTrigger>
+                          <SelectContent>
+                            {parametres.map((p) => <SelectItem key={p.id} value={p.id}>{p.libelle}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell><Input className="h-8" value={r.valeur} onChange={(e) => updateRow(i, { valeur: e.target.value })} /></TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {p ? `${p.seuil_min ?? "—"} / ${p.seuil_max ?? "—"}` : "—"}
+                      </TableCell>
+                      <TableCell className="text-xs">{(p?.unites as { symbole: string } | null)?.symbole ?? "—"}</TableCell>
+                      <TableCell>
+                        {r.conformite === null || r.conformite === undefined ? "—" : r.conformite ? <Badge>OK</Badge> : <Badge variant="destructive">NC</Badge>}
+                      </TableCell>
+                      <TableCell><Input className="h-8" value={r.observations ?? ""} onChange={(e) => updateRow(i, { observations: e.target.value })} /></TableCell>
+                      <TableCell><Button variant="ghost" size="icon" onClick={() => removeRow(i)}>×</Button></TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-4">
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" onClick={() => validate.mutate("technicien")} disabled={validate.isPending}>
+                <CheckCircle2 className="h-3 w-3" /> Valider Technicien
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => validate.mutate("chef_labo")} disabled={validate.isPending}>
+                <CheckCircle2 className="h-3 w-3" /> Valider Chef Labo
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => validate.mutate("qualite")} disabled={validate.isPending}>
+                <CheckCircle2 className="h-3 w-3" /> Valider Qualité
+              </Button>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={onClose}>Fermer</Button>
+              <Button onClick={() => save.mutate()} disabled={save.isPending}>
+                {save.isPending && <Loader2 className="h-4 w-4 animate-spin" />} Enregistrer
+              </Button>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
