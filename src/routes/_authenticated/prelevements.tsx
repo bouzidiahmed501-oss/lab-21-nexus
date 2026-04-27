@@ -86,7 +86,7 @@ function PrelevementsPage() {
 
   const updateStatut = useMutation({
     mutationFn: async ({ id, statut }: { id: string; statut: Statut }) => {
-      const patch: Record<string, unknown> = { statut };
+      const patch: { statut: Statut; date_reception?: string } = { statut };
       if (statut === "receptionne") patch.date_reception = new Date().toISOString();
       const { error } = await supabase.from("prelevements").update(patch).eq("id", id);
       if (error) throw error;

@@ -17,8 +17,11 @@ import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
 import { Route as AuthenticatedRapportsRouteImport } from './routes/_authenticated/rapports'
 import { Route as AuthenticatedProjetsRouteImport } from './routes/_authenticated/projets'
 import { Route as AuthenticatedProduitsRouteImport } from './routes/_authenticated/produits'
+import { Route as AuthenticatedPrelevementsRouteImport } from './routes/_authenticated/prelevements'
 import { Route as AuthenticatedParametresRouteImport } from './routes/_authenticated/parametres'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedMissionsRouteImport } from './routes/_authenticated/missions'
+import { Route as AuthenticatedFeuillesRouteRouteImport } from './routes/_authenticated/feuilles-route'
 import { Route as AuthenticatedFacturationRouteImport } from './routes/_authenticated/facturation'
 import { Route as AuthenticatedEquipementsRouteImport } from './routes/_authenticated/equipements'
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
@@ -64,6 +67,12 @@ const AuthenticatedProduitsRoute = AuthenticatedProduitsRouteImport.update({
   path: '/produits',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedPrelevementsRoute =
+  AuthenticatedPrelevementsRouteImport.update({
+    id: '/prelevements',
+    path: '/prelevements',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedParametresRoute = AuthenticatedParametresRouteImport.update({
   id: '/parametres',
   path: '/parametres',
@@ -73,6 +82,17 @@ const AuthenticatedNotificationsRoute =
   AuthenticatedNotificationsRouteImport.update({
     id: '/notifications',
     path: '/notifications',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedMissionsRoute = AuthenticatedMissionsRouteImport.update({
+  id: '/missions',
+  path: '/missions',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedFeuillesRouteRoute =
+  AuthenticatedFeuillesRouteRouteImport.update({
+    id: '/feuilles-route',
+    path: '/feuilles-route',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedFacturationRoute =
@@ -113,8 +133,11 @@ export interface FileRoutesByFullPath {
   '/clients': typeof AuthenticatedClientsRoute
   '/equipements': typeof AuthenticatedEquipementsRoute
   '/facturation': typeof AuthenticatedFacturationRoute
+  '/feuilles-route': typeof AuthenticatedFeuillesRouteRoute
+  '/missions': typeof AuthenticatedMissionsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/parametres': typeof AuthenticatedParametresRoute
+  '/prelevements': typeof AuthenticatedPrelevementsRoute
   '/produits': typeof AuthenticatedProduitsRoute
   '/projets': typeof AuthenticatedProjetsRoute
   '/rapports': typeof AuthenticatedRapportsRoute
@@ -128,8 +151,11 @@ export interface FileRoutesByTo {
   '/clients': typeof AuthenticatedClientsRoute
   '/equipements': typeof AuthenticatedEquipementsRoute
   '/facturation': typeof AuthenticatedFacturationRoute
+  '/feuilles-route': typeof AuthenticatedFeuillesRouteRoute
+  '/missions': typeof AuthenticatedMissionsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/parametres': typeof AuthenticatedParametresRoute
+  '/prelevements': typeof AuthenticatedPrelevementsRoute
   '/produits': typeof AuthenticatedProduitsRoute
   '/projets': typeof AuthenticatedProjetsRoute
   '/rapports': typeof AuthenticatedRapportsRoute
@@ -146,8 +172,11 @@ export interface FileRoutesById {
   '/_authenticated/clients': typeof AuthenticatedClientsRoute
   '/_authenticated/equipements': typeof AuthenticatedEquipementsRoute
   '/_authenticated/facturation': typeof AuthenticatedFacturationRoute
+  '/_authenticated/feuilles-route': typeof AuthenticatedFeuillesRouteRoute
+  '/_authenticated/missions': typeof AuthenticatedMissionsRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/parametres': typeof AuthenticatedParametresRoute
+  '/_authenticated/prelevements': typeof AuthenticatedPrelevementsRoute
   '/_authenticated/produits': typeof AuthenticatedProduitsRoute
   '/_authenticated/projets': typeof AuthenticatedProjetsRoute
   '/_authenticated/rapports': typeof AuthenticatedRapportsRoute
@@ -165,8 +194,11 @@ export interface FileRouteTypes {
     | '/clients'
     | '/equipements'
     | '/facturation'
+    | '/feuilles-route'
+    | '/missions'
     | '/notifications'
     | '/parametres'
+    | '/prelevements'
     | '/produits'
     | '/projets'
     | '/rapports'
@@ -180,8 +212,11 @@ export interface FileRouteTypes {
     | '/clients'
     | '/equipements'
     | '/facturation'
+    | '/feuilles-route'
+    | '/missions'
     | '/notifications'
     | '/parametres'
+    | '/prelevements'
     | '/produits'
     | '/projets'
     | '/rapports'
@@ -197,8 +232,11 @@ export interface FileRouteTypes {
     | '/_authenticated/clients'
     | '/_authenticated/equipements'
     | '/_authenticated/facturation'
+    | '/_authenticated/feuilles-route'
+    | '/_authenticated/missions'
     | '/_authenticated/notifications'
     | '/_authenticated/parametres'
+    | '/_authenticated/prelevements'
     | '/_authenticated/produits'
     | '/_authenticated/projets'
     | '/_authenticated/rapports'
@@ -270,6 +308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProduitsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/prelevements': {
+      id: '/_authenticated/prelevements'
+      path: '/prelevements'
+      fullPath: '/prelevements'
+      preLoaderRoute: typeof AuthenticatedPrelevementsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/parametres': {
       id: '/_authenticated/parametres'
       path: '/parametres'
@@ -282,6 +327,20 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/missions': {
+      id: '/_authenticated/missions'
+      path: '/missions'
+      fullPath: '/missions'
+      preLoaderRoute: typeof AuthenticatedMissionsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/feuilles-route': {
+      id: '/_authenticated/feuilles-route'
+      path: '/feuilles-route'
+      fullPath: '/feuilles-route'
+      preLoaderRoute: typeof AuthenticatedFeuillesRouteRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/facturation': {
@@ -328,8 +387,11 @@ interface AuthenticatedRouteChildren {
   AuthenticatedClientsRoute: typeof AuthenticatedClientsRoute
   AuthenticatedEquipementsRoute: typeof AuthenticatedEquipementsRoute
   AuthenticatedFacturationRoute: typeof AuthenticatedFacturationRoute
+  AuthenticatedFeuillesRouteRoute: typeof AuthenticatedFeuillesRouteRoute
+  AuthenticatedMissionsRoute: typeof AuthenticatedMissionsRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
+  AuthenticatedPrelevementsRoute: typeof AuthenticatedPrelevementsRoute
   AuthenticatedProduitsRoute: typeof AuthenticatedProduitsRoute
   AuthenticatedProjetsRoute: typeof AuthenticatedProjetsRoute
   AuthenticatedRapportsRoute: typeof AuthenticatedRapportsRoute
@@ -343,8 +405,11 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedClientsRoute: AuthenticatedClientsRoute,
   AuthenticatedEquipementsRoute: AuthenticatedEquipementsRoute,
   AuthenticatedFacturationRoute: AuthenticatedFacturationRoute,
+  AuthenticatedFeuillesRouteRoute: AuthenticatedFeuillesRouteRoute,
+  AuthenticatedMissionsRoute: AuthenticatedMissionsRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedParametresRoute: AuthenticatedParametresRoute,
+  AuthenticatedPrelevementsRoute: AuthenticatedPrelevementsRoute,
   AuthenticatedProduitsRoute: AuthenticatedProduitsRoute,
   AuthenticatedProjetsRoute: AuthenticatedProjetsRoute,
   AuthenticatedRapportsRoute: AuthenticatedRapportsRoute,
