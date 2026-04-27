@@ -209,7 +209,7 @@ function NewDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
         lieu: lieu || null, preleveur_nom: preleveur || null,
         temperature: temp ? Number(temp) : null,
         conformite, observations: observations || null,
-        statut: "preleve",
+        statut: "effectue",
       });
       if (error) throw error;
     },
