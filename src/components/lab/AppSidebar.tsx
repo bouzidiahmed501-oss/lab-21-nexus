@@ -13,6 +13,9 @@ import {
   Settings,
   LogOut,
   Bell,
+  MapPin,
+  TestTubes,
+  CalendarRange,
 } from "lucide-react";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
@@ -39,6 +42,9 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     label: "Activité laboratoire",
     items: [
       { label: "Bons de commande", to: "/bons-commande", icon: ClipboardList },
+      { label: "Missions", to: "/missions", icon: MapPin },
+      { label: "Prélèvements", to: "/prelevements", icon: TestTubes },
+      { label: "Feuilles de route", to: "/feuilles-route", icon: CalendarRange },
       { label: "Analyses", to: "/analyses", icon: FlaskConical },
       { label: "Rapports", to: "/rapports", icon: FileText },
     ],
