@@ -31,12 +31,11 @@ export const Route = createFileRoute("/_authenticated/prelevements")({
   component: PrelevementsPage,
 });
 
-const STATUTS = ["planifie", "preleve", "receptionne", "en_analyse", "termine", "rejete"] as const;
+const STATUTS = ["planifie", "effectue", "recu_labo", "rejete"] as const;
 type Statut = (typeof STATUTS)[number];
 
 const VAR: Record<Statut, "default" | "secondary" | "outline" | "destructive"> = {
-  planifie: "outline", preleve: "outline", receptionne: "secondary",
-  en_analyse: "default", termine: "default", rejete: "destructive",
+  planifie: "outline", effectue: "default", recu_labo: "secondary", rejete: "destructive",
 };
 
 interface Row {
