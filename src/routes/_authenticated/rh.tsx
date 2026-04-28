@@ -186,23 +186,32 @@ function EmployeForm({ onClose, onSaved }: { onClose: () => void; onSaved: () =>
     } catch (e: any) { toast.error(e.message); } finally { setSaving(false); }
   };
 
-  const F = ({ k, label, type = "text" }: any) => (
-    <div><Label>{label}</Label><Input type={type} value={(f as any)[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })} /></div>
-  );
+  const fields: { k: keyof typeof f; label: string; type?: string }[] = [
+    { k: "nom", label: "Nom *" },
+    { k: "prenom", label: "Prénom *" },
+    { k: "matricule", label: "Matricule" },
+    { k: "cin", label: "CIN" },
+    { k: "cnss", label: "N° CNSS" },
+    { k: "email", label: "Email", type: "email" },
+    { k: "telephone", label: "Téléphone" },
+    { k: "fonction", label: "Fonction" },
+    { k: "service", label: "Service" },
+  ];
 
   return (
     <DialogContent className="max-w-2xl">
       <DialogHeader><DialogTitle>Nouvel employé</DialogTitle></DialogHeader>
       <div className="grid grid-cols-2 gap-4">
-        <F k="nom" label="Nom *" />
-        <F k="prenom" label="Prénom *" />
-        <F k="matricule" label="Matricule" />
-        <F k="cin" label="CIN" />
-        <F k="cnss" label="N° CNSS" />
-        <F k="email" label="Email" type="email" />
-        <F k="telephone" label="Téléphone" />
-        <F k="fonction" label="Fonction" />
-        <F k="service" label="Service" />
+        {fields.map((fd) => (
+          <div key={fd.k}>
+            <Label>{fd.label}</Label>
+            <Input
+              type={fd.type ?? "text"}
+              value={f[fd.k]}
+              onChange={(e) => setF({ ...f, [fd.k]: e.target.value })}
+            />
+          </div>
+        ))}
         <div>
           <Label>Type contrat</Label>
           <Select value={f.contrat_type} onValueChange={(v) => setF({ ...f, contrat_type: v })}>
@@ -212,8 +221,14 @@ function EmployeForm({ onClose, onSaved }: { onClose: () => void; onSaved: () =>
             </SelectContent>
           </Select>
         </div>
-        <F k="date_embauche" label="Date embauche" type="date" />
-        <F k="salaire_base" label="Salaire base (TND)" type="number" />
+        <div>
+          <Label>Date embauche</Label>
+          <Input type="date" value={f.date_embauche} onChange={(e) => setF({ ...f, date_embauche: e.target.value })} />
+        </div>
+        <div>
+          <Label>Salaire base (TND)</Label>
+          <Input type="number" value={f.salaire_base} onChange={(e) => setF({ ...f, salaire_base: e.target.value })} />
+        </div>
       </div>
       <DialogFooter>
         <Button variant="outline" onClick={onClose}>Annuler</Button>
