@@ -579,6 +579,89 @@ export type Database = {
           },
         ]
       }
+      bulletins_paie: {
+        Row: {
+          annee: number
+          brut: number
+          cnss_patronal: number
+          cnss_salarial: number
+          created_at: string
+          created_by: string | null
+          employe_id: string
+          heures_supp_montant: number
+          id: string
+          irpp: number
+          jours_conges: number | null
+          jours_travailles: number | null
+          mois: number
+          net_a_payer: number
+          observations: string | null
+          pdf_path: string | null
+          primes: number
+          retenues: number
+          salaire_base: number
+          updated_at: string
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          annee: number
+          brut?: number
+          cnss_patronal?: number
+          cnss_salarial?: number
+          created_at?: string
+          created_by?: string | null
+          employe_id: string
+          heures_supp_montant?: number
+          id?: string
+          irpp?: number
+          jours_conges?: number | null
+          jours_travailles?: number | null
+          mois: number
+          net_a_payer?: number
+          observations?: string | null
+          pdf_path?: string | null
+          primes?: number
+          retenues?: number
+          salaire_base?: number
+          updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          annee?: number
+          brut?: number
+          cnss_patronal?: number
+          cnss_salarial?: number
+          created_at?: string
+          created_by?: string | null
+          employe_id?: string
+          heures_supp_montant?: number
+          id?: string
+          irpp?: number
+          jours_conges?: number | null
+          jours_travailles?: number | null
+          mois?: number
+          net_a_payer?: number
+          observations?: string | null
+          pdf_path?: string | null
+          primes?: number
+          retenues?: number
+          salaire_base?: number
+          updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bulletins_paie_employe_id_fkey"
+            columns: ["employe_id"]
+            isOneToOne: false
+            referencedRelation: "employes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           adresse: string | null
@@ -647,6 +730,277 @@ export type Database = {
           ville?: string | null
         }
         Relationships: []
+      }
+      conges: {
+        Row: {
+          commentaire_validation: string | null
+          created_at: string
+          created_by: string | null
+          date_debut: string
+          date_fin: string
+          date_validation: string | null
+          employe_id: string
+          id: string
+          motif: string | null
+          nb_jours: number
+          statut: Database["public"]["Enums"]["conge_statut"]
+          type: Database["public"]["Enums"]["conge_type"]
+          updated_at: string
+          validateur_id: string | null
+        }
+        Insert: {
+          commentaire_validation?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_debut: string
+          date_fin: string
+          date_validation?: string | null
+          employe_id: string
+          id?: string
+          motif?: string | null
+          nb_jours?: number
+          statut?: Database["public"]["Enums"]["conge_statut"]
+          type?: Database["public"]["Enums"]["conge_type"]
+          updated_at?: string
+          validateur_id?: string | null
+        }
+        Update: {
+          commentaire_validation?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string
+          date_fin?: string
+          date_validation?: string | null
+          employe_id?: string
+          id?: string
+          motif?: string | null
+          nb_jours?: number
+          statut?: Database["public"]["Enums"]["conge_statut"]
+          type?: Database["public"]["Enums"]["conge_type"]
+          updated_at?: string
+          validateur_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conges_employe_id_fkey"
+            columns: ["employe_id"]
+            isOneToOne: false
+            referencedRelation: "employes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employes: {
+        Row: {
+          adresse: string | null
+          cin: string | null
+          cnss: string | null
+          contrat_type: Database["public"]["Enums"]["contrat_type"]
+          created_at: string
+          created_by: string | null
+          date_embauche: string
+          date_fin_contrat: string | null
+          date_naissance: string | null
+          date_sortie: string | null
+          email: string | null
+          fonction: string | null
+          id: string
+          is_active: boolean
+          matricule: string | null
+          nom: string
+          notes: string | null
+          numero: string
+          prenom: string
+          rib: string | null
+          salaire_base: number
+          service: string | null
+          telephone: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          adresse?: string | null
+          cin?: string | null
+          cnss?: string | null
+          contrat_type?: Database["public"]["Enums"]["contrat_type"]
+          created_at?: string
+          created_by?: string | null
+          date_embauche?: string
+          date_fin_contrat?: string | null
+          date_naissance?: string | null
+          date_sortie?: string | null
+          email?: string | null
+          fonction?: string | null
+          id?: string
+          is_active?: boolean
+          matricule?: string | null
+          nom: string
+          notes?: string | null
+          numero: string
+          prenom: string
+          rib?: string | null
+          salaire_base?: number
+          service?: string | null
+          telephone?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          adresse?: string | null
+          cin?: string | null
+          cnss?: string | null
+          contrat_type?: Database["public"]["Enums"]["contrat_type"]
+          created_at?: string
+          created_by?: string | null
+          date_embauche?: string
+          date_fin_contrat?: string | null
+          date_naissance?: string | null
+          date_sortie?: string | null
+          email?: string | null
+          fonction?: string | null
+          id?: string
+          is_active?: boolean
+          matricule?: string | null
+          nom?: string
+          notes?: string | null
+          numero?: string
+          prenom?: string
+          rib?: string | null
+          salaire_base?: number
+          service?: string | null
+          telephone?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      equipements: {
+        Row: {
+          code: string | null
+          cout_achat: number | null
+          created_at: string
+          created_by: string | null
+          date_achat: string | null
+          date_mise_service: string | null
+          designation: string
+          fournisseur: string | null
+          frequence_etalonnage_mois: number | null
+          garantie_fin: string | null
+          id: string
+          localisation: string | null
+          marque: string | null
+          modele: string | null
+          notes: string | null
+          numero: string
+          numero_serie: string | null
+          prochaine_etalonnage: string | null
+          responsable_id: string | null
+          service: string | null
+          statut: Database["public"]["Enums"]["equipement_statut"]
+          updated_at: string
+        }
+        Insert: {
+          code?: string | null
+          cout_achat?: number | null
+          created_at?: string
+          created_by?: string | null
+          date_achat?: string | null
+          date_mise_service?: string | null
+          designation: string
+          fournisseur?: string | null
+          frequence_etalonnage_mois?: number | null
+          garantie_fin?: string | null
+          id?: string
+          localisation?: string | null
+          marque?: string | null
+          modele?: string | null
+          notes?: string | null
+          numero: string
+          numero_serie?: string | null
+          prochaine_etalonnage?: string | null
+          responsable_id?: string | null
+          service?: string | null
+          statut?: Database["public"]["Enums"]["equipement_statut"]
+          updated_at?: string
+        }
+        Update: {
+          code?: string | null
+          cout_achat?: number | null
+          created_at?: string
+          created_by?: string | null
+          date_achat?: string | null
+          date_mise_service?: string | null
+          designation?: string
+          fournisseur?: string | null
+          frequence_etalonnage_mois?: number | null
+          garantie_fin?: string | null
+          id?: string
+          localisation?: string | null
+          marque?: string | null
+          modele?: string | null
+          notes?: string | null
+          numero?: string
+          numero_serie?: string | null
+          prochaine_etalonnage?: string | null
+          responsable_id?: string | null
+          service?: string | null
+          statut?: Database["public"]["Enums"]["equipement_statut"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      etalonnages: {
+        Row: {
+          certificat_url: string | null
+          cout: number | null
+          created_at: string
+          created_by: string | null
+          date_etalonnage: string
+          equipement_id: string
+          id: string
+          numero_certificat: string | null
+          observations: string | null
+          organisme: string | null
+          prochaine_date: string | null
+          resultat: Database["public"]["Enums"]["etalonnage_resultat"]
+        }
+        Insert: {
+          certificat_url?: string | null
+          cout?: number | null
+          created_at?: string
+          created_by?: string | null
+          date_etalonnage: string
+          equipement_id: string
+          id?: string
+          numero_certificat?: string | null
+          observations?: string | null
+          organisme?: string | null
+          prochaine_date?: string | null
+          resultat?: Database["public"]["Enums"]["etalonnage_resultat"]
+        }
+        Update: {
+          certificat_url?: string | null
+          cout?: number | null
+          created_at?: string
+          created_by?: string | null
+          date_etalonnage?: string
+          equipement_id?: string
+          id?: string
+          numero_certificat?: string | null
+          observations?: string | null
+          organisme?: string | null
+          prochaine_date?: string | null
+          resultat?: Database["public"]["Enums"]["etalonnage_resultat"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "etalonnages_equipement_id_fkey"
+            columns: ["equipement_id"]
+            isOneToOne: false
+            referencedRelation: "equipements"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       feuilles_route: {
         Row: {
@@ -831,6 +1185,56 @@ export type Database = {
           rehashed_at?: string | null
         }
         Relationships: []
+      }
+      maintenances: {
+        Row: {
+          cout: number | null
+          created_at: string
+          created_by: string | null
+          date_intervention: string
+          description: string
+          duree_arret_h: number | null
+          equipement_id: string
+          id: string
+          intervenant: string | null
+          observations: string | null
+          type: Database["public"]["Enums"]["maintenance_type"]
+        }
+        Insert: {
+          cout?: number | null
+          created_at?: string
+          created_by?: string | null
+          date_intervention: string
+          description: string
+          duree_arret_h?: number | null
+          equipement_id: string
+          id?: string
+          intervenant?: string | null
+          observations?: string | null
+          type?: Database["public"]["Enums"]["maintenance_type"]
+        }
+        Update: {
+          cout?: number | null
+          created_at?: string
+          created_by?: string | null
+          date_intervention?: string
+          description?: string
+          duree_arret_h?: number | null
+          equipement_id?: string
+          id?: string
+          intervenant?: string | null
+          observations?: string | null
+          type?: Database["public"]["Enums"]["maintenance_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenances_equipement_id_fkey"
+            columns: ["equipement_id"]
+            isOneToOne: false
+            referencedRelation: "equipements"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       methodes_analyse: {
         Row: {
@@ -1226,6 +1630,56 @@ export type Database = {
           },
         ]
       }
+      pointages: {
+        Row: {
+          absent: boolean
+          created_at: string
+          date_pointage: string
+          employe_id: string
+          heure_arrivee: string | null
+          heure_depart: string | null
+          heures_supp: number | null
+          heures_travaillees: number | null
+          id: string
+          motif_absence: string | null
+          notes: string | null
+        }
+        Insert: {
+          absent?: boolean
+          created_at?: string
+          date_pointage: string
+          employe_id: string
+          heure_arrivee?: string | null
+          heure_depart?: string | null
+          heures_supp?: number | null
+          heures_travaillees?: number | null
+          id?: string
+          motif_absence?: string | null
+          notes?: string | null
+        }
+        Update: {
+          absent?: boolean
+          created_at?: string
+          date_pointage?: string
+          employe_id?: string
+          heure_arrivee?: string | null
+          heure_depart?: string | null
+          heures_supp?: number | null
+          heures_travaillees?: number | null
+          id?: string
+          motif_absence?: string | null
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pointages_employe_id_fkey"
+            columns: ["employe_id"]
+            isOneToOne: false
+            referencedRelation: "employes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prelevements: {
         Row: {
           client_id: string
@@ -1388,6 +1842,125 @@ export type Database = {
           matricule?: string | null
           phone?: string | null
           service?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      projet_taches: {
+        Row: {
+          assigne_id: string | null
+          created_at: string
+          created_by: string | null
+          date_debut: string | null
+          date_echeance: string | null
+          date_fin: string | null
+          description: string | null
+          id: string
+          ordre: number
+          priorite: Database["public"]["Enums"]["tache_priorite"]
+          projet_id: string
+          statut: Database["public"]["Enums"]["tache_statut"]
+          titre: string
+          updated_at: string
+        }
+        Insert: {
+          assigne_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string | null
+          date_echeance?: string | null
+          date_fin?: string | null
+          description?: string | null
+          id?: string
+          ordre?: number
+          priorite?: Database["public"]["Enums"]["tache_priorite"]
+          projet_id: string
+          statut?: Database["public"]["Enums"]["tache_statut"]
+          titre: string
+          updated_at?: string
+        }
+        Update: {
+          assigne_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string | null
+          date_echeance?: string | null
+          date_fin?: string | null
+          description?: string | null
+          id?: string
+          ordre?: number
+          priorite?: Database["public"]["Enums"]["tache_priorite"]
+          projet_id?: string
+          statut?: Database["public"]["Enums"]["tache_statut"]
+          titre?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projet_taches_projet_id_fkey"
+            columns: ["projet_id"]
+            isOneToOne: false
+            referencedRelation: "projets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projets: {
+        Row: {
+          avancement_pct: number
+          budget: number | null
+          client_id: string | null
+          cout_reel: number | null
+          created_at: string
+          created_by: string | null
+          date_debut: string | null
+          date_fin_prevue: string | null
+          date_fin_reelle: string | null
+          description: string | null
+          id: string
+          nom: string
+          notes: string | null
+          numero: string
+          responsable_id: string | null
+          statut: Database["public"]["Enums"]["projet_statut"]
+          updated_at: string
+        }
+        Insert: {
+          avancement_pct?: number
+          budget?: number | null
+          client_id?: string | null
+          cout_reel?: number | null
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string | null
+          date_fin_prevue?: string | null
+          date_fin_reelle?: string | null
+          description?: string | null
+          id?: string
+          nom: string
+          notes?: string | null
+          numero: string
+          responsable_id?: string | null
+          statut?: Database["public"]["Enums"]["projet_statut"]
+          updated_at?: string
+        }
+        Update: {
+          avancement_pct?: number
+          budget?: number | null
+          client_id?: string | null
+          cout_reel?: number | null
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string | null
+          date_fin_prevue?: string | null
+          date_fin_reelle?: string | null
+          description?: string | null
+          id?: string
+          nom?: string
+          notes?: string | null
+          numero?: string
+          responsable_id?: string | null
+          statut?: Database["public"]["Enums"]["projet_statut"]
           updated_at?: string
         }
         Relationships: []
@@ -1802,13 +2375,25 @@ export type Database = {
         | "cloturee"
         | "abandonnee"
       capa_type: "corrective" | "preventive" | "immediate" | "amelioration"
+      conge_statut: "demande" | "approuve" | "refuse" | "annule"
+      conge_type:
+        | "annuel"
+        | "maladie"
+        | "maternite"
+        | "paternite"
+        | "sans_solde"
+        | "special"
       constat_type:
         | "ecart_majeur"
         | "ecart_mineur"
         | "observation"
         | "opportunite"
         | "point_fort"
+      contrat_type: "cdi" | "cdd" | "stage" | "freelance" | "interim"
+      equipement_statut: "actif" | "maintenance" | "hors_service" | "reforme"
+      etalonnage_resultat: "conforme" | "non_conforme" | "avec_reserves"
       fr_statut: "planifiee" | "en_cours" | "terminee" | "annulee"
+      maintenance_type: "preventive" | "corrective" | "verification"
       mission_statut: "planifiee" | "en_cours" | "terminee" | "annulee"
       nc_gravite: "mineure" | "majeure" | "critique"
       nc_source:
@@ -1827,6 +2412,7 @@ export type Database = {
         | "annulee"
       niveau_validation: "technicien" | "chef_labo" | "qualite"
       prelevement_statut: "planifie" | "effectue" | "recu_labo" | "rejete"
+      projet_statut: "planifie" | "en_cours" | "en_pause" | "termine" | "annule"
       rapport_statut:
         | "brouillon"
         | "en_validation"
@@ -1848,6 +2434,8 @@ export type Database = {
         | "cloturee"
         | "rejetee"
       revue_statut: "planifiee" | "tenue" | "cloturee"
+      tache_priorite: "basse" | "normale" | "haute" | "critique"
+      tache_statut: "a_faire" | "en_cours" | "bloquee" | "terminee"
       type_matrice:
         | "eau"
         | "sol"
@@ -2036,6 +2624,15 @@ export const Constants = {
         "abandonnee",
       ],
       capa_type: ["corrective", "preventive", "immediate", "amelioration"],
+      conge_statut: ["demande", "approuve", "refuse", "annule"],
+      conge_type: [
+        "annuel",
+        "maladie",
+        "maternite",
+        "paternite",
+        "sans_solde",
+        "special",
+      ],
       constat_type: [
         "ecart_majeur",
         "ecart_mineur",
@@ -2043,7 +2640,11 @@ export const Constants = {
         "opportunite",
         "point_fort",
       ],
+      contrat_type: ["cdi", "cdd", "stage", "freelance", "interim"],
+      equipement_statut: ["actif", "maintenance", "hors_service", "reforme"],
+      etalonnage_resultat: ["conforme", "non_conforme", "avec_reserves"],
       fr_statut: ["planifiee", "en_cours", "terminee", "annulee"],
+      maintenance_type: ["preventive", "corrective", "verification"],
       mission_statut: ["planifiee", "en_cours", "terminee", "annulee"],
       nc_gravite: ["mineure", "majeure", "critique"],
       nc_source: [
@@ -2064,6 +2665,7 @@ export const Constants = {
       ],
       niveau_validation: ["technicien", "chef_labo", "qualite"],
       prelevement_statut: ["planifie", "effectue", "recu_labo", "rejete"],
+      projet_statut: ["planifie", "en_cours", "en_pause", "termine", "annule"],
       rapport_statut: [
         "brouillon",
         "en_validation",
@@ -2088,6 +2690,8 @@ export const Constants = {
         "rejetee",
       ],
       revue_statut: ["planifiee", "tenue", "cloturee"],
+      tache_priorite: ["basse", "normale", "haute", "critique"],
+      tache_statut: ["a_faire", "en_cours", "bloquee", "terminee"],
       type_matrice: [
         "eau",
         "sol",
