@@ -1,18 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Loader2, FileText, Trash2, Download, Eye, ClipboardList } from "lucide-react";
+import { Plus, Loader2, FileText, Trash2, Download, Eye } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/lab/PageHeader";
-import { EmptyState } from "@/components/lab/EmptyState";
+import { DataTable, type Column } from "@/components/lab/DataTable";
+import { StatusBadge, statutTone } from "@/components/lab/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -33,11 +33,6 @@ export const Route = createFileRoute("/_authenticated/bons-commande")({
 
 const STATUTS = ["brouillon", "envoye", "accepte", "refuse", "en_cours", "cloture", "annule"] as const;
 type BCStatut = (typeof STATUTS)[number];
-
-const STATUT_VARIANT: Record<BCStatut, "default" | "secondary" | "outline" | "destructive"> = {
-  brouillon: "secondary", envoye: "outline", accepte: "default", refuse: "destructive",
-  en_cours: "default", cloture: "secondary", annule: "destructive",
-};
 
 interface Ligne {
   id?: string;
