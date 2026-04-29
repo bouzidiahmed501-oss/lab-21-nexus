@@ -17,23 +17,36 @@ import {
   TestTubes,
   CalendarRange,
   ShieldCheck,
+  FlaskConical as Flask,
 } from "lucide-react";
-import { Logo } from "./Logo";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import type { AppRole } from "@/hooks/useUserRoles";
+import { cn } from "@/lib/utils";
 
 interface NavItem {
   label: string;
   to: string;
   icon: React.ComponentType<{ className?: string }>;
-  roles?: AppRole[]; // si vide -> visible par tous les internes
+  roles?: AppRole[];
 }
 
 const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
-    label: "Vue d'ensemble",
+    label: "Pilotage",
     items: [
       { label: "Tableau de bord", to: "/", icon: LayoutDashboard },
       { label: "Notifications", to: "/notifications", icon: Bell },
@@ -60,36 +73,11 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: "Gestion",
     items: [
-      {
-        label: "Facturation",
-        to: "/facturation",
-        icon: Receipt,
-        roles: ["admin", "direction", "comptable"],
-      },
-      {
-        label: "Équipements",
-        to: "/equipements",
-        icon: Wrench,
-        roles: ["admin", "direction", "chef_labo", "technicien", "qualite"],
-      },
-      {
-        label: "RH & Paie",
-        to: "/rh",
-        icon: UserCog,
-        roles: ["admin", "direction", "rh"],
-      },
-      {
-        label: "Projets",
-        to: "/projets",
-        icon: Briefcase,
-        roles: ["admin", "direction", "chef_labo"],
-      },
-      {
-        label: "Qualité",
-        to: "/qualite",
-        icon: ShieldCheck,
-        roles: ["admin", "direction", "qualite", "chef_labo", "technicien", "commercial"],
-      },
+      { label: "Facturation", to: "/facturation", icon: Receipt, roles: ["admin", "direction", "comptable"] },
+      { label: "Équipements", to: "/equipements", icon: Wrench, roles: ["admin", "direction", "chef_labo", "technicien", "qualite"] },
+      { label: "RH & Paie", to: "/rh", icon: UserCog, roles: ["admin", "direction", "rh"] },
+      { label: "Projets", to: "/projets", icon: Briefcase, roles: ["admin", "direction", "chef_labo"] },
+      { label: "Qualité", to: "/qualite", icon: ShieldCheck, roles: ["admin", "direction", "qualite", "chef_labo", "technicien", "commercial"] },
     ],
   },
 ];
@@ -114,6 +102,8 @@ const ROLE_LABELS: Record<AppRole, string> = {
 
 export function AppSidebar({ roles, userEmail, primaryRole }: AppSidebarProps) {
   const location = useLocation();
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
   const pathname = location.pathname;
 
   const handleLogout = async () => {
@@ -127,84 +117,103 @@ export function AppSidebar({ roles, userEmail, primaryRole }: AppSidebarProps) {
     return item.roles.some((r) => roles.includes(r));
   };
 
-  return (
-    <aside className="flex h-screen w-64 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
-      <div className="flex h-16 items-center border-b border-sidebar-border px-5">
-        <Logo variant="light" />
-      </div>
+  const isActive = (to: string) =>
+    pathname === to || (to !== "/" && pathname.startsWith(to));
 
-      <nav className="flex-1 overflow-y-auto px-3 py-4">
+  return (
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+      <SidebarHeader className="border-b border-sidebar-border">
+        <div className={cn("flex items-center gap-2 px-2 py-2", collapsed && "justify-center px-0")}>
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
+            <Flask className="h-4 w-4" />
+          </div>
+          {!collapsed && (
+            <div className="flex flex-col leading-tight">
+              <span className="text-sm font-bold tracking-tight text-sidebar-foreground">BALIMS</span>
+              <span className="text-[10px] uppercase tracking-wider text-sidebar-foreground/60">LIMS Platform</span>
+            </div>
+          )}
+        </div>
+      </SidebarHeader>
+
+      <SidebarContent className="px-1 py-2">
         {NAV_GROUPS.map((group) => {
           const visibleItems = group.items.filter(canSee);
           if (visibleItems.length === 0) return null;
           return (
-            <div key={group.label} className="mb-6">
-              <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
-                {group.label}
-              </p>
-              <ul className="space-y-0.5">
-                {visibleItems.map((item) => {
-                  const Icon = item.icon;
-                  const active =
-                    pathname === item.to ||
-                    (item.to !== "/" && pathname.startsWith(item.to));
-                  return (
-                    <li key={item.to}>
-                      <Link
-                        to={item.to}
-                        className={cn(
-                          "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                          active
-                            ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
-                            : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                        )}
-                      >
-                        <Icon className="h-4 w-4 shrink-0" />
-                        <span className="truncate">{item.label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+            <SidebarGroup key={group.label}>
+              {!collapsed && (
+                <SidebarGroupLabel className="px-2 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+                  {group.label}
+                </SidebarGroupLabel>
+              )}
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {visibleItems.map((item) => {
+                    const Icon = item.icon;
+                    const active = isActive(item.to);
+                    return (
+                      <SidebarMenuItem key={item.to}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={active}
+                          tooltip={collapsed ? item.label : undefined}
+                          className={cn(
+                            "h-8 gap-2 text-[13px] text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                            active && "bg-sidebar-primary/15 text-sidebar-foreground border-l-2 border-sidebar-primary rounded-l-none",
+                          )}
+                        >
+                          <Link to={item.to}>
+                            <Icon className="h-4 w-4 shrink-0" />
+                            <span className="truncate">{item.label}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
           );
         })}
-      </nav>
+      </SidebarContent>
 
-      <div className="border-t border-sidebar-border p-3">
-        <div className="mb-2 rounded-md bg-sidebar-accent/40 px-3 py-2">
-          <p className="truncate text-xs font-medium text-sidebar-foreground">
-            {userEmail ?? "Utilisateur"}
-          </p>
-          {primaryRole && (
-            <p className="truncate text-[10px] text-sidebar-foreground/60">
-              {ROLE_LABELS[primaryRole]}
+      <SidebarFooter className="border-t border-sidebar-border p-2">
+        {!collapsed && (
+          <div className="mb-2 rounded-sm bg-sidebar-accent/40 px-2 py-1.5">
+            <p className="truncate text-[11px] font-medium text-sidebar-foreground">
+              {userEmail ?? "Utilisateur"}
             </p>
-          )}
-        </div>
-        <div className="flex gap-1">
+            {primaryRole && (
+              <p className="truncate text-[10px] text-sidebar-foreground/60">
+                {ROLE_LABELS[primaryRole]}
+              </p>
+            )}
+          </div>
+        )}
+        <div className={cn("flex gap-1", collapsed && "flex-col")}>
           <Button
             variant="ghost"
             size="sm"
             asChild
-            className="flex-1 justify-start text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            className="h-7 flex-1 justify-start px-2 text-xs text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           >
             <Link to="/parametres">
-              <Settings className="h-4 w-4" />
-              Paramètres
+              <Settings className="h-3.5 w-3.5" />
+              {!collapsed && <span className="ml-1.5">Paramètres</span>}
             </Link>
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={handleLogout}
-            className="text-sidebar-foreground/80 hover:bg-destructive/20 hover:text-destructive"
+            className="h-7 w-7 text-sidebar-foreground/80 hover:bg-destructive/20 hover:text-destructive"
             aria-label="Se déconnecter"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-3.5 w-3.5" />
           </Button>
         </div>
-      </div>
-    </aside>
+      </SidebarFooter>
+    </Sidebar>
   );
 }
