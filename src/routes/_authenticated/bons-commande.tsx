@@ -1,18 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Loader2, FileText, Trash2, Download, Eye, ClipboardList } from "lucide-react";
+import { Plus, Loader2, FileText, Trash2, Download, Eye } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/lab/PageHeader";
-import { EmptyState } from "@/components/lab/EmptyState";
+import { DataTable, type Column } from "@/components/lab/DataTable";
+import { StatusBadge, statutTone } from "@/components/lab/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -33,11 +33,6 @@ export const Route = createFileRoute("/_authenticated/bons-commande")({
 
 const STATUTS = ["brouillon", "envoye", "accepte", "refuse", "en_cours", "cloture", "annule"] as const;
 type BCStatut = (typeof STATUTS)[number];
-
-const STATUT_VARIANT: Record<BCStatut, "default" | "secondary" | "outline" | "destructive"> = {
-  brouillon: "secondary", envoye: "outline", accepte: "default", refuse: "destructive",
-  en_cours: "default", cloture: "secondary", annule: "destructive",
-};
 
 interface Ligne {
   id?: string;
@@ -66,7 +61,6 @@ interface BCRow {
 
 function BCPage() {
   const qc = useQueryClient();
-  const [search, setSearch] = useState("");
   const [statutFilter, setStatutFilter] = useState<string>("all");
   const [open, setOpen] = useState(false);
   const [viewingId, setViewingId] = useState<string | null>(null);
@@ -84,14 +78,9 @@ function BCPage() {
   });
 
   const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    return bcs.filter((b) => {
-      if (statutFilter !== "all" && b.statut !== statutFilter) return false;
-      if (!q) return true;
-      return [b.numero, b.clients?.raison_sociale, b.reference_client, b.objet]
-        .filter(Boolean).some((v) => v!.toLowerCase().includes(q));
-    });
-  }, [bcs, search, statutFilter]);
+    if (statutFilter === "all") return bcs;
+    return bcs.filter((b) => b.statut === statutFilter);
+  }, [bcs, statutFilter]);
 
   const updateStatut = useMutation({
     mutationFn: async ({ id, statut }: { id: string; statut: BCStatut }) => {
@@ -133,72 +122,68 @@ function BCPage() {
     }
   };
 
+  const columns: Column<BCRow>[] = [
+    { key: "numero", header: "N°", cell: (r) => <span className="text-numeric font-medium">{r.numero}</span>, width: "130px" },
+    { key: "date_bc", header: "Date", cell: (r) => <span className="text-numeric">{formatDate(r.date_bc)}</span>, accessor: (r) => r.date_bc, width: "110px" },
+    { key: "client", header: "Client", accessor: (r) => r.clients?.raison_sociale ?? "", cell: (r) => r.clients?.raison_sociale ?? "—" },
+    { key: "reference_client", header: "Réf. client", cell: (r) => <span className="text-muted-foreground">{r.reference_client || "—"}</span> },
+    { key: "objet", header: "Objet", cell: (r) => <span className="truncate text-muted-foreground">{r.objet || "—"}</span> },
+    { key: "total_ttc", header: "Total TTC", align: "right", cell: (r) => <span className="font-medium">{formatCurrency(r.total_ttc)}</span>, accessor: (r) => Number(r.total_ttc), width: "130px" },
+    {
+      key: "statut", header: "Statut", align: "center", width: "150px",
+      cell: (r) => (
+        <Select value={r.statut} onValueChange={(v) => updateStatut.mutate({ id: r.id, statut: v as BCStatut })}>
+          <SelectTrigger className="h-7 border-0 bg-transparent p-0 hover:bg-transparent" onClick={(e) => e.stopPropagation()}>
+            <StatusBadge label={r.statut} tone={statutTone(r.statut)} />
+          </SelectTrigger>
+          <SelectContent>{STATUTS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+        </Select>
+      ),
+    },
+    {
+      key: "actions", header: "", align: "right", sortable: false, width: "90px",
+      cell: (r) => (
+        <div className="flex justify-end gap-0.5">
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); setViewingId(r.id); }} title="Voir lignes">
+            <Eye className="h-3.5 w-3.5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); handlePdf(r); }} title="Télécharger PDF">
+            <Download className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div>
       <PageHeader
         title="Bons de commande"
         description="Création, suivi et validation des BC clients."
-        actions={<Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" /> Nouveau BC</Button>}
+        badge={<StatusBadge label={`${bcs.length}`} tone="info" dot={false} />}
+        actions={<Button size="sm" onClick={() => setOpen(true)}><Plus className="h-3.5 w-3.5" /> Nouveau BC</Button>}
       />
 
-      <div className="space-y-4 p-6">
-        <div className="flex flex-wrap gap-3">
-          <div className="relative max-w-sm flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Rechercher (n°, client, réf, objet…)" className="pl-9"
-              value={search} onChange={(e) => setSearch(e.target.value)} />
-          </div>
-          <Select value={statutFilter} onValueChange={setStatutFilter}>
-            <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous statuts</SelectItem>
-              {STATUTS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {isLoading ? (
-          <div className="flex justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
-        ) : filtered.length === 0 ? (
-          <EmptyState icon={ClipboardList} title="Aucun BC"
-            description="Créez votre premier bon de commande pour démarrer le workflow."
-            action={<Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" /> Nouveau BC</Button>} />
-        ) : (
-          <div className="rounded-lg border border-border/60 bg-card">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>N°</TableHead><TableHead>Date</TableHead><TableHead>Client</TableHead>
-                  <TableHead>Réf. client</TableHead><TableHead className="text-right">Total TTC</TableHead>
-                  <TableHead>Statut</TableHead><TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((b) => (
-                  <TableRow key={b.id}>
-                    <TableCell className="font-mono text-sm font-medium">{b.numero}</TableCell>
-                    <TableCell>{formatDate(b.date_bc)}</TableCell>
-                    <TableCell>{b.clients?.raison_sociale ?? "—"}</TableCell>
-                    <TableCell className="text-muted-foreground">{b.reference_client || "—"}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(b.total_ttc)}</TableCell>
-                    <TableCell>
-                      <Select value={b.statut} onValueChange={(v) => updateStatut.mutate({ id: b.id, statut: v as BCStatut })}>
-                        <SelectTrigger className="h-7 w-32 text-xs">
-                          <Badge variant={STATUT_VARIANT[b.statut]}>{b.statut}</Badge>
-                        </SelectTrigger>
-                        <SelectContent>{STATUTS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" onClick={() => setViewingId(b.id)} title="Voir lignes"><Eye className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => handlePdf(b)} title="Télécharger PDF"><Download className="h-4 w-4" /></Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+      <div className="space-y-3 p-4">
+        <DataTable
+          data={filtered}
+          columns={columns}
+          loading={isLoading}
+          rowKey={(r) => r.id}
+          searchableKeys={["numero", "reference_client", "objet"]}
+          searchPlaceholder="Rechercher (n°, réf, objet…)"
+          exportFilename="bons_commande"
+          emptyMessage="Aucun bon de commande."
+          toolbarLeft={
+            <Select value={statutFilter} onValueChange={setStatutFilter}>
+              <SelectTrigger className="h-8 w-40 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous statuts</SelectItem>
+                {STATUTS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          }
+        />
 
         <p className="text-xs text-muted-foreground">
           Les missions de prélèvement et analyses se créent depuis un BC accepté. <Link to="/analyses" className="text-primary hover:underline">Voir les analyses</Link>.

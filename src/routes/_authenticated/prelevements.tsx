@@ -1,25 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Loader2, TestTubes } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/lab/PageHeader";
-import { EmptyState } from "@/components/lab/EmptyState";
+import { DataTable, type Column } from "@/components/lab/DataTable";
+import { StatusBadge, statutTone } from "@/components/lab/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -33,10 +30,6 @@ export const Route = createFileRoute("/_authenticated/prelevements")({
 
 const STATUTS = ["planifie", "effectue", "recu_labo", "rejete"] as const;
 type Statut = (typeof STATUTS)[number];
-
-const VAR: Record<Statut, "default" | "secondary" | "outline" | "destructive"> = {
-  planifie: "outline", effectue: "default", recu_labo: "secondary", rejete: "destructive",
-};
 
 interface Row {
   id: string;
@@ -57,7 +50,6 @@ interface Row {
 
 function PrelevementsPage() {
   const qc = useQueryClient();
-  const [search, setSearch] = useState("");
   const [statutFilter, setStatutFilter] = useState<string>("all");
   const [open, setOpen] = useState(false);
 
@@ -74,14 +66,9 @@ function PrelevementsPage() {
   });
 
   const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    return rows.filter((r) => {
-      if (statutFilter !== "all" && r.statut !== statutFilter) return false;
-      if (!q) return true;
-      return [r.numero, r.clients?.raison_sociale, r.lieu, r.preleveur_nom]
-        .filter(Boolean).some((v) => v!.toLowerCase().includes(q));
-    });
-  }, [rows, search, statutFilter]);
+    if (statutFilter === "all") return rows;
+    return rows.filter((r) => r.statut === statutFilter);
+  }, [rows, statutFilter]);
 
   const updateStatut = useMutation({
     mutationFn: async ({ id, statut }: { id: string; statut: Statut }) => {
@@ -94,71 +81,57 @@ function PrelevementsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const columns: Column<Row>[] = [
+    { key: "numero", header: "N°", cell: (r) => <span className="text-numeric font-medium">{r.numero}</span>, width: "130px" },
+    { key: "date_prelevement", header: "Date prélèv.", cell: (r) => <span className="text-numeric text-xs">{formatDateTime(r.date_prelevement)}</span>, accessor: (r) => r.date_prelevement, width: "150px" },
+    { key: "client", header: "Client", accessor: (r) => r.clients?.raison_sociale ?? "", cell: (r) => r.clients?.raison_sociale ?? "—" },
+    { key: "mission", header: "Mission", accessor: (r) => r.missions?.numero ?? "", cell: (r) => <span className="text-numeric text-xs text-muted-foreground">{r.missions?.numero ?? "—"}</span>, width: "120px" },
+    { key: "preleveur", header: "Préleveur", accessor: (r) => r.preleveur_nom ?? "", cell: (r) => r.preleveur_nom ?? "—" },
+    { key: "lieu", header: "Lieu", cell: (r) => <span className="text-muted-foreground">{r.lieu ?? "—"}</span> },
+    { key: "temperature", header: "T° (°C)", align: "right", width: "80px", cell: (r) => r.temperature ?? "—", accessor: (r) => r.temperature ?? null },
+    { key: "conformite", header: "Conf.", align: "center", width: "80px", cell: (r) => r.conformite === null ? "—" : <StatusBadge label={r.conformite ? "OK" : "NC"} tone={r.conformite ? "success" : "destructive"} dot={false} /> },
+    {
+      key: "statut", header: "Statut", align: "center", width: "150px",
+      cell: (r) => (
+        <Select value={r.statut} onValueChange={(v) => updateStatut.mutate({ id: r.id, statut: v as Statut })}>
+          <SelectTrigger className="h-7 border-0 bg-transparent p-0 hover:bg-transparent" onClick={(e) => e.stopPropagation()}>
+            <StatusBadge label={r.statut} tone={statutTone(r.statut)} />
+          </SelectTrigger>
+          <SelectContent>{STATUTS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+        </Select>
+      ),
+    },
+  ];
+
   return (
     <div>
       <PageHeader
         title="Prélèvements & Réception"
         description="Traçabilité des échantillons : prélèvement, transport, réception au labo."
-        actions={<Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" /> Nouveau prélèvement</Button>}
+        badge={<StatusBadge label={`${rows.length}`} tone="info" dot={false} />}
+        actions={<Button size="sm" onClick={() => setOpen(true)}><Plus className="h-3.5 w-3.5" /> Nouveau prélèvement</Button>}
       />
 
-      <div className="space-y-4 p-6">
-        <div className="flex flex-wrap gap-3">
-          <div className="relative max-w-sm flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Rechercher…" className="pl-9"
-              value={search} onChange={(e) => setSearch(e.target.value)} />
-          </div>
-          <Select value={statutFilter} onValueChange={setStatutFilter}>
-            <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous statuts</SelectItem>
-              {STATUTS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {isLoading ? (
-          <div className="flex justify-center py-16"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
-        ) : filtered.length === 0 ? (
-          <EmptyState icon={TestTubes} title="Aucun prélèvement"
-            description="Enregistrez un prélèvement (lié ou non à une mission)."
-            action={<Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" /> Nouveau</Button>} />
-        ) : (
-          <div className="rounded-lg border border-border/60 bg-card">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>N°</TableHead><TableHead>Date prélèvement</TableHead>
-                  <TableHead>Client</TableHead><TableHead>Mission</TableHead>
-                  <TableHead>Préleveur</TableHead><TableHead>T° (°C)</TableHead>
-                  <TableHead>Conf.</TableHead><TableHead>Statut</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((r) => (
-                  <TableRow key={r.id}>
-                    <TableCell className="font-mono text-sm font-medium">{r.numero}</TableCell>
-                    <TableCell>{formatDateTime(r.date_prelevement)}</TableCell>
-                    <TableCell>{r.clients?.raison_sociale ?? "—"}</TableCell>
-                    <TableCell className="font-mono text-xs text-muted-foreground">{r.missions?.numero ?? "—"}</TableCell>
-                    <TableCell>{r.preleveur_nom ?? "—"}</TableCell>
-                    <TableCell>{r.temperature ?? "—"}</TableCell>
-                    <TableCell>
-                      {r.conformite === null ? "—" : r.conformite ? <Badge variant="default">OK</Badge> : <Badge variant="destructive">NC</Badge>}
-                    </TableCell>
-                    <TableCell>
-                      <Select value={r.statut} onValueChange={(v) => updateStatut.mutate({ id: r.id, statut: v as Statut })}>
-                        <SelectTrigger className="h-7 w-32 text-xs"><Badge variant={VAR[r.statut]}>{r.statut}</Badge></SelectTrigger>
-                        <SelectContent>{STATUTS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                      </Select>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+      <div className="p-4">
+        <DataTable
+          data={filtered}
+          columns={columns}
+          loading={isLoading}
+          rowKey={(r) => r.id}
+          searchableKeys={["numero", "lieu", "preleveur_nom"]}
+          searchPlaceholder="Rechercher (n°, lieu, préleveur…)"
+          exportFilename="prelevements"
+          emptyMessage="Aucun prélèvement enregistré."
+          toolbarLeft={
+            <Select value={statutFilter} onValueChange={setStatutFilter}>
+              <SelectTrigger className="h-8 w-40 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous statuts</SelectItem>
+                {STATUTS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          }
+        />
       </div>
 
       <NewDialog open={open} onClose={() => setOpen(false)} />
