@@ -91,7 +91,7 @@ function DashboardPage() {
         supabase.from("bons_commande").select("*", { count: "exact", head: true }).in("statut", ["validee", "en_cours"] as any),
         supabase.from("bons_commande").select("*", { count: "exact", head: true }),
         supabase.from("analyses").select("*", { count: "exact", head: true }).in("statut", ["a_faire", "en_cours"] as any),
-        supabase.from("facturation" as any).select("*", { count: "exact", head: true }).then(r => ({ count: 0, ...r })).catch(() => ({ count: 0 })),
+        Promise.resolve({ count: 0 }),
         supabase.from("bons_commande").select("total_ttc").gte("created_at", monthStart),
         supabase.from("clients").select("*", { count: "exact", head: true }).eq("is_active", true),
         supabase.from("non_conformites").select("*", { count: "exact", head: true }).neq("statut", "cloturee" as any),
