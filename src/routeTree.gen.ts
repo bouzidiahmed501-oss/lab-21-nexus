@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
+import { Route as AuthenticatedReferentielsRouteImport } from './routes/_authenticated/referentiels'
 import { Route as AuthenticatedRapportsRouteImport } from './routes/_authenticated/rapports'
 import { Route as AuthenticatedQualiteRouteImport } from './routes/_authenticated/qualite'
 import { Route as AuthenticatedProjetsRouteImport } from './routes/_authenticated/projets'
@@ -53,6 +54,12 @@ const AuthenticatedRhRoute = AuthenticatedRhRouteImport.update({
   path: '/rh',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedReferentielsRoute =
+  AuthenticatedReferentielsRouteImport.update({
+    id: '/referentiels',
+    path: '/referentiels',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedRapportsRoute = AuthenticatedRapportsRouteImport.update({
   id: '/rapports',
   path: '/rapports',
@@ -148,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/projets': typeof AuthenticatedProjetsRoute
   '/qualite': typeof AuthenticatedQualiteRoute
   '/rapports': typeof AuthenticatedRapportsRoute
+  '/referentiels': typeof AuthenticatedReferentielsRoute
   '/rh': typeof AuthenticatedRhRoute
 }
 export interface FileRoutesByTo {
@@ -167,6 +175,7 @@ export interface FileRoutesByTo {
   '/projets': typeof AuthenticatedProjetsRoute
   '/qualite': typeof AuthenticatedQualiteRoute
   '/rapports': typeof AuthenticatedRapportsRoute
+  '/referentiels': typeof AuthenticatedReferentielsRoute
   '/rh': typeof AuthenticatedRhRoute
   '/': typeof AuthenticatedIndexRoute
 }
@@ -189,6 +198,7 @@ export interface FileRoutesById {
   '/_authenticated/projets': typeof AuthenticatedProjetsRoute
   '/_authenticated/qualite': typeof AuthenticatedQualiteRoute
   '/_authenticated/rapports': typeof AuthenticatedRapportsRoute
+  '/_authenticated/referentiels': typeof AuthenticatedReferentielsRoute
   '/_authenticated/rh': typeof AuthenticatedRhRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
 }
@@ -212,6 +222,7 @@ export interface FileRouteTypes {
     | '/projets'
     | '/qualite'
     | '/rapports'
+    | '/referentiels'
     | '/rh'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -231,6 +242,7 @@ export interface FileRouteTypes {
     | '/projets'
     | '/qualite'
     | '/rapports'
+    | '/referentiels'
     | '/rh'
     | '/'
   id:
@@ -252,6 +264,7 @@ export interface FileRouteTypes {
     | '/_authenticated/projets'
     | '/_authenticated/qualite'
     | '/_authenticated/rapports'
+    | '/_authenticated/referentiels'
     | '/_authenticated/rh'
     | '/_authenticated/'
   fileRoutesById: FileRoutesById
@@ -297,6 +310,13 @@ declare module '@tanstack/react-router' {
       path: '/rh'
       fullPath: '/rh'
       preLoaderRoute: typeof AuthenticatedRhRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/referentiels': {
+      id: '/_authenticated/referentiels'
+      path: '/referentiels'
+      fullPath: '/referentiels'
+      preLoaderRoute: typeof AuthenticatedReferentielsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/rapports': {
@@ -415,6 +435,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProjetsRoute: typeof AuthenticatedProjetsRoute
   AuthenticatedQualiteRoute: typeof AuthenticatedQualiteRoute
   AuthenticatedRapportsRoute: typeof AuthenticatedRapportsRoute
+  AuthenticatedReferentielsRoute: typeof AuthenticatedReferentielsRoute
   AuthenticatedRhRoute: typeof AuthenticatedRhRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
@@ -434,6 +455,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedProjetsRoute: AuthenticatedProjetsRoute,
   AuthenticatedQualiteRoute: AuthenticatedQualiteRoute,
   AuthenticatedRapportsRoute: AuthenticatedRapportsRoute,
+  AuthenticatedReferentielsRoute: AuthenticatedReferentielsRoute,
   AuthenticatedRhRoute: AuthenticatedRhRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
