@@ -28,6 +28,8 @@ const ROUTE_LABELS: Record<string, string> = {
   "rh": "RH & Paie",
   "projets": "Projets",
   "qualite": "Qualité",
+  "referentiels": "Référentiels",
+  "milieux": "Milieux de culture",
   "notifications": "Notifications",
   "parametres": "Paramètres",
 };
