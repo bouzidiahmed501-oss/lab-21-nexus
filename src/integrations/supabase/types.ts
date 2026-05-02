@@ -438,6 +438,80 @@ export type Database = {
         }
         Relationships: []
       }
+      avoirs: {
+        Row: {
+          adresse: string | null
+          client_id: string
+          code_tva: string | null
+          created_at: string
+          created_by: string | null
+          date_avoir: string
+          fax: string | null
+          id: string
+          mode_reglement: string | null
+          net_a_payer: number | null
+          net_a_payer_texte: string | null
+          numero: string
+          retenue_source: number | null
+          telephone: string | null
+          timbre: number | null
+          total_ht: number | null
+          total_ttc: number | null
+          total_tva: number | null
+          updated_at: string
+        }
+        Insert: {
+          adresse?: string | null
+          client_id: string
+          code_tva?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_avoir?: string
+          fax?: string | null
+          id?: string
+          mode_reglement?: string | null
+          net_a_payer?: number | null
+          net_a_payer_texte?: string | null
+          numero: string
+          retenue_source?: number | null
+          telephone?: string | null
+          timbre?: number | null
+          total_ht?: number | null
+          total_ttc?: number | null
+          total_tva?: number | null
+          updated_at?: string
+        }
+        Update: {
+          adresse?: string | null
+          client_id?: string
+          code_tva?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_avoir?: string
+          fax?: string | null
+          id?: string
+          mode_reglement?: string | null
+          net_a_payer?: number | null
+          net_a_payer_texte?: string | null
+          numero?: string
+          retenue_source?: number | null
+          telephone?: string | null
+          timbre?: number | null
+          total_ht?: number | null
+          total_ttc?: number | null
+          total_tva?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avoirs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bc_lignes: {
         Row: {
           bc_id: string
@@ -508,6 +582,7 @@ export type Database = {
       bons_commande: {
         Row: {
           client_id: string
+          code_externe: string | null
           conditions: string | null
           created_at: string
           created_by: string | null
@@ -518,8 +593,12 @@ export type Database = {
           numero: string
           objet: string | null
           reference_client: string | null
+          referentiel_id: string | null
+          region_critere_id: string | null
           remise_pct: number
+          responsable_rencontre: string | null
           statut: Database["public"]["Enums"]["bc_statut"]
+          temperature_reception: string | null
           total_ht: number
           total_ttc: number
           total_tva: number
@@ -529,6 +608,7 @@ export type Database = {
         }
         Insert: {
           client_id: string
+          code_externe?: string | null
           conditions?: string | null
           created_at?: string
           created_by?: string | null
@@ -539,8 +619,12 @@ export type Database = {
           numero: string
           objet?: string | null
           reference_client?: string | null
+          referentiel_id?: string | null
+          region_critere_id?: string | null
           remise_pct?: number
+          responsable_rencontre?: string | null
           statut?: Database["public"]["Enums"]["bc_statut"]
+          temperature_reception?: string | null
           total_ht?: number
           total_ttc?: number
           total_tva?: number
@@ -550,6 +634,7 @@ export type Database = {
         }
         Update: {
           client_id?: string
+          code_externe?: string | null
           conditions?: string | null
           created_at?: string
           created_by?: string | null
@@ -560,8 +645,12 @@ export type Database = {
           numero?: string
           objet?: string | null
           reference_client?: string | null
+          referentiel_id?: string | null
+          region_critere_id?: string | null
           remise_pct?: number
+          responsable_rencontre?: string | null
           statut?: Database["public"]["Enums"]["bc_statut"]
+          temperature_reception?: string | null
           total_ht?: number
           total_ttc?: number
           total_tva?: number
@@ -575,6 +664,20 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bons_commande_referentiel_id_fkey"
+            columns: ["referentiel_id"]
+            isOneToOne: false
+            referencedRelation: "referentiels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bons_commande_region_critere_id_fkey"
+            columns: ["region_critere_id"]
+            isOneToOne: false
+            referencedRelation: "region_criteres"
             referencedColumns: ["id"]
           },
         ]
@@ -658,6 +761,96 @@ export type Database = {
             columns: ["employe_id"]
             isOneToOne: false
             referencedRelation: "employes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalogue_analyses: {
+        Row: {
+          accredite: boolean | null
+          avec_temperature: boolean | null
+          code: string
+          code_norme: string | null
+          code_norme_reference: string | null
+          created_at: string
+          date_accreditation: string | null
+          date_version: string | null
+          id: string
+          incertitude: string | null
+          indice: number
+          is_active: boolean | null
+          libelle: string | null
+          num_dossier_accreditation: string | null
+          ordre: number
+          organisme_accrediteur: string | null
+          prix: number
+          referentiel_id: string | null
+          titre_norme: string | null
+          type_analyse_id: string | null
+          updated_at: string
+          version_norme: string | null
+        }
+        Insert: {
+          accredite?: boolean | null
+          avec_temperature?: boolean | null
+          code: string
+          code_norme?: string | null
+          code_norme_reference?: string | null
+          created_at?: string
+          date_accreditation?: string | null
+          date_version?: string | null
+          id?: string
+          incertitude?: string | null
+          indice?: number
+          is_active?: boolean | null
+          libelle?: string | null
+          num_dossier_accreditation?: string | null
+          ordre?: number
+          organisme_accrediteur?: string | null
+          prix?: number
+          referentiel_id?: string | null
+          titre_norme?: string | null
+          type_analyse_id?: string | null
+          updated_at?: string
+          version_norme?: string | null
+        }
+        Update: {
+          accredite?: boolean | null
+          avec_temperature?: boolean | null
+          code?: string
+          code_norme?: string | null
+          code_norme_reference?: string | null
+          created_at?: string
+          date_accreditation?: string | null
+          date_version?: string | null
+          id?: string
+          incertitude?: string | null
+          indice?: number
+          is_active?: boolean | null
+          libelle?: string | null
+          num_dossier_accreditation?: string | null
+          ordre?: number
+          organisme_accrediteur?: string | null
+          prix?: number
+          referentiel_id?: string | null
+          titre_norme?: string | null
+          type_analyse_id?: string | null
+          updated_at?: string
+          version_norme?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalogue_analyses_referentiel_id_fkey"
+            columns: ["referentiel_id"]
+            isOneToOne: false
+            referencedRelation: "referentiels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalogue_analyses_type_analyse_id_fkey"
+            columns: ["type_analyse_id"]
+            isOneToOne: false
+            referencedRelation: "type_analyses"
             referencedColumns: ["id"]
           },
         ]
@@ -789,6 +982,131 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      criteres: {
+        Row: {
+          code: string
+          commentaire: string | null
+          created_at: string
+          famille_id: string | null
+          id: string
+          libelle: string | null
+          nature_critere_id: string | null
+          note: string | null
+          origine: string | null
+          quantite_testee: string | null
+          region_critere_id: string | null
+          type_analyse_id: string | null
+          updated_at: string
+          valeur_max: number | null
+          valeur_min: number | null
+          valeurs: string | null
+        }
+        Insert: {
+          code: string
+          commentaire?: string | null
+          created_at?: string
+          famille_id?: string | null
+          id?: string
+          libelle?: string | null
+          nature_critere_id?: string | null
+          note?: string | null
+          origine?: string | null
+          quantite_testee?: string | null
+          region_critere_id?: string | null
+          type_analyse_id?: string | null
+          updated_at?: string
+          valeur_max?: number | null
+          valeur_min?: number | null
+          valeurs?: string | null
+        }
+        Update: {
+          code?: string
+          commentaire?: string | null
+          created_at?: string
+          famille_id?: string | null
+          id?: string
+          libelle?: string | null
+          nature_critere_id?: string | null
+          note?: string | null
+          origine?: string | null
+          quantite_testee?: string | null
+          region_critere_id?: string | null
+          type_analyse_id?: string | null
+          updated_at?: string
+          valeur_max?: number | null
+          valeur_min?: number | null
+          valeurs?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "criteres_famille_id_fkey"
+            columns: ["famille_id"]
+            isOneToOne: false
+            referencedRelation: "familles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "criteres_nature_critere_id_fkey"
+            columns: ["nature_critere_id"]
+            isOneToOne: false
+            referencedRelation: "nature_criteres"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "criteres_region_critere_id_fkey"
+            columns: ["region_critere_id"]
+            isOneToOne: false
+            referencedRelation: "region_criteres"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "criteres_type_analyse_id_fkey"
+            columns: ["type_analyse_id"]
+            isOneToOne: false
+            referencedRelation: "type_analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents_qualite: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          date_realisation: string | null
+          description: string | null
+          fichier_url: string | null
+          id: string
+          libelle: string | null
+          updated_at: string
+          version: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          date_realisation?: string | null
+          description?: string | null
+          fichier_url?: string | null
+          id?: string
+          libelle?: string | null
+          updated_at?: string
+          version?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          date_realisation?: string | null
+          description?: string | null
+          fichier_url?: string | null
+          id?: string
+          libelle?: string | null
+          updated_at?: string
+          version?: string | null
+        }
+        Relationships: []
       }
       employes: {
         Row: {
@@ -1002,6 +1320,171 @@ export type Database = {
           },
         ]
       }
+      facture_bons_commande: {
+        Row: {
+          bon_commande_id: string
+          facture_id: string
+          id: string
+          ordre: number | null
+        }
+        Insert: {
+          bon_commande_id: string
+          facture_id: string
+          id?: string
+          ordre?: number | null
+        }
+        Update: {
+          bon_commande_id?: string
+          facture_id?: string
+          id?: string
+          ordre?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facture_bons_commande_bon_commande_id_fkey"
+            columns: ["bon_commande_id"]
+            isOneToOne: false
+            referencedRelation: "bons_commande"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facture_bons_commande_facture_id_fkey"
+            columns: ["facture_id"]
+            isOneToOne: false
+            referencedRelation: "factures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      factures: {
+        Row: {
+          adresse: string | null
+          client_id: string
+          code_tva: string | null
+          created_at: string
+          created_by: string | null
+          date_facture: string
+          date_reglement: string | null
+          fax: string | null
+          id: string
+          mode_reglement_id: string | null
+          net_a_payer: number | null
+          net_a_payer_texte: string | null
+          numero: string
+          retenue_source: number | null
+          statut: string
+          telephone: string | null
+          timbre: number | null
+          total_ht: number | null
+          total_ttc: number | null
+          total_tva: number | null
+          updated_at: string
+        }
+        Insert: {
+          adresse?: string | null
+          client_id: string
+          code_tva?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_facture?: string
+          date_reglement?: string | null
+          fax?: string | null
+          id?: string
+          mode_reglement_id?: string | null
+          net_a_payer?: number | null
+          net_a_payer_texte?: string | null
+          numero: string
+          retenue_source?: number | null
+          statut?: string
+          telephone?: string | null
+          timbre?: number | null
+          total_ht?: number | null
+          total_ttc?: number | null
+          total_tva?: number | null
+          updated_at?: string
+        }
+        Update: {
+          adresse?: string | null
+          client_id?: string
+          code_tva?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_facture?: string
+          date_reglement?: string | null
+          fax?: string | null
+          id?: string
+          mode_reglement_id?: string | null
+          net_a_payer?: number | null
+          net_a_payer_texte?: string | null
+          numero?: string
+          retenue_source?: number | null
+          statut?: string
+          telephone?: string | null
+          timbre?: number | null
+          total_ht?: number | null
+          total_ttc?: number | null
+          total_tva?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "factures_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "factures_mode_reglement_id_fkey"
+            columns: ["mode_reglement_id"]
+            isOneToOne: false
+            referencedRelation: "modes_reglement"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      familles: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          libelle: string | null
+          region_critere_id: string | null
+          super_famille_id: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          libelle?: string | null
+          region_critere_id?: string | null
+          super_famille_id?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          libelle?: string | null
+          region_critere_id?: string | null
+          super_famille_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "familles_region_critere_id_fkey"
+            columns: ["region_critere_id"]
+            isOneToOne: false
+            referencedRelation: "region_criteres"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "familles_super_famille_id_fkey"
+            columns: ["super_famille_id"]
+            isOneToOne: false
+            referencedRelation: "super_familles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feuilles_route: {
         Row: {
           created_at: string
@@ -1186,6 +1669,203 @@ export type Database = {
         }
         Relationships: []
       }
+      lignes_avoir: {
+        Row: {
+          avoir_id: string
+          created_at: string
+          designation: string | null
+          id: string
+          ordre: number
+          prix_unitaire: number | null
+          quantite: number | null
+          reference: string | null
+          remise: number | null
+          total_ht: number | null
+          tva: number | null
+        }
+        Insert: {
+          avoir_id: string
+          created_at?: string
+          designation?: string | null
+          id?: string
+          ordre?: number
+          prix_unitaire?: number | null
+          quantite?: number | null
+          reference?: string | null
+          remise?: number | null
+          total_ht?: number | null
+          tva?: number | null
+        }
+        Update: {
+          avoir_id?: string
+          created_at?: string
+          designation?: string | null
+          id?: string
+          ordre?: number
+          prix_unitaire?: number | null
+          quantite?: number | null
+          reference?: string | null
+          remise?: number | null
+          total_ht?: number | null
+          tva?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lignes_avoir_avoir_id_fkey"
+            columns: ["avoir_id"]
+            isOneToOne: false
+            referencedRelation: "avoirs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lignes_facture: {
+        Row: {
+          created_at: string
+          designation: string | null
+          facture_id: string
+          id: string
+          ordre: number
+          prix_unitaire: number | null
+          quantite: number | null
+          reference: string | null
+          remise: number | null
+          total_ht: number | null
+          tva: number | null
+        }
+        Insert: {
+          created_at?: string
+          designation?: string | null
+          facture_id: string
+          id?: string
+          ordre?: number
+          prix_unitaire?: number | null
+          quantite?: number | null
+          reference?: string | null
+          remise?: number | null
+          total_ht?: number | null
+          tva?: number | null
+        }
+        Update: {
+          created_at?: string
+          designation?: string | null
+          facture_id?: string
+          id?: string
+          ordre?: number
+          prix_unitaire?: number | null
+          quantite?: number | null
+          reference?: string | null
+          remise?: number | null
+          total_ht?: number | null
+          tva?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lignes_facture_facture_id_fkey"
+            columns: ["facture_id"]
+            isOneToOne: false
+            referencedRelation: "factures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lignes_pack_analyse: {
+        Row: {
+          catalogue_analyse_id: string | null
+          created_at: string
+          critere_id: string | null
+          id: string
+          ordre: number
+          pack_analyse_id: string
+        }
+        Insert: {
+          catalogue_analyse_id?: string | null
+          created_at?: string
+          critere_id?: string | null
+          id?: string
+          ordre?: number
+          pack_analyse_id: string
+        }
+        Update: {
+          catalogue_analyse_id?: string | null
+          created_at?: string
+          critere_id?: string | null
+          id?: string
+          ordre?: number
+          pack_analyse_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lignes_pack_analyse_catalogue_analyse_id_fkey"
+            columns: ["catalogue_analyse_id"]
+            isOneToOne: false
+            referencedRelation: "catalogue_analyses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lignes_pack_analyse_critere_id_fkey"
+            columns: ["critere_id"]
+            isOneToOne: false
+            referencedRelation: "criteres"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lignes_pack_analyse_pack_analyse_id_fkey"
+            columns: ["pack_analyse_id"]
+            isOneToOne: false
+            referencedRelation: "pack_analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lignes_reglement: {
+        Row: {
+          created_at: string
+          date_facture: string | null
+          facture_id: string
+          fraction_reglee: number | null
+          id: string
+          net_a_payer: number | null
+          ordre: number
+          reglement_id: string
+        }
+        Insert: {
+          created_at?: string
+          date_facture?: string | null
+          facture_id: string
+          fraction_reglee?: number | null
+          id?: string
+          net_a_payer?: number | null
+          ordre?: number
+          reglement_id: string
+        }
+        Update: {
+          created_at?: string
+          date_facture?: string | null
+          facture_id?: string
+          fraction_reglee?: number | null
+          id?: string
+          net_a_payer?: number | null
+          ordre?: number
+          reglement_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lignes_reglement_facture_id_fkey"
+            columns: ["facture_id"]
+            isOneToOne: false
+            referencedRelation: "factures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lignes_reglement_reglement_id_fkey"
+            columns: ["reglement_id"]
+            isOneToOne: false
+            referencedRelation: "reglements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenances: {
         Row: {
           cout: number | null
@@ -1275,6 +1955,115 @@ export type Database = {
         }
         Relationships: []
       }
+      milieu_origines: {
+        Row: {
+          code: string
+          created_at: string
+          date_reception: string | null
+          date_sortie: string | null
+          dlc: string | null
+          id: string
+          lot_fabricant: string | null
+          quantite_base: number | null
+          quantite_restante: number | null
+          type_milieu_id: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          date_reception?: string | null
+          date_sortie?: string | null
+          dlc?: string | null
+          id?: string
+          lot_fabricant?: string | null
+          quantite_base?: number | null
+          quantite_restante?: number | null
+          type_milieu_id?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          date_reception?: string | null
+          date_sortie?: string | null
+          dlc?: string | null
+          id?: string
+          lot_fabricant?: string | null
+          quantite_base?: number | null
+          quantite_restante?: number | null
+          type_milieu_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milieu_origines_type_milieu_id_fkey"
+            columns: ["type_milieu_id"]
+            isOneToOne: false
+            referencedRelation: "type_milieux"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      milieux: {
+        Row: {
+          appareil_id: string | null
+          code: string
+          created_at: string
+          date_preparation: string | null
+          dlc: string | null
+          id: string
+          milieu_origine_id: string | null
+          ph: number | null
+          preparateur_id: string | null
+          quantite: number | null
+          test_negativite: boolean | null
+          test_positivite: boolean | null
+          test_sterilite: boolean | null
+          updated_at: string
+          volume: number | null
+        }
+        Insert: {
+          appareil_id?: string | null
+          code: string
+          created_at?: string
+          date_preparation?: string | null
+          dlc?: string | null
+          id?: string
+          milieu_origine_id?: string | null
+          ph?: number | null
+          preparateur_id?: string | null
+          quantite?: number | null
+          test_negativite?: boolean | null
+          test_positivite?: boolean | null
+          test_sterilite?: boolean | null
+          updated_at?: string
+          volume?: number | null
+        }
+        Update: {
+          appareil_id?: string | null
+          code?: string
+          created_at?: string
+          date_preparation?: string | null
+          dlc?: string | null
+          id?: string
+          milieu_origine_id?: string | null
+          ph?: number | null
+          preparateur_id?: string | null
+          quantite?: number | null
+          test_negativite?: boolean | null
+          test_positivite?: boolean | null
+          test_sterilite?: boolean | null
+          updated_at?: string
+          volume?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milieux_milieu_origine_id_fkey"
+            columns: ["milieu_origine_id"]
+            isOneToOne: false
+            referencedRelation: "milieu_origines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mission_echantillons: {
         Row: {
           code_echantillon: string
@@ -1339,13 +2128,18 @@ export type Database = {
       missions: {
         Row: {
           bc_id: string | null
+          bon: number | null
           client_id: string
           created_at: string
           created_by: string | null
           date_mission: string
           date_prevue: string | null
+          frais: number | null
           id: string
+          kilometrage_arrivee: number | null
+          kilometrage_depart: number | null
           lieu: string | null
+          moyen_locomotion_id: string | null
           notes: string | null
           numero: string
           objet: string | null
@@ -1355,13 +2149,18 @@ export type Database = {
         }
         Insert: {
           bc_id?: string | null
+          bon?: number | null
           client_id: string
           created_at?: string
           created_by?: string | null
           date_mission?: string
           date_prevue?: string | null
+          frais?: number | null
           id?: string
+          kilometrage_arrivee?: number | null
+          kilometrage_depart?: number | null
           lieu?: string | null
+          moyen_locomotion_id?: string | null
           notes?: string | null
           numero: string
           objet?: string | null
@@ -1371,13 +2170,18 @@ export type Database = {
         }
         Update: {
           bc_id?: string | null
+          bon?: number | null
           client_id?: string
           created_at?: string
           created_by?: string | null
           date_mission?: string
           date_prevue?: string | null
+          frais?: number | null
           id?: string
+          kilometrage_arrivee?: number | null
+          kilometrage_depart?: number | null
           lieu?: string | null
+          moyen_locomotion_id?: string | null
           notes?: string | null
           numero?: string
           objet?: string | null
@@ -1400,7 +2204,110 @@ export type Database = {
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "missions_moyen_locomotion_id_fkey"
+            columns: ["moyen_locomotion_id"]
+            isOneToOne: false
+            referencedRelation: "moyens_locomotion"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      modes_reglement: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          libelle: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          libelle?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          libelle?: string | null
+        }
+        Relationships: []
+      }
+      moyens_locomotion: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          immatriculation: string | null
+          is_active: boolean | null
+          libelle: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          immatriculation?: string | null
+          is_active?: boolean | null
+          libelle?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          immatriculation?: string | null
+          is_active?: boolean | null
+          libelle?: string | null
+        }
+        Relationships: []
+      }
+      nature_analyses: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          libelle: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          libelle: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          libelle?: string
+        }
+        Relationships: []
+      }
+      nature_criteres: {
+        Row: {
+          code: string
+          created_at: string
+          has_max: boolean | null
+          has_min: boolean | null
+          id: string
+          libelle: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          has_max?: boolean | null
+          has_min?: boolean | null
+          id?: string
+          libelle?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          has_max?: boolean | null
+          has_min?: boolean | null
+          id?: string
+          libelle?: string | null
+        }
+        Relationships: []
       }
       non_conformites: {
         Row: {
@@ -1570,6 +2477,48 @@ export type Database = {
         }
         Relationships: []
       }
+      pack_analyses: {
+        Row: {
+          avec_declaration_conformite: boolean | null
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          libelle: string | null
+          note_pour_criteres: string | null
+          origine: string | null
+          reference_critere: string | null
+          tableau_resultats: string | null
+          updated_at: string
+        }
+        Insert: {
+          avec_declaration_conformite?: boolean | null
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          libelle?: string | null
+          note_pour_criteres?: string | null
+          origine?: string | null
+          reference_critere?: string | null
+          tableau_resultats?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avec_declaration_conformite?: boolean | null
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          libelle?: string | null
+          note_pour_criteres?: string | null
+          origine?: string | null
+          reference_critere?: string | null
+          tableau_resultats?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       parametres_analyse: {
         Row: {
           code: string | null
@@ -1683,60 +2632,114 @@ export type Database = {
       prelevements: {
         Row: {
           client_id: string
+          conclusion: string | null
           conditions: string | null
           conformite: boolean | null
           created_at: string
           created_by: string | null
           date_prelevement: string
           date_reception: string | null
+          denomination: string | null
+          df: string | null
+          dlc: string | null
           echantillon_id: string | null
+          famille_id: string | null
+          fournisseur: string | null
           id: string
           lieu: string | null
+          lot: string | null
           mission_id: string | null
+          mode_acheminement: string | null
+          mode_conservation: string | null
           numero: string
           observations: string | null
+          pack_analyse_id: string | null
           preleveur_nom: string | null
+          referentiel_id: string | null
+          region_critere_id: string | null
+          remarque_non_conformite: string | null
+          secteur: string | null
           statut: Database["public"]["Enums"]["prelevement_statut"]
           temperature: number | null
+          tp_ambiante: number | null
+          tp_produit: number | null
           updated_at: string
+          validateur_id: string | null
+          version: string | null
         }
         Insert: {
           client_id: string
+          conclusion?: string | null
           conditions?: string | null
           conformite?: boolean | null
           created_at?: string
           created_by?: string | null
           date_prelevement?: string
           date_reception?: string | null
+          denomination?: string | null
+          df?: string | null
+          dlc?: string | null
           echantillon_id?: string | null
+          famille_id?: string | null
+          fournisseur?: string | null
           id?: string
           lieu?: string | null
+          lot?: string | null
           mission_id?: string | null
+          mode_acheminement?: string | null
+          mode_conservation?: string | null
           numero: string
           observations?: string | null
+          pack_analyse_id?: string | null
           preleveur_nom?: string | null
+          referentiel_id?: string | null
+          region_critere_id?: string | null
+          remarque_non_conformite?: string | null
+          secteur?: string | null
           statut?: Database["public"]["Enums"]["prelevement_statut"]
           temperature?: number | null
+          tp_ambiante?: number | null
+          tp_produit?: number | null
           updated_at?: string
+          validateur_id?: string | null
+          version?: string | null
         }
         Update: {
           client_id?: string
+          conclusion?: string | null
           conditions?: string | null
           conformite?: boolean | null
           created_at?: string
           created_by?: string | null
           date_prelevement?: string
           date_reception?: string | null
+          denomination?: string | null
+          df?: string | null
+          dlc?: string | null
           echantillon_id?: string | null
+          famille_id?: string | null
+          fournisseur?: string | null
           id?: string
           lieu?: string | null
+          lot?: string | null
           mission_id?: string | null
+          mode_acheminement?: string | null
+          mode_conservation?: string | null
           numero?: string
           observations?: string | null
+          pack_analyse_id?: string | null
           preleveur_nom?: string | null
+          referentiel_id?: string | null
+          region_critere_id?: string | null
+          remarque_non_conformite?: string | null
+          secteur?: string | null
           statut?: Database["public"]["Enums"]["prelevement_statut"]
           temperature?: number | null
+          tp_ambiante?: number | null
+          tp_produit?: number | null
           updated_at?: string
+          validateur_id?: string | null
+          version?: string | null
         }
         Relationships: [
           {
@@ -1754,10 +2757,38 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "prelevements_famille_id_fkey"
+            columns: ["famille_id"]
+            isOneToOne: false
+            referencedRelation: "familles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "prelevements_mission_id_fkey"
             columns: ["mission_id"]
             isOneToOne: false
             referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prelevements_pack_analyse_id_fkey"
+            columns: ["pack_analyse_id"]
+            isOneToOne: false
+            referencedRelation: "pack_analyses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prelevements_referentiel_id_fkey"
+            columns: ["referentiel_id"]
+            isOneToOne: false
+            referencedRelation: "referentiels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prelevements_region_critere_id_fkey"
+            columns: ["region_critere_id"]
+            isOneToOne: false
+            referencedRelation: "region_criteres"
             referencedColumns: ["id"]
           },
         ]
@@ -2168,6 +3199,137 @@ export type Database = {
           },
         ]
       }
+      referentiels: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          libelle: string | null
+          organisme: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          libelle?: string | null
+          organisme?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          libelle?: string | null
+          organisme?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      region_criteres: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          libelle: string | null
+          referentiel_id: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          libelle?: string | null
+          referentiel_id?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          libelle?: string | null
+          referentiel_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "region_criteres_referentiel_id_fkey"
+            columns: ["referentiel_id"]
+            isOneToOne: false
+            referencedRelation: "referentiels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reglements: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by: string | null
+          date_effective: string | null
+          date_paiement: string | null
+          date_versement: string | null
+          etablissement_payeur: string | null
+          id: string
+          mode_reglement_id: string | null
+          montant: number
+          numero: string
+          payeur: string | null
+          reference: string | null
+          solde_actuel: number | null
+          solde_precedent: number | null
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          date_effective?: string | null
+          date_paiement?: string | null
+          date_versement?: string | null
+          etablissement_payeur?: string | null
+          id?: string
+          mode_reglement_id?: string | null
+          montant?: number
+          numero: string
+          payeur?: string | null
+          reference?: string | null
+          solde_actuel?: number | null
+          solde_precedent?: number | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          date_effective?: string | null
+          date_paiement?: string | null
+          date_versement?: string | null
+          etablissement_payeur?: string | null
+          id?: string
+          mode_reglement_id?: string | null
+          montant?: number
+          numero?: string
+          payeur?: string | null
+          reference?: string | null
+          solde_actuel?: number | null
+          solde_precedent?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reglements_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reglements_mode_reglement_id_fkey"
+            columns: ["mode_reglement_id"]
+            isOneToOne: false
+            referencedRelation: "modes_reglement"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       revues_direction: {
         Row: {
           axes_amelioration: string | null
@@ -2231,6 +3393,98 @@ export type Database = {
           statut?: Database["public"]["Enums"]["revue_statut"]
           titre?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      super_familles: {
+        Row: {
+          code: string
+          created_at: string
+          groupe_date_analyse: string | null
+          id: string
+          libelle: string | null
+          ordre: number
+          prix_defaut: number | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          groupe_date_analyse?: string | null
+          id?: string
+          libelle?: string | null
+          ordre?: number
+          prix_defaut?: number | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          groupe_date_analyse?: string | null
+          id?: string
+          libelle?: string | null
+          ordre?: number
+          prix_defaut?: number | null
+        }
+        Relationships: []
+      }
+      type_analyses: {
+        Row: {
+          code: string
+          created_at: string
+          format_texte_rapport: string | null
+          id: string
+          libelle: string | null
+          nature_analyse_id: string | null
+          nombre_decimales: number | null
+          ordre: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          format_texte_rapport?: string | null
+          id?: string
+          libelle?: string | null
+          nature_analyse_id?: string | null
+          nombre_decimales?: number | null
+          ordre?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          format_texte_rapport?: string | null
+          id?: string
+          libelle?: string | null
+          nature_analyse_id?: string | null
+          nombre_decimales?: number | null
+          ordre?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "type_analyses_nature_analyse_id_fkey"
+            columns: ["nature_analyse_id"]
+            isOneToOne: false
+            referencedRelation: "nature_analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      type_milieux: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          libelle: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          libelle?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          libelle?: string | null
         }
         Relationships: []
       }
