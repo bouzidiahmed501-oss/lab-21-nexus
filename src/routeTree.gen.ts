@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
+import { Route as AuthenticatedReferentielsRouteImport } from './routes/_authenticated/referentiels'
 import { Route as AuthenticatedRapportsRouteImport } from './routes/_authenticated/rapports'
 import { Route as AuthenticatedQualiteRouteImport } from './routes/_authenticated/qualite'
 import { Route as AuthenticatedProjetsRouteImport } from './routes/_authenticated/projets'
@@ -22,6 +23,7 @@ import { Route as AuthenticatedPrelevementsRouteImport } from './routes/_authent
 import { Route as AuthenticatedParametresRouteImport } from './routes/_authenticated/parametres'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedMissionsRouteImport } from './routes/_authenticated/missions'
+import { Route as AuthenticatedMilieuxRouteImport } from './routes/_authenticated/milieux'
 import { Route as AuthenticatedFeuillesRouteRouteImport } from './routes/_authenticated/feuilles-route'
 import { Route as AuthenticatedFacturationRouteImport } from './routes/_authenticated/facturation'
 import { Route as AuthenticatedEquipementsRouteImport } from './routes/_authenticated/equipements'
@@ -53,6 +55,12 @@ const AuthenticatedRhRoute = AuthenticatedRhRouteImport.update({
   path: '/rh',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedReferentielsRoute =
+  AuthenticatedReferentielsRouteImport.update({
+    id: '/referentiels',
+    path: '/referentiels',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedRapportsRoute = AuthenticatedRapportsRouteImport.update({
   id: '/rapports',
   path: '/rapports',
@@ -93,6 +101,11 @@ const AuthenticatedNotificationsRoute =
 const AuthenticatedMissionsRoute = AuthenticatedMissionsRouteImport.update({
   id: '/missions',
   path: '/missions',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedMilieuxRoute = AuthenticatedMilieuxRouteImport.update({
+  id: '/milieux',
+  path: '/milieux',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedFeuillesRouteRoute =
@@ -140,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/equipements': typeof AuthenticatedEquipementsRoute
   '/facturation': typeof AuthenticatedFacturationRoute
   '/feuilles-route': typeof AuthenticatedFeuillesRouteRoute
+  '/milieux': typeof AuthenticatedMilieuxRoute
   '/missions': typeof AuthenticatedMissionsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/parametres': typeof AuthenticatedParametresRoute
@@ -148,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/projets': typeof AuthenticatedProjetsRoute
   '/qualite': typeof AuthenticatedQualiteRoute
   '/rapports': typeof AuthenticatedRapportsRoute
+  '/referentiels': typeof AuthenticatedReferentielsRoute
   '/rh': typeof AuthenticatedRhRoute
 }
 export interface FileRoutesByTo {
@@ -159,6 +174,7 @@ export interface FileRoutesByTo {
   '/equipements': typeof AuthenticatedEquipementsRoute
   '/facturation': typeof AuthenticatedFacturationRoute
   '/feuilles-route': typeof AuthenticatedFeuillesRouteRoute
+  '/milieux': typeof AuthenticatedMilieuxRoute
   '/missions': typeof AuthenticatedMissionsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/parametres': typeof AuthenticatedParametresRoute
@@ -167,6 +183,7 @@ export interface FileRoutesByTo {
   '/projets': typeof AuthenticatedProjetsRoute
   '/qualite': typeof AuthenticatedQualiteRoute
   '/rapports': typeof AuthenticatedRapportsRoute
+  '/referentiels': typeof AuthenticatedReferentielsRoute
   '/rh': typeof AuthenticatedRhRoute
   '/': typeof AuthenticatedIndexRoute
 }
@@ -181,6 +198,7 @@ export interface FileRoutesById {
   '/_authenticated/equipements': typeof AuthenticatedEquipementsRoute
   '/_authenticated/facturation': typeof AuthenticatedFacturationRoute
   '/_authenticated/feuilles-route': typeof AuthenticatedFeuillesRouteRoute
+  '/_authenticated/milieux': typeof AuthenticatedMilieuxRoute
   '/_authenticated/missions': typeof AuthenticatedMissionsRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/parametres': typeof AuthenticatedParametresRoute
@@ -189,6 +207,7 @@ export interface FileRoutesById {
   '/_authenticated/projets': typeof AuthenticatedProjetsRoute
   '/_authenticated/qualite': typeof AuthenticatedQualiteRoute
   '/_authenticated/rapports': typeof AuthenticatedRapportsRoute
+  '/_authenticated/referentiels': typeof AuthenticatedReferentielsRoute
   '/_authenticated/rh': typeof AuthenticatedRhRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
 }
@@ -204,6 +223,7 @@ export interface FileRouteTypes {
     | '/equipements'
     | '/facturation'
     | '/feuilles-route'
+    | '/milieux'
     | '/missions'
     | '/notifications'
     | '/parametres'
@@ -212,6 +232,7 @@ export interface FileRouteTypes {
     | '/projets'
     | '/qualite'
     | '/rapports'
+    | '/referentiels'
     | '/rh'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -223,6 +244,7 @@ export interface FileRouteTypes {
     | '/equipements'
     | '/facturation'
     | '/feuilles-route'
+    | '/milieux'
     | '/missions'
     | '/notifications'
     | '/parametres'
@@ -231,6 +253,7 @@ export interface FileRouteTypes {
     | '/projets'
     | '/qualite'
     | '/rapports'
+    | '/referentiels'
     | '/rh'
     | '/'
   id:
@@ -244,6 +267,7 @@ export interface FileRouteTypes {
     | '/_authenticated/equipements'
     | '/_authenticated/facturation'
     | '/_authenticated/feuilles-route'
+    | '/_authenticated/milieux'
     | '/_authenticated/missions'
     | '/_authenticated/notifications'
     | '/_authenticated/parametres'
@@ -252,6 +276,7 @@ export interface FileRouteTypes {
     | '/_authenticated/projets'
     | '/_authenticated/qualite'
     | '/_authenticated/rapports'
+    | '/_authenticated/referentiels'
     | '/_authenticated/rh'
     | '/_authenticated/'
   fileRoutesById: FileRoutesById
@@ -297,6 +322,13 @@ declare module '@tanstack/react-router' {
       path: '/rh'
       fullPath: '/rh'
       preLoaderRoute: typeof AuthenticatedRhRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/referentiels': {
+      id: '/_authenticated/referentiels'
+      path: '/referentiels'
+      fullPath: '/referentiels'
+      preLoaderRoute: typeof AuthenticatedReferentielsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/rapports': {
@@ -355,6 +387,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMissionsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/milieux': {
+      id: '/_authenticated/milieux'
+      path: '/milieux'
+      fullPath: '/milieux'
+      preLoaderRoute: typeof AuthenticatedMilieuxRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/feuilles-route': {
       id: '/_authenticated/feuilles-route'
       path: '/feuilles-route'
@@ -407,6 +446,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedEquipementsRoute: typeof AuthenticatedEquipementsRoute
   AuthenticatedFacturationRoute: typeof AuthenticatedFacturationRoute
   AuthenticatedFeuillesRouteRoute: typeof AuthenticatedFeuillesRouteRoute
+  AuthenticatedMilieuxRoute: typeof AuthenticatedMilieuxRoute
   AuthenticatedMissionsRoute: typeof AuthenticatedMissionsRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
@@ -415,6 +455,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProjetsRoute: typeof AuthenticatedProjetsRoute
   AuthenticatedQualiteRoute: typeof AuthenticatedQualiteRoute
   AuthenticatedRapportsRoute: typeof AuthenticatedRapportsRoute
+  AuthenticatedReferentielsRoute: typeof AuthenticatedReferentielsRoute
   AuthenticatedRhRoute: typeof AuthenticatedRhRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
@@ -426,6 +467,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedEquipementsRoute: AuthenticatedEquipementsRoute,
   AuthenticatedFacturationRoute: AuthenticatedFacturationRoute,
   AuthenticatedFeuillesRouteRoute: AuthenticatedFeuillesRouteRoute,
+  AuthenticatedMilieuxRoute: AuthenticatedMilieuxRoute,
   AuthenticatedMissionsRoute: AuthenticatedMissionsRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedParametresRoute: AuthenticatedParametresRoute,
@@ -434,6 +476,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedProjetsRoute: AuthenticatedProjetsRoute,
   AuthenticatedQualiteRoute: AuthenticatedQualiteRoute,
   AuthenticatedRapportsRoute: AuthenticatedRapportsRoute,
+  AuthenticatedReferentielsRoute: AuthenticatedReferentielsRoute,
   AuthenticatedRhRoute: AuthenticatedRhRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
