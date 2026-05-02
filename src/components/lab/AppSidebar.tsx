@@ -2,6 +2,8 @@ import { Link, useLocation } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Users,
+  BookOpen,
+  Beaker,
   Package,
   FlaskConical,
   ClipboardList,
