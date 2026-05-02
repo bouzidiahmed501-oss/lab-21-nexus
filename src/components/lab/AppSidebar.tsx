@@ -70,6 +70,8 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     items: [
       { label: "Clients", to: "/clients", icon: Users },
       { label: "Produits", to: "/produits", icon: Package },
+      { label: "Catalogue Analyses", to: "/referentiels", icon: BookOpen },
+      { label: "Milieux de culture", to: "/milieux", icon: Beaker },
     ],
   },
   {
