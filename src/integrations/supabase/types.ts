@@ -1363,14 +1363,20 @@ export type Database = {
           code_tva: string | null
           created_at: string
           created_by: string | null
+          date_echeance: string | null
           date_facture: string
           date_reglement: string | null
+          elfatoora_status: string | null
+          elfatoora_uuid: string | null
           fax: string | null
           id: string
+          last_reminder_at: string | null
           mode_reglement_id: string | null
           net_a_payer: number | null
           net_a_payer_texte: string | null
           numero: string
+          payment_status: string | null
+          reminder_count: number | null
           retenue_source: number | null
           statut: string
           telephone: string | null
@@ -1386,14 +1392,20 @@ export type Database = {
           code_tva?: string | null
           created_at?: string
           created_by?: string | null
+          date_echeance?: string | null
           date_facture?: string
           date_reglement?: string | null
+          elfatoora_status?: string | null
+          elfatoora_uuid?: string | null
           fax?: string | null
           id?: string
+          last_reminder_at?: string | null
           mode_reglement_id?: string | null
           net_a_payer?: number | null
           net_a_payer_texte?: string | null
           numero: string
+          payment_status?: string | null
+          reminder_count?: number | null
           retenue_source?: number | null
           statut?: string
           telephone?: string | null
@@ -1409,14 +1421,20 @@ export type Database = {
           code_tva?: string | null
           created_at?: string
           created_by?: string | null
+          date_echeance?: string | null
           date_facture?: string
           date_reglement?: string | null
+          elfatoora_status?: string | null
+          elfatoora_uuid?: string | null
           fax?: string | null
           id?: string
+          last_reminder_at?: string | null
           mode_reglement_id?: string | null
           net_a_payer?: number | null
           net_a_payer_texte?: string | null
           numero?: string
+          payment_status?: string | null
+          reminder_count?: number | null
           retenue_source?: number | null
           statut?: string
           telephone?: string | null
