@@ -284,7 +284,7 @@ function NewBcDialog({ open, onClose }: { open: boolean; onClose: () => void }) 
     onSuccess: () => {
       toast.success("Bon de commande créé");
       qc.invalidateQueries({ queryKey: ["bons_commande"] });
-      setClientId(""); setRefClient(""); setObjet(""); setConditions("");
+      setClientId(""); setRefClient(""); setObjet(""); setConditions(""); setTemperatureReception(""); setCodeExterne("");
       setLignes([{ designation: "", quantite: 1, prix_unitaire: 0, remise_pct: 0, tva_pct: 19, total_ht: 0 }]);
       onClose();
     },
