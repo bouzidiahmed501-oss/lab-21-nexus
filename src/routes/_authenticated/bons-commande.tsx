@@ -314,9 +314,17 @@ function NewBcDialog({ open, onClose }: { open: boolean; onClose: () => void }) 
               <Label>Référence client</Label>
               <Input value={refClient} onChange={(e) => setRefClient(e.target.value)} maxLength={200} />
             </div>
-            <div className="space-y-2 md:col-span-3">
+            <div className="space-y-2">
               <Label>Objet</Label>
               <Input value={objet} onChange={(e) => setObjet(e.target.value)} maxLength={500} />
+            </div>
+            <div className="space-y-2">
+              <Label>Temp. réception (°C)</Label>
+              <Input value={temperatureReception} onChange={(e) => setTemperatureReception(e.target.value)} placeholder="ex: 4°C" maxLength={50} />
+            </div>
+            <div className="space-y-2">
+              <Label>Code externe</Label>
+              <Input value={codeExterne} onChange={(e) => setCodeExterne(e.target.value)} maxLength={200} />
             </div>
           </div>
 
