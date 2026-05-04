@@ -204,6 +204,8 @@ function NewBcDialog({ open, onClose }: { open: boolean; onClose: () => void }) 
   const [objet, setObjet] = useState("");
   const [conditions, setConditions] = useState("");
   const [dateBc, setDateBc] = useState(() => new Date().toISOString().split("T")[0]);
+  const [temperatureReception, setTemperatureReception] = useState("");
+  const [codeExterne, setCodeExterne] = useState("");
   const [lignes, setLignes] = useState<Ligne[]>([
     { designation: "", quantite: 1, prix_unitaire: 0, remise_pct: 0, tva_pct: 19, total_ht: 0 },
   ]);
