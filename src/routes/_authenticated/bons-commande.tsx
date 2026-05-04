@@ -262,8 +262,9 @@ function NewBcDialog({ open, onClose }: { open: boolean; onClose: () => void }) 
         .from("bons_commande")
         .insert({
           numero, client_id: clientId, date_bc: dateBc, statut: "brouillon",
-          reference_client: refClient || null, objet: objet || null, conditions: conditions || null,
-          total_ht: totals.ht, total_tva: totals.tva, total_ttc: totals.ttc,
+263:           reference_client: refClient || null, objet: objet || null, conditions: conditions || null,
+264:           temperature_reception: temperatureReception || null, code_externe: codeExterne || null,
+265:           total_ht: totals.ht, total_tva: totals.tva, total_ttc: totals.ttc,
         })
         .select("id").single();
       if (e1) throw e1;
