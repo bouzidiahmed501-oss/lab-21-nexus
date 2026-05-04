@@ -392,8 +392,71 @@ function NewBcDialog({ open, onClose }: { open: boolean; onClose: () => void }) 
   );
 }
 
+// ============== WORKFLOW STEPS ==============
+const WORKFLOW_STEPS: { key: BCStatut; label: string; icon: typeof CheckCircle2 }[] = [
+  { key: "brouillon", label: "Brouillon", icon: Clock },
+  { key: "envoye", label: "Envoyé", icon: FileText },
+  { key: "accepte", label: "Accepté", icon: CheckCircle2 },
+  { key: "en_cours", label: "En cours", icon: Loader2 },
+  { key: "cloture", label: "Clôturé", icon: CheckCircle2 },
+];
+
+function WorkflowTimeline({ statut }: { statut: BCStatut }) {
+  const currentIdx = WORKFLOW_STEPS.findIndex((s) => s.key === statut);
+  const isRefused = statut === "refuse";
+  const isCancelled = statut === "annule";
+
+  if (isRefused || isCancelled) {
+    return (
+      <div className="flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+        <XCircle className="h-4 w-4" />
+        {isRefused ? "BC refusé par le client" : "BC annulé"}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1">
+      {WORKFLOW_STEPS.map((step, i) => {
+        const done = i <= currentIdx;
+        const active = i === currentIdx;
+        const Icon = step.icon;
+        return (
+          <div key={step.key} className="flex items-center">
+            {i > 0 && (
+              <div className={`mx-1 h-0.5 w-6 ${done ? "bg-primary" : "bg-border"}`} />
+            )}
+            <div className="flex flex-col items-center gap-0.5">
+              <div className={`flex h-6 w-6 items-center justify-center rounded-full border ${
+                done ? "border-primary bg-primary text-primary-foreground" : "border-border bg-muted text-muted-foreground"
+              } ${active ? "ring-2 ring-primary/30" : ""}`}>
+                <Icon className="h-3 w-3" />
+              </div>
+              <span className={`text-[9px] leading-none ${done ? "font-medium text-foreground" : "text-muted-foreground"}`}>
+                {step.label}
+              </span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ============== VIEW DIALOG ==============
 function ViewBcDialog({ id, onClose }: { id: string; onClose: () => void }) {
+  const { data: bc } = useQuery({
+    queryKey: ["bc_detail", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("bons_commande")
+        .select("*, clients(raison_sociale, matricule_fiscal, adresse, telephone, email)")
+        .eq("id", id).single();
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const { data: lignes = [] } = useQuery({
     queryKey: ["bc_lignes", id],
     queryFn: async () => {
@@ -402,25 +465,143 @@ function ViewBcDialog({ id, onClose }: { id: string; onClose: () => void }) {
       return data;
     },
   });
+
+  const { data: prelevements = [] } = useQuery({
+    queryKey: ["bc_prelevements", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("prelevements")
+        .select("id, numero, statut, denomination, date_prelevement, temperature")
+        .eq("client_id", bc?.client_id ?? "")
+        .order("date_prelevement", { ascending: false })
+        .limit(20);
+      if (error) return [];
+      return data ?? [];
+    },
+    enabled: !!bc?.client_id,
+  });
+
+  const { data: missions = [] } = useQuery({
+    queryKey: ["bc_missions", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("missions")
+        .select("id, numero, date_mission, statut, lieu")
+        .eq("bc_id", id)
+        .order("date_mission", { ascending: false });
+      if (error) return [];
+      return data ?? [];
+    },
+  });
+
+  if (!bc) return null;
+
+  const client = bc.clients as { raison_sociale: string; matricule_fiscal: string | null; adresse: string | null; telephone: string | null; email: string | null } | null;
+
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader><DialogTitle><FileText className="inline h-4 w-4" /> Lignes du BC</DialogTitle></DialogHeader>
-        <Table>
-          <TableHeader>
-            <TableRow><TableHead>Désignation</TableHead><TableHead className="text-right">Qté</TableHead><TableHead className="text-right">PU</TableHead><TableHead className="text-right">Total HT</TableHead></TableRow>
-          </TableHeader>
-          <TableBody>
-            {lignes.map((l) => (
-              <TableRow key={l.id}>
-                <TableCell>{l.designation}</TableCell>
-                <TableCell className="text-right">{Number(l.quantite)}</TableCell>
-                <TableCell className="text-right">{Number(l.prix_unitaire).toFixed(3)}</TableCell>
-                <TableCell className="text-right font-medium">{Number(l.total_ht).toFixed(3)}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            {bc.numero}
+            <StatusBadge label={bc.statut as string} tone={statutTone(bc.statut as string)} />
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-5">
+          {/* Workflow Timeline */}
+          <div className="flex justify-center">
+            <WorkflowTimeline statut={bc.statut as BCStatut} />
+          </div>
+
+          {/* Info Grid */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2 rounded-md border border-border/60 p-3">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Client</h4>
+              <p className="text-sm font-medium">{client?.raison_sociale ?? "—"}</p>
+              {client?.matricule_fiscal && <p className="text-xs text-muted-foreground">MF: {client.matricule_fiscal}</p>}
+              {client?.adresse && <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" />{client.adresse}</p>}
+              {client?.telephone && <p className="text-xs text-muted-foreground">Tél: {client.telephone}</p>}
+            </div>
+            <div className="space-y-2 rounded-md border border-border/60 p-3">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Détails BC</h4>
+              <div className="grid grid-cols-2 gap-1 text-xs">
+                <span className="text-muted-foreground">Date BC:</span><span>{formatDate(bc.date_bc)}</span>
+                <span className="text-muted-foreground">Réf. client:</span><span>{bc.reference_client || "—"}</span>
+                <span className="text-muted-foreground">Code externe:</span><span>{bc.code_externe || "—"}</span>
+                {bc.temperature_reception && (
+                  <><span className="text-muted-foreground flex items-center gap-1"><Thermometer className="h-3 w-3" />Temp.:</span><span>{bc.temperature_reception}</span></>
+                )}
+                {bc.date_souhaitee && (
+                  <><span className="text-muted-foreground">Date souhaitée:</span><span>{formatDate(bc.date_souhaitee)}</span></>
+                )}
+              </div>
+              {bc.objet && <p className="mt-1 text-xs italic text-muted-foreground">{bc.objet}</p>}
+            </div>
+          </div>
+
+          {/* Lignes */}
+          <div>
+            <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Lignes ({lignes.length})</h4>
+            <div className="rounded-md border border-border/60">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Désignation</TableHead>
+                    <TableHead className="w-16 text-right">Qté</TableHead>
+                    <TableHead className="w-24 text-right">PU HT</TableHead>
+                    <TableHead className="w-16 text-right">Rem%</TableHead>
+                    <TableHead className="w-24 text-right">Total HT</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {lignes.map((l) => (
+                    <TableRow key={l.id}>
+                      <TableCell className="text-sm">{l.designation}</TableCell>
+                      <TableCell className="text-right tabular-nums">{Number(l.quantite)}</TableCell>
+                      <TableCell className="text-right tabular-nums">{Number(l.prix_unitaire).toFixed(3)}</TableCell>
+                      <TableCell className="text-right tabular-nums">{Number(l.remise_pct)}%</TableCell>
+                      <TableCell className="text-right font-medium tabular-nums">{Number(l.total_ht).toFixed(3)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="mt-2 flex justify-end">
+              <div className="space-y-0.5 text-right text-xs">
+                <div>Total HT: <span className="font-medium tabular-nums">{formatCurrency(bc.total_ht)}</span></div>
+                <div>TVA: <span className="tabular-nums">{formatCurrency(bc.total_tva)}</span></div>
+                <div className="border-t pt-0.5 text-sm font-semibold">TTC: <span className="tabular-nums">{formatCurrency(bc.total_ttc)}</span></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Missions liées */}
+          {missions.length > 0 && (
+            <div>
+              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Missions liées ({missions.length})</h4>
+              <div className="space-y-1">
+                {missions.map((m) => (
+                  <div key={m.id} className="flex items-center gap-3 rounded-sm border border-border/40 px-3 py-1.5 text-xs">
+                    <span className="font-mono font-medium">{m.numero}</span>
+                    <span className="text-muted-foreground">{formatDate(m.date_mission)}</span>
+                    {m.lieu && <span className="text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" />{m.lieu}</span>}
+                    <StatusBadge label={m.statut as string} tone={statutTone(m.statut as string)} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Notes */}
+          {bc.notes && (
+            <div>
+              <h4 className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Notes</h4>
+              <p className="text-sm text-muted-foreground whitespace-pre-wrap">{bc.notes}</p>
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
