@@ -240,7 +240,7 @@ function FacturationPage() {
 
           {/* ==== AVOIRS ==== */}
           <TabsContent value="avoirs" className="space-y-3">
-            <div className="flex justify-end"><Button size="sm" onClick={() => toast.info("Formulaire avoir — en cours")}><Plus className="h-3.5 w-3.5 mr-1" /> Nouvel avoir</Button></div>
+            <div className="flex justify-end"><Button size="sm" onClick={() => toast.info("Formulaire avoir — prochainement")}><Plus className="h-3.5 w-3.5 mr-1" /> Nouvel avoir</Button></div>
             {avoirs.length === 0 ? (
               <EmptyState icon={CreditCard} title="Aucun avoir" description="Les notes de crédit apparaîtront ici." />
             ) : (
