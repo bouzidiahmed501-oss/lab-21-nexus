@@ -473,3 +473,156 @@ function ViewFactureDialog({ id, onClose }: { id: string; onClose: () => void })
     </Dialog>
   );
 }
+
+/* ========== NEW REGLEMENT ========== */
+function NewReglementDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [clientId, setClientId] = useState("");
+  const [montant, setMontant] = useState<number>(0);
+  const [modeReglement, setModeReglement] = useState("virement");
+  const [reference, setReference] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const { data: clients = [] } = useQuery({
+    queryKey: ["clients-reg"],
+    queryFn: async () => {
+      const { data } = await supabase.from("clients").select("id, raison_sociale").eq("is_active", true).order("raison_sociale");
+      return (data ?? []) as any[];
+    },
+  });
+
+  const { data: facturesClient = [] } = useQuery({
+    queryKey: ["factures-client-reg", clientId],
+    enabled: !!clientId,
+    queryFn: async () => {
+      const { data } = await supabase.from("factures")
+        .select("id, numero, net_a_payer, date_facture, statut")
+        .eq("client_id", clientId)
+        .in("statut", ["emise", "partielle", "impayee"])
+        .order("date_facture");
+      return (data ?? []) as any[];
+    },
+  });
+
+  const [selectedFactures, setSelectedFactures] = useState<Set<string>>(new Set());
+
+  const toggleFac = (id: string) => {
+    setSelectedFactures(prev => {
+      const n = new Set(prev);
+      if (n.has(id)) n.delete(id); else n.add(id);
+      return n;
+    });
+  };
+
+  const submit = async () => {
+    if (!clientId) { toast.error("Sélectionnez un client"); return; }
+    if (montant <= 0) { toast.error("Montant invalide"); return; }
+    setSaving(true);
+    try {
+      const numero = await nextNumero("REG");
+      const { data: reg, error: e1 } = await supabase.from("reglements").insert({
+        numero, client_id: clientId, montant,
+        mode_reglement: modeReglement,
+        reference: reference || null,
+        date_paiement: new Date().toISOString().split("T")[0],
+      }).select("id").single();
+      if (e1) throw e1;
+
+      // Link to selected factures
+      if (selectedFactures.size > 0) {
+        const links = Array.from(selectedFactures).map((facture_id, i) => {
+          const fac = facturesClient.find((f: any) => f.id === facture_id);
+          return {
+            reglement_id: reg.id, facture_id, ordre: i,
+            net_a_payer: fac?.net_a_payer ?? 0,
+            date_facture: fac?.date_facture ?? null,
+          };
+        });
+        await supabase.from("lignes_reglement").insert(links);
+
+        // Update facture payment status
+        for (const fid of selectedFactures) {
+          await supabase.from("factures").update({
+            payment_status: "paye", statut: "payee",
+            date_reglement: new Date().toISOString().split("T")[0],
+          }).eq("id", fid);
+        }
+      }
+
+      toast.success(`Règlement ${numero} enregistré`);
+      qc.invalidateQueries({ queryKey: ["reglements"] });
+      qc.invalidateQueries({ queryKey: ["factures"] });
+      onClose();
+    } catch (e: any) { toast.error(e.message); } finally { setSaving(false); }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader><DialogTitle>Nouveau règlement</DialogTitle></DialogHeader>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs">Client *</Label>
+              <Select value={clientId} onValueChange={(v) => { setClientId(v); setSelectedFactures(new Set()); }}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Sélectionner…" /></SelectTrigger>
+                <SelectContent>{clients.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.raison_sociale}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">Mode de règlement</Label>
+              <Select value={modeReglement} onValueChange={setModeReglement}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="virement">Virement</SelectItem>
+                  <SelectItem value="cheque">Chèque</SelectItem>
+                  <SelectItem value="especes">Espèces</SelectItem>
+                  <SelectItem value="traite">Traite</SelectItem>
+                  <SelectItem value="carte">Carte</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">Montant (DT) *</Label>
+              <Input type="number" step="0.001" className="h-8 text-xs" value={montant} onChange={e => setMontant(Number(e.target.value))} />
+            </div>
+            <div>
+              <Label className="text-xs">Référence (chèque/virement)</Label>
+              <Input className="h-8 text-xs" value={reference} onChange={e => setReference(e.target.value)} maxLength={100} />
+            </div>
+          </div>
+
+          {clientId && facturesClient.length > 0 && (
+            <div>
+              <Label className="text-xs font-semibold">Factures à régler</Label>
+              <div className="mt-1 rounded-md border border-border/60 max-h-48 overflow-y-auto">
+                <Table>
+                  <TableHeader><TableRow className="text-[10px]">
+                    <TableHead className="w-10"></TableHead><TableHead>N°</TableHead>
+                    <TableHead>Date</TableHead><TableHead className="text-right">Net à payer</TableHead>
+                  </TableRow></TableHeader>
+                  <TableBody>
+                    {facturesClient.map((f: any) => (
+                      <TableRow key={f.id} className="text-xs cursor-pointer hover:bg-muted/30" onClick={() => toggleFac(f.id)}>
+                        <TableCell>
+                          <input type="checkbox" checked={selectedFactures.has(f.id)} onChange={() => toggleFac(f.id)} className="accent-primary" />
+                        </TableCell>
+                        <TableCell className="font-mono">{f.numero}</TableCell>
+                        <TableCell>{formatDate(f.date_facture)}</TableCell>
+                        <TableCell className="text-right tabular-nums font-medium">{Number(f.net_a_payer).toFixed(3)} DT</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Annuler</Button>
+          <Button onClick={submit} disabled={saving}>{saving && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />} Enregistrer</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
