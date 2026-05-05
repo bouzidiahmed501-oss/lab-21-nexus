@@ -268,6 +268,7 @@ function FacturationPage() {
       </div>
 
       {openNew && <NewFactureDialog open={openNew} onClose={() => setOpenNew(false)} />}
+      {openReg && <NewReglementDialog open={openReg} onClose={() => setOpenReg(false)} />}
       {viewId && <ViewFactureDialog id={viewId} onClose={() => setViewId(null)} />}
     </div>
   );
