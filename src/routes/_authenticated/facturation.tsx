@@ -211,7 +211,7 @@ function FacturationPage() {
 
           {/* ==== REGLEMENTS ==== */}
           <TabsContent value="reglements" className="space-y-3">
-            <div className="flex justify-end"><Button size="sm" onClick={() => toast.info("Formulaire règlement — en cours")}><Plus className="h-3.5 w-3.5 mr-1" /> Nouveau règlement</Button></div>
+            <div className="flex justify-end"><Button size="sm" onClick={() => setOpenReg(true)}><Plus className="h-3.5 w-3.5 mr-1" /> Nouveau règlement</Button></div>
             {reglements.length === 0 ? (
               <EmptyState icon={Banknote} title="Aucun règlement" description="Les règlements apparaîtront ici." />
             ) : (
