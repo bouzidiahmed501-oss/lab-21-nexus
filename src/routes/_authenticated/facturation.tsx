@@ -522,10 +522,9 @@ function NewReglementDialog({ open, onClose }: { open: boolean; onClose: () => v
       const numero = await nextNumero("REG");
       const { data: reg, error: e1 } = await supabase.from("reglements").insert({
         numero, client_id: clientId, montant,
-        mode_reglement: modeReglement,
         reference: reference || null,
         date_paiement: new Date().toISOString().split("T")[0],
-      }).select("id").single();
+      } as any).select("id").single();
       if (e1) throw e1;
 
       // Link to selected factures
