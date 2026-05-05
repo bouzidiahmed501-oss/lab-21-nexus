@@ -54,6 +54,7 @@ function FacturationPage() {
   const [search, setSearch] = useState("");
   const [statutFilter, setStatutFilter] = useState("all");
   const [openNew, setOpenNew] = useState(false);
+  const [openReg, setOpenReg] = useState(false);
   const [viewId, setViewId] = useState<string | null>(null);
   const [tab, setTab] = useState("factures");
 
