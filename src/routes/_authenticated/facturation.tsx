@@ -214,7 +214,8 @@ function FacturationPage() {
                         <TableCell><Badge variant={STATUT_VARIANT[f.statut] ?? "outline"}>{STATUT_LABEL[f.statut] ?? f.statut}</Badge></TableCell>
                         <TableCell className="text-right space-x-1">
                           <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setViewId(f.id)}><Eye className="h-3 w-3" /></Button>
-                          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => generateXML(f)}><FileCode className="h-3 w-3" /></Button>
+                         <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => handlePdfFacture(f)} title="PDF"><Download className="h-3 w-3" /></Button>
+                         <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => handleElfatoora(f)} title="XML Elfatoora"><FileCode className="h-3 w-3" /></Button>
                         </TableCell>
                       </TableRow>
                     ))}
