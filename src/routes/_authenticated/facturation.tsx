@@ -112,31 +112,43 @@ function FacturationPage() {
     return { nbFactures: factures.length, ca, impayes, totalReglements };
   }, [factures, reglements]);
 
-  const generateXML = (f: any) => {
-    const c = f.clients || {};
-    const date = (f.date_facture || new Date().toISOString().slice(0, 10)).replace(/-/g, "");
-    const esc = (s: string) => String(s).replace(/[<>&'"]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" }[c]!));
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<TEIF xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.8.8" controlingAgency="TTN">
-  <InvoiceHeader>
-    <MessageSenderIdentifier type="I-01">BALIMS</MessageSenderIdentifier>
-    <MessageRecieverIdentifier type="I-01">${esc(c.matricule_fiscal || "")}</MessageRecieverIdentifier>
-  </InvoiceHeader>
-  <InvoiceBody>
-    <Bgm><DocumentIdentifier>${esc(f.numero)}</DocumentIdentifier><DocumentType code="I-11">Facture</DocumentType></Bgm>
-    <Dtm><DateText format="DDMMYYYY" functionCode="I-31">${date}</DateText></Dtm>
-    <InvoiceMoa>
-      <AmountDetails><Moa amountTypeCode="I-181" currencyIdentifier="TND">${Number(f.total_ht || 0).toFixed(3)}</Moa></AmountDetails>
-      <AmountDetails><Moa amountTypeCode="I-182" currencyIdentifier="TND">${Number(f.total_tva || 0).toFixed(3)}</Moa></AmountDetails>
-      <AmountDetails><Moa amountTypeCode="I-180" currencyIdentifier="TND">${Number(f.total_ttc || 0).toFixed(3)}</Moa></AmountDetails>
-    </InvoiceMoa>
-  </InvoiceBody>
-</TEIF>`;
-    const blob = new Blob([xml], { type: "application/xml" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `${f.numero}-elfatoora.xml`; a.click();
-    URL.revokeObjectURL(url);
-    toast.success(`XML Elfatoora ${f.numero} téléchargé`);
+  const handlePdfFacture = async (f: any) => {
+    try {
+      const { data: lignes } = await supabase.from("lignes_facture").select("*").eq("facture_id", f.id).order("ordre");
+      const blob = await generateFacturePdf({
+        numero: f.numero, date_facture: f.date_facture, date_echeance: f.date_echeance,
+        client: { raison_sociale: f.clients?.raison_sociale ?? "", adresse: f.clients?.adresse, matricule_fiscal: f.clients?.matricule_fiscal, code_tva: f.code_tva },
+        lignes: (lignes ?? []).map((l: any) => ({ reference: l.reference || "", designation: l.designation || "", quantite: l.quantite, prix_unitaire: Number(l.prix_unitaire), remise: Number(l.remise), tva: Number(l.tva), total_ht: Number(l.total_ht) })),
+        total_ht: Number(f.total_ht), total_tva: Number(f.total_tva), total_ttc: Number(f.total_ttc),
+        timbre: Number(f.timbre || 1), retenue_source: Number(f.retenue_source || 0), net_a_payer: Number(f.net_a_payer),
+        net_a_payer_texte: f.net_a_payer_texte, mode_reglement: f.mode_reglement,
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = `${f.numero}.pdf`; a.click();
+      URL.revokeObjectURL(url);
+    } catch (e: any) { toast.error(e.message); }
+  };
+
+  const handleElfatoora = async (f: any) => {
+    try {
+      const { data: soc } = await supabase.from("app_settings").select("settings").eq("category", "societe").maybeSingle();
+      const societe = (soc?.settings ?? {}) as any;
+      const { data: lignes } = await supabase.from("lignes_facture").select("*").eq("facture_id", f.id).order("ordre");
+      const inv: ElfatooraInvoice = {
+        numero: f.numero, date_facture: f.date_facture, devise: "TND",
+        fournisseur: { raison_sociale: societe.raison_sociale || "BALIMS", matricule_fiscal: societe.matricule_fiscal || "", adresse: societe.adresse, ville: societe.ville },
+        client: { raison_sociale: f.clients?.raison_sociale ?? "", matricule_fiscal: f.clients?.matricule_fiscal ?? "", adresse: f.clients?.adresse },
+        lignes: (lignes ?? []).map((l: any) => ({ designation: l.designation || "", quantite: l.quantite, prix_unitaire: Number(l.prix_unitaire), tva_pct: Number(l.tva || 19), total_ht: Number(l.total_ht) })),
+        total_ht: Number(f.total_ht), total_tva: Number(f.total_tva), total_ttc: Number(f.total_ttc),
+        timbre: Number(f.timbre || 1), net_a_payer: Number(f.net_a_payer),
+      };
+      const xml = generateElfatooraXml(inv);
+      const blob = new Blob([xml], { type: "application/xml" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = `${f.numero}-elfatoora.xml`; a.click();
+      URL.revokeObjectURL(url);
+      toast.success(`XML Elfatoora UBL 2.1 — ${f.numero}`);
+    } catch (e: any) { toast.error(e.message); }
   };
 
   return (
