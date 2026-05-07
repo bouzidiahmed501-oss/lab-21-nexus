@@ -21,9 +21,11 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Plus, Search, Receipt, FileCode, Loader2, Eye, Trash2, CreditCard, Banknote } from "lucide-react";
+import { Plus, Search, Receipt, FileCode, Loader2, Eye, Trash2, CreditCard, Banknote, Download } from "lucide-react";
 import { nextNumero } from "@/lib/numbering";
 import { formatCurrency, formatDate } from "@/lib/format";
+import { generateFacturePdf } from "@/lib/pdf/facture";
+import { generateElfatooraXml, type ElfatooraInvoice } from "@/lib/elfatoora";
 
 export const Route = createFileRoute("/_authenticated/facturation")({
   head: () => ({ meta: [{ title: "Facturation — BALIMS" }] }),
