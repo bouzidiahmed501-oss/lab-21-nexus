@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Plus, Search, Briefcase, ListChecks, AlertCircle, GanttChart, Calendar } from "lucide-react";
+import { Plus, Search, Briefcase, ListChecks, AlertCircle, GanttChart } from "lucide-react";
 import { nextNumero } from "@/lib/numbering";
 import { formatCurrency, formatDate } from "@/lib/format";
 
@@ -43,6 +43,9 @@ const TACHE_STATUT: Record<string, string> = {
 const PRIORITE_LABEL: Record<string, string> = { basse: "Basse", normale: "Normale", haute: "Haute", critique: "Critique" };
 const PRIORITE_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   basse: "outline", normale: "secondary", haute: "default", critique: "destructive",
+};
+const STATUT_COLORS: Record<string, string> = {
+  planifie: "bg-muted", en_cours: "bg-primary", en_pause: "bg-amber-500", termine: "bg-emerald-500", annule: "bg-destructive",
 };
 
 function ProjetsPage() {
@@ -78,7 +81,7 @@ function ProjetsPage() {
     <div className="flex h-full flex-col">
       <PageHeader
         title="Projets"
-        description="Gestion de projets, tâches et avancement"
+        description="Gestion de projets, tâches, avancement et timeline Gantt"
         actions={
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" /> Nouveau projet</Button></DialogTrigger>
@@ -87,12 +90,6 @@ function ProjetsPage() {
         }
       />
       <div className="flex-1 overflow-y-auto p-6">
-        <Tabs defaultValue="liste">
-          <TabsList className="mb-4">
-            <TabsTrigger value="liste"><Briefcase className="mr-1 h-3.5 w-3.5" />Liste</TabsTrigger>
-            <TabsTrigger value="gantt"><GanttChart className="mr-1 h-3.5 w-3.5" />Timeline</TabsTrigger>
-          </TabsList>
-          <TabsContent value="liste">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total</p><p className="text-2xl font-semibold">{stats.total}</p></CardContent></Card>
           <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">En cours</p><p className="text-2xl font-semibold text-primary">{stats.enCours}</p></CardContent></Card>
@@ -100,54 +97,67 @@ function ProjetsPage() {
           <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Budget total</p><p className="text-xl font-semibold">{formatCurrency(stats.budget)}</p></CardContent></Card>
         </div>
 
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-center gap-2">
-              <CardTitle>Liste des projets</CardTitle>
-              <div className="flex gap-2">
-                <div className="relative">
-                  <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input className="pl-8 w-64" placeholder="Rechercher…" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <Tabs defaultValue="liste">
+          <TabsList className="mb-4">
+            <TabsTrigger value="liste"><Briefcase className="mr-1 h-3.5 w-3.5" />Liste</TabsTrigger>
+            <TabsTrigger value="gantt"><GanttChart className="mr-1 h-3.5 w-3.5" />Timeline</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="liste">
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center gap-2">
+                  <CardTitle>Liste des projets</CardTitle>
+                  <div className="flex gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input className="pl-8 w-64" placeholder="Rechercher…" value={search} onChange={(e) => setSearch(e.target.value)} />
+                    </div>
+                    <Select value={statutFilter} onValueChange={setStatutFilter}>
+                      <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous statuts</SelectItem>
+                        {Object.entries(STATUT_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                <Select value={statutFilter} onValueChange={setStatutFilter}>
-                  <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tous statuts</SelectItem>
-                    {Object.entries(STATUT_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {filtered.length === 0 ? (
-              <EmptyState icon={Briefcase} title="Aucun projet" description="Démarrez votre premier projet." />
-            ) : (
-              <Table>
-                <TableHeader><TableRow>
-                  <TableHead>Numéro</TableHead><TableHead>Nom</TableHead><TableHead>Statut</TableHead>
-                  <TableHead>Avancement</TableHead><TableHead>Échéance</TableHead>
-                  <TableHead className="text-right">Budget</TableHead><TableHead className="text-right">Actions</TableHead>
-                </TableRow></TableHeader>
-                <TableBody>
-                  {filtered.map((p: any) => (
-                    <TableRow key={p.id}>
-                      <TableCell className="font-mono text-xs">{p.numero}</TableCell>
-                      <TableCell className="font-medium">{p.nom}</TableCell>
-                      <TableCell><Badge variant={STATUT_VARIANT[p.statut]}>{STATUT_LABEL[p.statut]}</Badge></TableCell>
-                      <TableCell><div className="flex items-center gap-2"><Progress value={p.avancement_pct} className="w-24" /><span className="text-xs text-muted-foreground">{p.avancement_pct}%</span></div></TableCell>
-                      <TableCell>{formatDate(p.date_fin_prevue)}</TableCell>
-                      <TableCell className="text-right">{p.budget ? formatCurrency(p.budget) : "—"}</TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" onClick={() => setSelected(p)}>Ouvrir</Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
+              </CardHeader>
+              <CardContent>
+                {filtered.length === 0 ? (
+                  <EmptyState icon={Briefcase} title="Aucun projet" description="Démarrez votre premier projet." />
+                ) : (
+                  <Table>
+                    <TableHeader><TableRow>
+                      <TableHead>Numéro</TableHead><TableHead>Nom</TableHead><TableHead>Statut</TableHead>
+                      <TableHead>Avancement</TableHead><TableHead>Échéance</TableHead>
+                      <TableHead className="text-right">Budget</TableHead><TableHead className="text-right">Actions</TableHead>
+                    </TableRow></TableHeader>
+                    <TableBody>
+                      {filtered.map((p: any) => (
+                        <TableRow key={p.id}>
+                          <TableCell className="font-mono text-xs">{p.numero}</TableCell>
+                          <TableCell className="font-medium">{p.nom}</TableCell>
+                          <TableCell><Badge variant={STATUT_VARIANT[p.statut]}>{STATUT_LABEL[p.statut]}</Badge></TableCell>
+                          <TableCell><div className="flex items-center gap-2"><Progress value={p.avancement_pct} className="w-24" /><span className="text-xs text-muted-foreground">{p.avancement_pct}%</span></div></TableCell>
+                          <TableCell>{formatDate(p.date_fin_prevue)}</TableCell>
+                          <TableCell className="text-right">{p.budget ? formatCurrency(p.budget) : "—"}</TableCell>
+                          <TableCell className="text-right">
+                            <Button variant="ghost" size="sm" onClick={() => setSelected(p)}>Ouvrir</Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="gantt">
+            <GanttTimeline projets={filtered} />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {selected && (
@@ -156,6 +166,85 @@ function ProjetsPage() {
     </div>
   );
 }
+
+/* ======================== GANTT TIMELINE ======================== */
+
+function GanttTimeline({ projets }: { projets: any[] }) {
+  const withDates = projets.filter((p) => p.date_debut && p.date_fin_prevue);
+  if (withDates.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center text-sm text-muted-foreground">
+          Aucun projet avec dates de début et fin. Renseignez-les pour voir la timeline.
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const allStarts = withDates.map((p) => new Date(p.date_debut).getTime());
+  const allEnds = withDates.map((p) => new Date(p.date_fin_prevue).getTime());
+  const minDate = Math.min(...allStarts);
+  const maxDate = Math.max(...allEnds);
+  const range = maxDate - minDate || 1;
+
+  const months: string[] = [];
+  const d = new Date(minDate);
+  d.setDate(1);
+  while (d.getTime() <= maxDate + 30 * 86400000) {
+    months.push(d.toLocaleDateString("fr-FR", { month: "short", year: "2-digit" }));
+    d.setMonth(d.getMonth() + 1);
+  }
+
+  return (
+    <Card>
+      <CardHeader><CardTitle className="text-base">Timeline des projets</CardTitle></CardHeader>
+      <CardContent className="overflow-x-auto">
+        {/* Month headers */}
+        <div className="flex border-b mb-2 pb-1 min-w-[600px]">
+          <div className="w-48 shrink-0" />
+          <div className="flex-1 flex">
+            {months.map((m, i) => (
+              <div key={i} className="flex-1 text-[10px] text-muted-foreground text-center">{m}</div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bars */}
+        <div className="space-y-2 min-w-[600px]">
+          {withDates.map((p) => {
+            const start = new Date(p.date_debut).getTime();
+            const end = new Date(p.date_fin_prevue).getTime();
+            const left = ((start - minDate) / range) * 100;
+            const width = Math.max(((end - start) / range) * 100, 2);
+            const color = STATUT_COLORS[p.statut] || "bg-primary";
+
+            return (
+              <div key={p.id} className="flex items-center">
+                <div className="w-48 shrink-0 pr-2">
+                  <p className="text-xs font-medium truncate">{p.nom}</p>
+                  <p className="text-[10px] text-muted-foreground">{p.avancement_pct}%</p>
+                </div>
+                <div className="flex-1 relative h-7 bg-muted/30 rounded">
+                  <div
+                    className={`absolute top-1 h-5 rounded ${color} opacity-80`}
+                    style={{ left: `${left}%`, width: `${width}%` }}
+                  >
+                    <div
+                      className="h-full rounded bg-foreground/20"
+                      style={{ width: `${p.avancement_pct}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+/* ======================== FORMS ======================== */
 
 function ProjetForm({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
   const [f, setF] = useState({
@@ -284,7 +373,7 @@ function ProjetDetail({ projet, onClose, onChanged }: { projet: any; onClose: ()
             <Progress value={avancement} />
             <div className="text-xs text-muted-foreground flex items-center gap-2">
               <AlertCircle className="h-3.5 w-3.5" />
-              Avancement automatique selon tâches : {tauxAuto}% ({tachesTerminees}/{taches.length})
+              Avancement auto (tâches) : {tauxAuto}% ({tachesTerminees}/{taches.length})
               {taches.length > 0 && (
                 <Button size="sm" variant="link" className="h-auto p-0" onClick={() => setAvancement(tauxAuto)}>Synchroniser</Button>
               )}
