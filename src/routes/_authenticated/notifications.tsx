@@ -36,7 +36,7 @@ interface Notification {
   title: string;
   message: string | null;
   level: string;
-  category: string | null;
+  category?: string | null;
   link: string | null;
   is_read: boolean;
   read_at: string | null;
