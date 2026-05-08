@@ -120,24 +120,41 @@ function DashboardTab() {
     queryKey: ["qualite-stats"],
     queryFn: async () => {
       const [nc, rec, capa, audits] = await Promise.all([
-        supabase.from("non_conformites").select("statut, gravite"),
-        supabase.from("reclamations").select("statut, fondee"),
-        supabase.from("actions_capa").select("statut"),
+        supabase.from("non_conformites").select("statut, gravite, date_detection, source"),
+        supabase.from("reclamations").select("statut, fondee, date_reception"),
+        supabase.from("actions_capa").select("statut, type, efficace, date_planifiee"),
         supabase.from("audits").select("statut"),
       ]);
       const ncRows = nc.data ?? [];
       const recRows = rec.data ?? [];
       const capaRows = capa.data ?? [];
       const audRows = audits.data ?? [];
+
+      const ncClosed = ncRows.filter((r) => r.statut === "cloturee").length;
+      const capaVerified = capaRows.filter((r) => r.statut === "verifiee" || r.statut === "cloturee").length;
+      const capaEfficaces = capaRows.filter((r) => r.efficace === true).length;
+      const capaEnRetard = capaRows.filter((r) => {
+        if (!r.date_planifiee || r.statut === "cloturee" || r.statut === "abandonnee") return false;
+        return new Date(r.date_planifiee) < new Date();
+      }).length;
+
       return {
         nc_ouvertes: ncRows.filter((r) => r.statut !== "cloturee" && r.statut !== "annulee").length,
         nc_critiques: ncRows.filter((r) => r.gravite === "critique").length,
         nc_total: ncRows.length,
+        nc_taux_cloture: ncRows.length > 0 ? Math.round((ncClosed / ncRows.length) * 100) : 0,
+        nc_par_source: Object.entries(ncRows.reduce((acc: Record<string, number>, r) => {
+          acc[r.source as string] = (acc[r.source as string] || 0) + 1; return acc;
+        }, {})),
         rec_ouvertes: recRows.filter((r) => !["cloturee", "rejetee"].includes(r.statut as string)).length,
         rec_fondees: recRows.filter((r) => r.fondee === true).length,
         rec_total: recRows.length,
         capa_en_cours: capaRows.filter((r) => ["planifiee", "en_cours"].includes(r.statut as string)).length,
         capa_total: capaRows.length,
+        capa_verified: capaVerified,
+        capa_efficaces: capaEfficaces,
+        capa_en_retard: capaEnRetard,
+        capa_taux_efficacite: capaVerified > 0 ? Math.round((capaEfficaces / capaVerified) * 100) : 0,
         audits_en_cours: audRows.filter((r) => ["planifie", "en_cours"].includes(r.statut as string)).length,
         audits_total: audRows.length,
       };
@@ -149,32 +166,84 @@ function DashboardTab() {
   }
 
   const cards = [
-    { label: "NC ouvertes", value: stats?.nc_ouvertes ?? 0, sub: `${stats?.nc_critiques ?? 0} critiques`, icon: AlertTriangle, color: "text-amber-600" },
-    { label: "Réclamations en cours", value: stats?.rec_ouvertes ?? 0, sub: `${stats?.rec_fondees ?? 0} fondées (total)`, icon: MessageSquareWarning, color: "text-orange-600" },
-    { label: "Actions CAPA actives", value: stats?.capa_en_cours ?? 0, sub: `${stats?.capa_total ?? 0} au total`, icon: ListChecks, color: "text-blue-600" },
+    { label: "NC ouvertes", value: stats?.nc_ouvertes ?? 0, sub: `${stats?.nc_critiques ?? 0} critiques · ${stats?.nc_taux_cloture ?? 0}% clôturées`, icon: AlertTriangle, color: "text-amber-600" },
+    { label: "Réclamations en cours", value: stats?.rec_ouvertes ?? 0, sub: `${stats?.rec_fondees ?? 0} fondées sur ${stats?.rec_total ?? 0}`, icon: MessageSquareWarning, color: "text-orange-600" },
+    { label: "Actions CAPA actives", value: stats?.capa_en_cours ?? 0, sub: `${stats?.capa_en_retard ?? 0} en retard · ${stats?.capa_taux_efficacite ?? 0}% efficaces`, icon: ListChecks, color: "text-blue-600" },
     { label: "Audits en cours", value: stats?.audits_en_cours ?? 0, sub: `${stats?.audits_total ?? 0} au total`, icon: ClipboardCheck, color: "text-purple-600" },
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {cards.map((c) => (
-        <Card key={c.label}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{c.label}</CardTitle>
-            <c.icon className={`h-4 w-4 ${c.color}`} />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-semibold tracking-tight">{c.value}</div>
-            <p className="mt-1 text-xs text-muted-foreground">{c.sub}</p>
+    <div className="space-y-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {cards.map((c) => (
+          <Card key={c.label}>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{c.label}</CardTitle>
+              <c.icon className={`h-4 w-4 ${c.color}`} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-semibold tracking-tight">{c.value}</div>
+              <p className="mt-1 text-xs text-muted-foreground">{c.sub}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Indicateurs qualité ISO 17025 */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader><CardTitle className="text-sm">Indicateurs clés ISO 17025</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground">Taux de clôture NC</span>
+              <Badge className={`${(stats?.nc_taux_cloture ?? 0) >= 80 ? "bg-emerald-500/15 text-emerald-600" : "bg-amber-500/15 text-amber-600"}`}>
+                {stats?.nc_taux_cloture ?? 0}%
+              </Badge>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground">Taux d'efficacité CAPA</span>
+              <Badge className={`${(stats?.capa_taux_efficacite ?? 0) >= 75 ? "bg-emerald-500/15 text-emerald-600" : "bg-red-500/15 text-red-600"}`}>
+                {stats?.capa_taux_efficacite ?? 0}%
+              </Badge>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground">CAPA en retard</span>
+              <Badge className={`${(stats?.capa_en_retard ?? 0) === 0 ? "bg-emerald-500/15 text-emerald-600" : "bg-red-500/15 text-red-600"}`}>
+                {stats?.capa_en_retard ?? 0}
+              </Badge>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground">NC critiques actives</span>
+              <Badge className={`${(stats?.nc_critiques ?? 0) === 0 ? "bg-emerald-500/15 text-emerald-600" : "bg-red-500/15 text-red-600"}`}>
+                {stats?.nc_critiques ?? 0}
+              </Badge>
+            </div>
           </CardContent>
         </Card>
-      ))}
-      <Card className="md:col-span-2 lg:col-span-4">
-        <CardHeader><CardTitle className="text-base">À propos du module Qualité</CardTitle></CardHeader>
+
+        <Card>
+          <CardHeader><CardTitle className="text-sm">NC par source</CardTitle></CardHeader>
+          <CardContent className="space-y-2">
+            {(stats?.nc_par_source ?? []).map(([source, count]) => (
+              <div key={source} className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground capitalize">{source}</span>
+                <span className="font-medium">{count as number}</span>
+              </div>
+            ))}
+            {(stats?.nc_par_source ?? []).length === 0 && (
+              <p className="text-xs text-muted-foreground">Aucune NC enregistrée.</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader><CardTitle className="text-base">Exigences ISO/CEI 17025</CardTitle></CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Ce module couvre les exigences clés de la norme <b>ISO/CEI 17025</b> en matière de gestion qualité :
-          détection et traitement des non-conformités, gestion des réclamations clients, actions correctives & préventives (CAPA),
-          audits internes/externes, revues de direction, et indicateurs de performance.
+          Ce module couvre les exigences clés de la norme <b>ISO/CEI 17025:2017</b> :
+          § 7.10 Travaux non conformes · § 7.9 Réclamations · § 8.7 Actions correctives ·
+          § 8.8 Audits internes · § 8.9 Revues de direction · § 8.6 Actions préventives.
+          Les indicateurs ci-dessus alimentent directement la revue de direction.
         </CardContent>
       </Card>
     </div>

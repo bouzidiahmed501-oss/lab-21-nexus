@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Loader2, MapPin, Eye, Trash2 } from "lucide-react";
+import { Plus, Search, Loader2, MapPin, Eye, Trash2, Car, DollarSign, Users } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 
@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -23,7 +25,7 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { nextNumero } from "@/lib/numbering";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatCurrency } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/missions")({
   head: () => ({ meta: [{ title: "Missions — BALIMS" }] }),
@@ -32,20 +34,12 @@ export const Route = createFileRoute("/_authenticated/missions")({
 
 const STATUTS = ["planifiee", "en_cours", "terminee", "annulee"] as const;
 type Statut = (typeof STATUTS)[number];
-
+const STATUT_LABEL: Record<Statut, string> = {
+  planifiee: "Planifiée", en_cours: "En cours", terminee: "Terminée", annulee: "Annulée",
+};
 const STATUT_VARIANT: Record<Statut, "default" | "secondary" | "outline" | "destructive"> = {
   planifiee: "outline", en_cours: "default", terminee: "secondary", annulee: "destructive",
 };
-
-interface Echantillon {
-  code_echantillon: string;
-  designation: string;
-  produit_id?: string | null;
-  quantite?: number | null;
-  unite_id?: string | null;
-  conditions_prelevement?: string;
-  notes?: string;
-}
 
 interface MissionRow {
   id: string;
@@ -57,6 +51,9 @@ interface MissionRow {
   lieu: string | null;
   statut: Statut;
   objet: string | null;
+  vehicule: string | null;
+  preleveur: string | null;
+  frais_deplacement: number | null;
   clients: { raison_sociale: string } | null;
   bons_commande: { numero: string } | null;
 }
@@ -76,7 +73,7 @@ function MissionsPage() {
         .select("*, clients(raison_sociale), bons_commande:bc_id(numero)")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as unknown as MissionRow[];
+      return (data ?? []) as unknown as MissionRow[];
     },
   });
 
@@ -85,10 +82,18 @@ function MissionsPage() {
     return missions.filter((m) => {
       if (statutFilter !== "all" && m.statut !== statutFilter) return false;
       if (!q) return true;
-      return [m.numero, m.clients?.raison_sociale, m.lieu, m.objet]
+      return [m.numero, m.clients?.raison_sociale, m.lieu, m.objet, m.preleveur, m.vehicule]
         .filter(Boolean).some((v) => v!.toLowerCase().includes(q));
     });
   }, [missions, search, statutFilter]);
+
+  const stats = useMemo(() => ({
+    total: missions.length,
+    planifiees: missions.filter((m) => m.statut === "planifiee").length,
+    enCours: missions.filter((m) => m.statut === "en_cours").length,
+    terminees: missions.filter((m) => m.statut === "terminee").length,
+    fraisTotal: missions.reduce((s, m) => s + Number(m.frais_deplacement || 0), 0),
+  }), [missions]);
 
   const updateStatut = useMutation({
     mutationFn: async ({ id, statut }: { id: string; statut: Statut }) => {
@@ -103,22 +108,31 @@ function MissionsPage() {
     <div>
       <PageHeader
         title="Missions de prélèvement"
-        description="Planification des sorties terrain et échantillons à collecter."
+        description="Planification des sorties terrain, véhicules, préleveurs et échantillons."
         actions={<Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" /> Nouvelle mission</Button>}
       />
 
       <div className="space-y-4 p-6">
+        {/* KPI Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <Card><CardContent className="p-3 text-center"><p className="text-2xl font-bold">{stats.total}</p><p className="text-[10px] text-muted-foreground">Total</p></CardContent></Card>
+          <Card><CardContent className="p-3 text-center"><p className="text-2xl font-bold text-blue-600">{stats.planifiees}</p><p className="text-[10px] text-muted-foreground">Planifiées</p></CardContent></Card>
+          <Card><CardContent className="p-3 text-center"><p className="text-2xl font-bold text-primary">{stats.enCours}</p><p className="text-[10px] text-muted-foreground">En cours</p></CardContent></Card>
+          <Card><CardContent className="p-3 text-center"><p className="text-2xl font-bold text-emerald-600">{stats.terminees}</p><p className="text-[10px] text-muted-foreground">Terminées</p></CardContent></Card>
+          <Card><CardContent className="p-3 text-center"><p className="text-xl font-bold">{formatCurrency(stats.fraisTotal)}</p><p className="text-[10px] text-muted-foreground">Frais total</p></CardContent></Card>
+        </div>
+
         <div className="flex flex-wrap gap-3">
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Rechercher (n°, client, lieu…)" className="pl-9"
+            <Input placeholder="Rechercher (n°, client, lieu, préleveur…)" className="pl-9"
               value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <Select value={statutFilter} onValueChange={setStatutFilter}>
             <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous statuts</SelectItem>
-              {STATUTS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+              {STATUTS.map((s) => <SelectItem key={s} value={s}>{STATUT_LABEL[s]}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -134,9 +148,11 @@ function MissionsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>N°</TableHead><TableHead>Date prévue</TableHead><TableHead>Client</TableHead>
-                  <TableHead>BC lié</TableHead><TableHead>Lieu</TableHead>
-                  <TableHead>Statut</TableHead><TableHead className="text-right">Actions</TableHead>
+                  <TableHead>N°</TableHead><TableHead>Date</TableHead><TableHead>Client</TableHead>
+                  <TableHead>BC</TableHead><TableHead>Lieu</TableHead>
+                  <TableHead>Préleveur</TableHead><TableHead>Véhicule</TableHead>
+                  <TableHead>Frais</TableHead><TableHead>Statut</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -146,13 +162,16 @@ function MissionsPage() {
                     <TableCell>{formatDate(m.date_prevue ?? m.date_mission)}</TableCell>
                     <TableCell>{m.clients?.raison_sociale ?? "—"}</TableCell>
                     <TableCell className="font-mono text-xs text-muted-foreground">{m.bons_commande?.numero ?? "—"}</TableCell>
-                    <TableCell className="max-w-[200px] truncate">{m.lieu || "—"}</TableCell>
+                    <TableCell className="max-w-[150px] truncate">{m.lieu || "—"}</TableCell>
+                    <TableCell className="text-sm">{m.preleveur || "—"}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{m.vehicule || "—"}</TableCell>
+                    <TableCell className="text-sm">{m.frais_deplacement ? formatCurrency(m.frais_deplacement) : "—"}</TableCell>
                     <TableCell>
                       <Select value={m.statut} onValueChange={(v) => updateStatut.mutate({ id: m.id, statut: v as Statut })}>
                         <SelectTrigger className="h-7 w-32 text-xs">
-                          <Badge variant={STATUT_VARIANT[m.statut]}>{m.statut}</Badge>
+                          <Badge variant={STATUT_VARIANT[m.statut]}>{STATUT_LABEL[m.statut]}</Badge>
                         </SelectTrigger>
-                        <SelectContent>{STATUTS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                        <SelectContent>{STATUTS.map((s) => <SelectItem key={s} value={s}>{STATUT_LABEL[s]}</SelectItem>)}</SelectContent>
                       </Select>
                     </TableCell>
                     <TableCell className="text-right">
@@ -172,6 +191,13 @@ function MissionsPage() {
   );
 }
 
+interface Echantillon {
+  code_echantillon: string;
+  designation: string;
+  produit_id?: string | null;
+  quantite?: number | null;
+}
+
 function NewMissionDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const qc = useQueryClient();
   const [clientId, setClientId] = useState("");
@@ -180,6 +206,9 @@ function NewMissionDialog({ open, onClose }: { open: boolean; onClose: () => voi
   const [lieu, setLieu] = useState("");
   const [objet, setObjet] = useState("");
   const [notes, setNotes] = useState("");
+  const [vehicule, setVehicule] = useState("");
+  const [preleveur, setPreleveur] = useState("");
+  const [frais, setFrais] = useState("");
   const [echantillons, setEchantillons] = useState<Echantillon[]>([
     { code_echantillon: "", designation: "" },
   ]);
@@ -219,17 +248,17 @@ function NewMissionDialog({ open, onClose }: { open: boolean; onClose: () => voi
   const create = useMutation({
     mutationFn: async () => {
       if (!clientId) throw new Error("Sélectionnez un client");
-      z.string().max(200).parse(lieu);
-      z.string().max(500).parse(objet);
       const validEch = echantillons.filter((e) => e.code_echantillon.trim() && e.designation.trim());
 
       const numero = await nextNumero("MIS");
       const { data: m, error: e1 } = await supabase.from("missions").insert({
         numero, client_id: clientId, bc_id: bcId === "none" ? null : bcId,
         date_mission: new Date().toISOString().split("T")[0],
-        date_prevue: datePrevue || null, lieu: lieu || null, objet: objet || null, notes: notes || null,
-        statut: "planifiee",
-      }).select("id").single();
+        date_prevue: datePrevue || null, lieu: lieu || null, objet: objet || null,
+        notes: notes || null, statut: "planifiee",
+        vehicule: vehicule || null, preleveur: preleveur || null,
+        frais_deplacement: frais ? Number(frais) : null,
+      } as any).select("id").single();
       if (e1) throw e1;
 
       if (validEch.length > 0) {
@@ -240,8 +269,6 @@ function NewMissionDialog({ open, onClose }: { open: boolean; onClose: () => voi
             designation: e.designation,
             produit_id: e.produit_id || null,
             quantite: e.quantite || null,
-            conditions_prelevement: e.conditions_prelevement || null,
-            notes: e.notes || null,
           })),
         );
         if (e2) throw e2;
@@ -250,8 +277,6 @@ function NewMissionDialog({ open, onClose }: { open: boolean; onClose: () => voi
     onSuccess: () => {
       toast.success("Mission créée");
       qc.invalidateQueries({ queryKey: ["missions"] });
-      setClientId(""); setBcId("none"); setLieu(""); setObjet(""); setNotes("");
-      setEchantillons([{ code_echantillon: "", designation: "" }]);
       onClose();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -273,27 +298,21 @@ function NewMissionDialog({ open, onClose }: { open: boolean; onClose: () => voi
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Bon de commande lié</Label>
+              <Label>BC lié</Label>
               <Select value={bcId} onValueChange={setBcId} disabled={!clientId}>
                 <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">— Aucun —</SelectItem>
-                  {bcs.map((b) => <SelectItem key={b.id} value={b.id}>{b.numero} {b.objet ? `— ${b.objet}` : ""}</SelectItem>)}
+                  {bcs.map((b) => <SelectItem key={b.id} value={b.id}>{b.numero}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label>Date prévue</Label>
-              <Input type="date" value={datePrevue} onChange={(e) => setDatePrevue(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Lieu</Label>
-              <Input value={lieu} onChange={(e) => setLieu(e.target.value)} maxLength={200} />
-            </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label>Objet</Label>
-              <Input value={objet} onChange={(e) => setObjet(e.target.value)} maxLength={500} />
-            </div>
+            <div className="space-y-2"><Label>Date prévue</Label><Input type="date" value={datePrevue} onChange={(e) => setDatePrevue(e.target.value)} /></div>
+            <div className="space-y-2"><Label>Lieu</Label><Input value={lieu} onChange={(e) => setLieu(e.target.value)} /></div>
+            <div className="space-y-2"><Label>Objet</Label><Input value={objet} onChange={(e) => setObjet(e.target.value)} /></div>
+            <div className="space-y-2"><Label><Users className="inline h-3 w-3 mr-1" />Préleveur</Label><Input value={preleveur} onChange={(e) => setPreleveur(e.target.value)} placeholder="Nom du préleveur" /></div>
+            <div className="space-y-2"><Label><Car className="inline h-3 w-3 mr-1" />Véhicule</Label><Input value={vehicule} onChange={(e) => setVehicule(e.target.value)} placeholder="Immatriculation / modèle" /></div>
+            <div className="space-y-2"><Label><DollarSign className="inline h-3 w-3 mr-1" />Frais déplacement (TND)</Label><Input type="number" step="0.01" value={frais} onChange={(e) => setFrais(e.target.value)} /></div>
           </div>
 
           <div className="space-y-2">
@@ -326,7 +345,7 @@ function NewMissionDialog({ open, onClose }: { open: boolean; onClose: () => voi
                           </SelectContent>
                         </Select>
                       </TableCell>
-                      <TableCell><Input className="h-8" type="number" step="0.01" value={e.quantite ?? ""} onChange={(ev) => updateEch(i, { quantite: ev.target.value ? Number(ev.target.value) : null })} /></TableCell>
+                      <TableCell><Input className="h-8" type="number" value={e.quantite ?? ""} onChange={(ev) => updateEch(i, { quantite: ev.target.value ? Number(ev.target.value) : null })} /></TableCell>
                       <TableCell>
                         <Button type="button" variant="ghost" size="icon" onClick={() => removeEch(i)}><Trash2 className="h-3 w-3" /></Button>
                       </TableCell>
@@ -339,7 +358,7 @@ function NewMissionDialog({ open, onClose }: { open: boolean; onClose: () => voi
 
           <div className="space-y-2">
             <Label>Notes</Label>
-            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} maxLength={1000} />
+            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
           </div>
 
           <DialogFooter>
@@ -355,6 +374,15 @@ function NewMissionDialog({ open, onClose }: { open: boolean; onClose: () => voi
 }
 
 function ViewMissionDialog({ id, onClose }: { id: string; onClose: () => void }) {
+  const { data: mission } = useQuery({
+    queryKey: ["mission_detail", id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("missions")
+        .select("*, clients(raison_sociale)").eq("id", id).single();
+      if (error) throw error;
+      return data;
+    },
+  });
   const { data: ech = [], isLoading } = useQuery({
     queryKey: ["mission_ech", id],
     queryFn: async () => {
@@ -366,8 +394,21 @@ function ViewMissionDialog({ id, onClose }: { id: string; onClose: () => void })
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-3xl">
-        <DialogHeader><DialogTitle>Échantillons de la mission</DialogTitle></DialogHeader>
-        {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
+        <DialogHeader><DialogTitle>Détail de la mission</DialogTitle></DialogHeader>
+        {mission && (
+          <div className="grid grid-cols-2 gap-3 text-sm mb-4">
+            <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Client</span><span>{(mission as any).clients?.raison_sociale}</span></div>
+            <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Date</span><span>{formatDate((mission as any).date_prevue ?? (mission as any).date_mission)}</span></div>
+            <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Préleveur</span><span>{(mission as any).preleveur || "—"}</span></div>
+            <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Véhicule</span><span>{(mission as any).vehicule || "—"}</span></div>
+            <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Frais</span><span>{(mission as any).frais_deplacement ? formatCurrency((mission as any).frais_deplacement) : "—"}</span></div>
+            <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Lieu</span><span>{(mission as any).lieu || "—"}</span></div>
+          </div>
+        )}
+        <p className="text-sm font-medium mb-2">Échantillons ({ech.length})</p>
+        {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : ech.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-4">Aucun échantillon enregistré.</p>
+        ) : (
           <Table>
             <TableHeader><TableRow>
               <TableHead>Code</TableHead><TableHead>Désignation</TableHead><TableHead>Produit</TableHead><TableHead>Qté</TableHead>

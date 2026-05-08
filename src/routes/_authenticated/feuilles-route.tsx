@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Loader2, CalendarRange, Eye } from "lucide-react";
-import { z } from "zod";
+import { Plus, Search, Loader2, CalendarRange, Eye, UserPlus, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -32,14 +33,17 @@ export const Route = createFileRoute("/_authenticated/feuilles-route")({
 
 const STATUTS = ["planifiee", "en_cours", "terminee", "annulee"] as const;
 type Statut = (typeof STATUTS)[number];
+const STATUT_LABEL: Record<Statut, string> = {
+  planifiee: "Planifiée", en_cours: "En cours", terminee: "Terminée", annulee: "Annulée",
+};
 const VAR: Record<Statut, "default" | "secondary" | "outline" | "destructive"> = {
   planifiee: "outline", en_cours: "default", terminee: "secondary", annulee: "destructive",
 };
 
-interface Row {
-  id: string; numero: string; date_fr: string; statut: Statut;
-  laboratoire: string | null; technicien_id: string | null; notes: string | null;
-}
+const TACHE_STATUTS = ["a_faire", "en_cours", "terminee"] as const;
+const TACHE_LABEL: Record<string, string> = {
+  a_faire: "À faire", en_cours: "En cours", terminee: "Terminée",
+};
 
 function FRPage() {
   const qc = useQueryClient();
@@ -53,18 +57,25 @@ function FRPage() {
     queryFn: async () => {
       const { data, error } = await supabase.from("feuilles_route").select("*").order("date_fr", { ascending: false });
       if (error) throw error;
-      return data as unknown as Row[];
+      return data as any[];
     },
   });
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    return rows.filter((r) => {
+    return rows.filter((r: any) => {
       if (statutFilter !== "all" && r.statut !== statutFilter) return false;
       if (!q) return true;
-      return [r.numero, r.laboratoire].filter(Boolean).some((v) => v!.toLowerCase().includes(q));
+      return [r.numero, r.laboratoire].filter(Boolean).some((v: string) => v.toLowerCase().includes(q));
     });
   }, [rows, search, statutFilter]);
+
+  const stats = useMemo(() => ({
+    total: rows.length,
+    planifiees: rows.filter((r: any) => r.statut === "planifiee").length,
+    enCours: rows.filter((r: any) => r.statut === "en_cours").length,
+    terminees: rows.filter((r: any) => r.statut === "terminee").length,
+  }), [rows]);
 
   const updateStatut = useMutation({
     mutationFn: async ({ id, statut }: { id: string; statut: Statut }) => {
@@ -79,11 +90,19 @@ function FRPage() {
     <div>
       <PageHeader
         title="Feuilles de route"
-        description="Planning quotidien du laboratoire — affectation des analyses aux techniciens."
+        description="Planning quotidien — affectation des analyses aux techniciens avec suivi d'avancement."
         actions={<Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" /> Nouvelle FR</Button>}
       />
 
       <div className="space-y-4 p-6">
+        {/* KPI */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Card><CardContent className="p-3 text-center"><p className="text-2xl font-bold">{stats.total}</p><p className="text-[10px] text-muted-foreground">Total</p></CardContent></Card>
+          <Card><CardContent className="p-3 text-center"><p className="text-2xl font-bold text-blue-600">{stats.planifiees}</p><p className="text-[10px] text-muted-foreground">Planifiées</p></CardContent></Card>
+          <Card><CardContent className="p-3 text-center"><p className="text-2xl font-bold text-primary">{stats.enCours}</p><p className="text-[10px] text-muted-foreground">En cours</p></CardContent></Card>
+          <Card><CardContent className="p-3 text-center"><p className="text-2xl font-bold text-emerald-600">{stats.terminees}</p><p className="text-[10px] text-muted-foreground">Terminées</p></CardContent></Card>
+        </div>
+
         <div className="flex flex-wrap gap-3">
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -94,7 +113,7 @@ function FRPage() {
             <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous statuts</SelectItem>
-              {STATUTS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+              {STATUTS.map((s) => <SelectItem key={s} value={s}>{STATUT_LABEL[s]}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -116,15 +135,15 @@ function FRPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map((r) => (
+                {filtered.map((r: any) => (
                   <TableRow key={r.id}>
                     <TableCell className="font-mono text-sm font-medium">{r.numero}</TableCell>
                     <TableCell>{formatDate(r.date_fr)}</TableCell>
                     <TableCell>{r.laboratoire || "—"}</TableCell>
                     <TableCell>
                       <Select value={r.statut} onValueChange={(v) => updateStatut.mutate({ id: r.id, statut: v as Statut })}>
-                        <SelectTrigger className="h-7 w-32 text-xs"><Badge variant={VAR[r.statut]}>{r.statut}</Badge></SelectTrigger>
-                        <SelectContent>{STATUTS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                        <SelectTrigger className="h-7 w-32 text-xs"><Badge variant={VAR[r.statut as Statut]}>{STATUT_LABEL[r.statut as Statut]}</Badge></SelectTrigger>
+                        <SelectContent>{STATUTS.map((s) => <SelectItem key={s} value={s}>{STATUT_LABEL[s]}</SelectItem>)}</SelectContent>
                       </Select>
                     </TableCell>
                     <TableCell className="text-right">
@@ -152,8 +171,6 @@ function NewDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
 
   const create = useMutation({
     mutationFn: async () => {
-      z.string().max(100).parse(labo);
-      z.string().max(1000).parse(notes);
       const numero = await nextNumero("FR");
       const { error } = await supabase.from("feuilles_route").insert({
         numero, date_fr: dateFr, laboratoire: labo || null, notes: notes || null, statut: "planifiee",
@@ -174,23 +191,12 @@ function NewDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
       <DialogContent className="max-w-lg">
         <DialogHeader><DialogTitle>Nouvelle feuille de route</DialogTitle></DialogHeader>
         <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); create.mutate(); }}>
-          <div className="space-y-2">
-            <Label>Date *</Label>
-            <Input type="date" value={dateFr} onChange={(e) => setDateFr(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label>Laboratoire</Label>
-            <Input value={labo} onChange={(e) => setLabo(e.target.value)} placeholder="Microbiologie, Physico-chimie…" maxLength={100} />
-          </div>
-          <div className="space-y-2">
-            <Label>Notes</Label>
-            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} maxLength={1000} />
-          </div>
+          <div className="space-y-2"><Label>Date *</Label><Input type="date" value={dateFr} onChange={(e) => setDateFr(e.target.value)} /></div>
+          <div className="space-y-2"><Label>Laboratoire</Label><Input value={labo} onChange={(e) => setLabo(e.target.value)} placeholder="Microbiologie, Physico-chimie…" /></div>
+          <div className="space-y-2"><Label>Notes</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} /></div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
-            <Button type="submit" disabled={create.isPending}>
-              {create.isPending && <Loader2 className="h-4 w-4 animate-spin" />} Créer
-            </Button>
+            <Button type="submit" disabled={create.isPending}>{create.isPending && <Loader2 className="h-4 w-4 animate-spin" />} Créer</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -199,6 +205,10 @@ function NewDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
 }
 
 function ViewDialog({ id, onClose }: { id: string; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [addOpen, setAddOpen] = useState(false);
+  const [newTache, setNewTache] = useState({ designation: "", technicien: "", priorite: "normale" });
+
   const { data: taches = [], isLoading } = useQuery({
     queryKey: ["fr_taches", id],
     queryFn: async () => {
@@ -209,23 +219,113 @@ function ViewDialog({ id, onClose }: { id: string; onClose: () => void }) {
       return data;
     },
   });
+
+  const updateTacheStatut = useMutation({
+    mutationFn: async ({ tacheId, statut }: { tacheId: string; statut: string }) => {
+      const { error } = await supabase.from("fr_taches").update({ statut } as any).eq("id", tacheId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Tâche mise à jour");
+      qc.invalidateQueries({ queryKey: ["fr_taches", id] });
+    },
+  });
+
+  const addTache = useMutation({
+    mutationFn: async () => {
+      if (!newTache.designation) throw new Error("Désignation requise");
+      const { error } = await supabase.from("fr_taches").insert({
+        fr_id: id,
+        designation: newTache.designation,
+        technicien: newTache.technicien || null,
+        priorite: newTache.priorite,
+        statut: "a_faire",
+        ordre: taches.length + 1,
+      } as any);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Tâche ajoutée");
+      setNewTache({ designation: "", technicien: "", priorite: "normale" });
+      setAddOpen(false);
+      qc.invalidateQueries({ queryKey: ["fr_taches", id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const done = taches.filter((t: any) => t.statut === "terminee").length;
+  const pct = taches.length > 0 ? Math.round((done / taches.length) * 100) : 0;
+
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader><DialogTitle>Tâches planifiées</DialogTitle></DialogHeader>
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader><DialogTitle>Tâches de la feuille de route</DialogTitle></DialogHeader>
+
+        {/* Progress */}
+        <div className="flex items-center gap-3 mb-2">
+          <Progress value={pct} className="flex-1" />
+          <span className="text-sm font-medium">{pct}%</span>
+          <span className="text-xs text-muted-foreground">({done}/{taches.length})</span>
+        </div>
+
+        <div className="flex justify-end mb-2">
+          <Button size="sm" variant="outline" onClick={() => setAddOpen(!addOpen)}>
+            <UserPlus className="h-3 w-3 mr-1" /> Ajouter tâche
+          </Button>
+        </div>
+
+        {addOpen && (
+          <Card className="mb-3">
+            <CardContent className="p-3 grid grid-cols-3 gap-2">
+              <Input placeholder="Désignation *" value={newTache.designation} onChange={(e) => setNewTache({ ...newTache, designation: e.target.value })} />
+              <Input placeholder="Technicien" value={newTache.technicien} onChange={(e) => setNewTache({ ...newTache, technicien: e.target.value })} />
+              <div className="flex gap-2">
+                <Select value={newTache.priorite} onValueChange={(v) => setNewTache({ ...newTache, priorite: v })}>
+                  <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="basse">Basse</SelectItem>
+                    <SelectItem value="normale">Normale</SelectItem>
+                    <SelectItem value="haute">Haute</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button size="sm" onClick={() => addTache.mutate()} disabled={addTache.isPending}>
+                  <Plus className="h-3 w-3" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : taches.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">Aucune tâche affectée. Créez-les depuis le module Analyses.</p>
+          <p className="py-6 text-center text-sm text-muted-foreground">Aucune tâche affectée. Utilisez le bouton ci-dessus pour ajouter.</p>
         ) : (
           <Table>
             <TableHeader><TableRow>
-              <TableHead>Prélèvement</TableHead><TableHead>Paramètre</TableHead><TableHead>Statut</TableHead>
+              <TableHead>Désignation</TableHead>
+              <TableHead>Prélèvement</TableHead>
+              <TableHead>Paramètre</TableHead>
+              <TableHead>Technicien</TableHead>
+              <TableHead>Statut</TableHead>
             </TableRow></TableHeader>
             <TableBody>
-              {taches.map((t) => (
+              {taches.map((t: any) => (
                 <TableRow key={t.id}>
-                  <TableCell className="font-mono text-xs">{(t.prelevements as { numero: string } | null)?.numero ?? "—"}</TableCell>
-                  <TableCell>{(t.parametres_analyse as { libelle: string } | null)?.libelle ?? "—"}</TableCell>
-                  <TableCell><Badge variant="outline">{t.statut}</Badge></TableCell>
+                  <TableCell className="font-medium">{t.designation || "—"}</TableCell>
+                  <TableCell className="font-mono text-xs">{(t.prelevements as any)?.numero ?? "—"}</TableCell>
+                  <TableCell>{(t.parametres_analyse as any)?.libelle ?? "—"}</TableCell>
+                  <TableCell className="text-sm">{t.technicien || "—"}</TableCell>
+                  <TableCell>
+                    <Select value={t.statut} onValueChange={(v) => updateTacheStatut.mutate({ tacheId: t.id, statut: v })}>
+                      <SelectTrigger className="h-7 w-28 text-xs">
+                        <Badge variant={t.statut === "terminee" ? "secondary" : t.statut === "en_cours" ? "default" : "outline"}>
+                          {TACHE_LABEL[t.statut] || t.statut}
+                        </Badge>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TACHE_STATUTS.map((s) => <SelectItem key={s} value={s}>{TACHE_LABEL[s]}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
