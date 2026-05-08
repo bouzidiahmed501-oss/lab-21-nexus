@@ -87,6 +87,12 @@ function ProjetsPage() {
         }
       />
       <div className="flex-1 overflow-y-auto p-6">
+        <Tabs defaultValue="liste">
+          <TabsList className="mb-4">
+            <TabsTrigger value="liste"><Briefcase className="mr-1 h-3.5 w-3.5" />Liste</TabsTrigger>
+            <TabsTrigger value="gantt"><GanttChart className="mr-1 h-3.5 w-3.5" />Timeline</TabsTrigger>
+          </TabsList>
+          <TabsContent value="liste">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total</p><p className="text-2xl font-semibold">{stats.total}</p></CardContent></Card>
           <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">En cours</p><p className="text-2xl font-semibold text-primary">{stats.enCours}</p></CardContent></Card>
