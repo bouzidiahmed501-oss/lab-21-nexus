@@ -123,7 +123,7 @@ function DashboardTab() {
         supabase.from("non_conformites").select("statut, gravite, date_detection, source"),
         supabase.from("reclamations").select("statut, fondee, date_reception"),
         supabase.from("actions_capa").select("statut, type, efficace, date_planifiee"),
-        supabase.from("audits").select("statut, type_audit"),
+        supabase.from("audits").select("statut"),
       ]);
       const ncRows = nc.data ?? [];
       const recRows = rec.data ?? [];
