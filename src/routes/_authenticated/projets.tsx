@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Plus, Search, Briefcase, ListChecks, AlertCircle } from "lucide-react";
+import { Plus, Search, Briefcase, ListChecks, AlertCircle, GanttChart, Calendar } from "lucide-react";
 import { nextNumero } from "@/lib/numbering";
 import { formatCurrency, formatDate } from "@/lib/format";
 
