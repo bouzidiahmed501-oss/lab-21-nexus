@@ -77,11 +77,11 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: "Gestion",
     items: [
-      { label: "Facturation", to: "/facturation", icon: Receipt, roles: ["admin", "direction", "comptable"] },
-      { label: "Équipements", to: "/equipements", icon: Wrench, roles: ["admin", "direction", "chef_labo", "technicien", "qualite"] },
-      { label: "RH & Paie", to: "/rh", icon: UserCog, roles: ["admin", "direction", "rh"] },
-      { label: "Projets", to: "/projets", icon: Briefcase, roles: ["admin", "direction", "chef_labo"] },
-      { label: "Qualité", to: "/qualite", icon: ShieldCheck, roles: ["admin", "direction", "qualite", "chef_labo", "technicien", "commercial"] },
+      { label: "Facturation", to: "/facturation", icon: Receipt },
+      { label: "Équipements", to: "/equipements", icon: Wrench },
+      { label: "RH & Paie", to: "/rh", icon: UserCog },
+      { label: "Projets", to: "/projets", icon: Briefcase },
+      { label: "Qualité", to: "/qualite", icon: ShieldCheck },
     ],
   },
 ];
