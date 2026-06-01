@@ -148,7 +148,7 @@ function ParametresPage() {
         <TabsContent value="integrations"><IntegrationsTab canEdit={isAdmin} /></TabsContent>
         <TabsContent value="sauvegardes"><SauvegardesTab canEdit={isAdmin} /></TabsContent>
         <TabsContent value="utilisateurs"><PlaceholderTab title="Gestion des utilisateurs & rôles" description="Créez des comptes, attribuez des rôles (admin, direction, chef labo, technicien, qualité, comptable, RH, commercial, client), gérez les permissions et les services." badge="Module Sécurité" /></TabsContent>
-        <TabsContent value="audit"><PlaceholderTab title="Journal d'audit" description="Toutes les actions sensibles sont tracées : connexions, modifications, validations, suppressions. Filtre par utilisateur, date, type d'action." badge="Conformité ISO" /></TabsContent>
+        <TabsContent value="audit"><AuditLogTab /></TabsContent>
       </Tabs>
     </div>
   );
