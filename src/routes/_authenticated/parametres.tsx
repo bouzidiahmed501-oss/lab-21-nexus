@@ -680,3 +680,135 @@ function PlaceholderTab({ title, description, badge }: { title: string; descript
     </Card>
   );
 }
+
+// ----------------------------------------------------------------------------
+// Audit Log viewer
+// ----------------------------------------------------------------------------
+
+type AuditLogRow = {
+  id: string;
+  user_email: string | null;
+  action: string;
+  entity_type: string;
+  entity_id: string | null;
+  details: Record<string, unknown> | null;
+  created_at: string;
+};
+
+function AuditLogTab() {
+  const [filter, setFilter] = useState("");
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["audit_log"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("audit_log" as never)
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return (data ?? []) as unknown as AuditLogRow[];
+    },
+  });
+
+  const rows = (data ?? []).filter((r) => {
+    if (!filter) return true;
+    const q = filter.toLowerCase();
+    return (
+      r.action.toLowerCase().includes(q) ||
+      r.entity_type.toLowerCase().includes(q) ||
+      (r.user_email ?? "").toLowerCase().includes(q) ||
+      (r.entity_id ?? "").toLowerCase().includes(q)
+    );
+  });
+
+  const handleExport = async () => {
+    const { exportCSV } = await import("@/lib/csv");
+    exportCSV(
+      `audit_log_${new Date().toISOString().slice(0, 10)}`,
+      rows.map((r) => ({
+        date: new Date(r.created_at).toLocaleString("fr-FR"),
+        utilisateur: r.user_email ?? "",
+        action: r.action,
+        entite: r.entity_type,
+        id: r.entity_id ?? "",
+        details: JSON.stringify(r.details ?? {}),
+      })),
+    );
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <ScrollText className="h-5 w-5" />
+              Journal d'audit
+            </CardTitle>
+            <CardDescription>
+              500 dernières actions tracées (conformité ISO 17025 §7.5).
+            </CardDescription>
+          </div>
+          <div className="flex items-center gap-2">
+            <Input
+              placeholder="Filtrer…"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="h-8 w-48"
+            />
+            <Button size="sm" variant="outline" onClick={() => refetch()}>
+              Actualiser
+            </Button>
+            <Button size="sm" variant="outline" onClick={handleExport} disabled={!rows.length}>
+              Export CSV
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-10 text-sm text-muted-foreground">
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Chargement…
+          </div>
+        ) : rows.length === 0 ? (
+          <div className="rounded-md border border-dashed bg-muted/30 px-4 py-8 text-center text-sm text-muted-foreground">
+            Aucune entrée. Les actions seront enregistrées au fur et à mesure de l'utilisation.
+          </div>
+        ) : (
+          <div className="max-h-[60vh] overflow-auto rounded-md border">
+            <Table>
+              <TableHeader className="sticky top-0 bg-card">
+                <TableRow>
+                  <TableHead className="w-40">Date</TableHead>
+                  <TableHead>Utilisateur</TableHead>
+                  <TableHead>Action</TableHead>
+                  <TableHead>Entité</TableHead>
+                  <TableHead>ID</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rows.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
+                      {new Date(r.created_at).toLocaleString("fr-FR")}
+                    </TableCell>
+                    <TableCell className="text-xs">{r.user_email ?? "—"}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="font-mono text-[10px]">
+                        {r.action}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs">{r.entity_type}</TableCell>
+                    <TableCell className="font-mono text-[10px] text-muted-foreground">
+                      {r.entity_id ?? "—"}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
