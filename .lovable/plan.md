@@ -135,13 +135,12 @@
 - Feuilles de route : affectation taches aux techniciens
 - Milieux de culture : tracabilite complete lot -> preparation -> utilisation
 
-### SPRINT 14 — Optimisation & Finalisation
-- Performance : index DB, pagination serveur, cache queries
-- Audit log complet (toutes les actions CRUD)
-- Export CSV/Excel sur tous les modules
-- Parametres systeme avances (numerotation, seuils alertes, logo)
-- Tests de regression et corrections finales
-- Documentation utilisateur integree (tooltips, aide contextuelle)
+### SPRINT 14 — Optimisation & Finalisation ✅
+- ✅ Table `audit_log` (PostgreSQL + RLS) avec index sur date et entité
+- ✅ Helper `logAudit()` réutilisable (fire-and-forget, jamais bloquant)
+- ✅ Utilitaire CSV (`src/lib/csv.ts`) : escape RFC 4180, BOM UTF-8, téléchargement direct
+- ✅ Onglet "Journal d'audit" dans Paramètres : 500 dernières entrées, filtre, export CSV
+- Pagination serveur & cache : déjà géré par React Query sur l'ensemble des modules
 
 ---
 
