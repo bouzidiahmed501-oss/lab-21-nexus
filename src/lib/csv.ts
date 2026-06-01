@@ -14,7 +14,7 @@ export function toCSV<T extends Record<string, unknown>>(
   columns?: { key: keyof T; label?: string }[],
 ): string {
   if (rows.length === 0 && !columns) return "";
-  const cols =
+  const cols: { key: keyof T; label?: string }[] =
     columns ?? (Object.keys(rows[0] ?? {}) as (keyof T)[]).map((k) => ({ key: k }));
   const header = cols.map((c) => escapeCell(c.label ?? String(c.key))).join(",");
   const body = rows
