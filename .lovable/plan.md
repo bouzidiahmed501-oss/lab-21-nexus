@@ -1,163 +1,69 @@
+# Plan — Codes-barres, Sondes IoT, et complétion des modules
 
-# Plan d'Amelioration Complet — LIMS BALIMS
+## Lot 1 — Codes-barres Code128 sur la réception
 
-## Etat des Lieux
+**Base de données**
+- Ajouter `code_barre` (text unique) sur `prelevements` (auto-généré au format `PRL-{numero}` ou UUID court)
+- Ajouter `scanne_at`, `scanne_by`, `verifie_at`, `verifie_by` pour tracer la vérification
+- Trigger pour générer `code_barre` à l'insert si vide
 
-**64 tables** existent en base. **15 modules** ont une page frontend. Mais beaucoup restent des stubs ou des listes basiques sans workflow complet.
+**UI**
+- Composant `<BarcodeLabel>` (JsBarcode, format Code128) — étiquette imprimable A6/A7 avec numéro, client, date, paramètres
+- Page **Réception** : bouton "Imprimer étiquettes" pour un BC (toutes les lignes) ou un prélèvement individuel
+- Page **Vérification scan** : input qui capte la douchette USB (focus auto, Enter = submit), affiche la fiche du prélèvement, bouton "Valider la réception"
+- Recherche globale par code-barres dans la topbar
 
-### Modules en place (partiellement)
-| Module | Lignes | Etat |
-|--------|--------|------|
-| Qualite (NC, audits, CAPA, reclamations) | 1245 | Le plus avance |
-| Parametres | 682 | Fonctionnel |
-| RH (employes, conges, pointage, paie) | 555 | CRUD basique |
-| Equipements (GMAO, maintenances, etalonnages) | 532 | CRUD basique |
-| Facturation | 473 | CRUD, pas de workflow complet |
-| Analyses | 440 | CRUD, pas de saisie resultats inline |
-| Bons de commande | 427 | CRUD, manque workflow statuts legacy |
-| Referentiels (catalogue, criteres) | 395 | Gestion basique |
-| Missions | 390 | CRUD |
-| Rapports | 361 | CRUD, pas de generation PDF |
-| Projets | 358 | CRUD |
-| Prelevements | 256 | CRUD, manque workflow complet |
-| Feuilles de route | 237 | CRUD |
-| Milieux de culture | 225 | CRUD |
-| Produits | 223 | CRUD |
-| Clients | 194 | CRUD |
-| Notifications | 13 | **Stub vide** |
+**Librairie** : `jsbarcode` (pur JS, fonctionne navigateur + impression)
 
-### Fonctionnalites Legacy Manquantes (critiques)
-1. **Workflow BC complet** : enchainement brouillon -> receptionne -> en_cours -> resultats_prets -> facture -> archive
-2. **Saisie resultats d'analyse inline** avec controle conformite temps reel (ValeurMin/ValeurMax)
-3. **Generation PDF** rapports d'essai (format ISO 17025 LAB 21)
-4. **Generation PDF** factures (format tunisien avec TVA 19%, timbre, RS)
-5. **Elfatoora** : generation XML UBL 2.1 pour facturation electronique
-6. **Portail client** : acces externe clients pour suivi BC / telechargement rapports
-7. **Chaines/Unites** : structure hierarchique client legacy (Chaine = groupe, Unite = site)
-8. **Packs d'analyses** : affectation automatique criteres par famille produit
-9. **Liens BC -> Prelevements -> Analyses -> Resultats -> Rapport** : chaine complete
-10. **Dashboard BI** avec graphiques (CA, BC/jour, top clients, analyses par superfamille)
-11. **Notifications temps reel** (in-app + email)
-12. **Avoirs et reglements** complets
+## Lot 2 — Sondes IoT (LabGuard / Testo / générique)
 
----
+**Base de données**
+- `sondes` : id, code, libelle, equipement_id (FK), type (`temperature`|`humidite`|`pression`|`autre`), unite, seuil_min, seuil_max, intervalle_minutes, api_key (hash), is_active
+- `releves_sonde` : id, sonde_id, mesure (numeric), mesuree_at, batterie_pct, signal_pct, payload (jsonb), conformite (bool)
+- `alertes_sonde` : id, sonde_id, releve_id, type (`hors_seuil`|`hors_ligne`|`batterie_faible`), severite, acquittee_at, acquittee_by
 
-## Planning d'Amelioration (14 Sprints)
+**Endpoint webhook public** : `/api/public/sondes/ingest`
+- POST, auth par header `x-api-key` (vérifié contre `sondes.api_key` hashée)
+- Schéma Zod : `{ code_sonde, mesure, mesuree_at?, batterie?, signal?, raw? }`
+- Insert relevé + calcul conformité (seuils) + création alerte si hors seuil
+- Compatible LabGuard/Testo via mapping configurable côté sonde
 
-### SPRINT 1 — Workflow BC & Prelevements (fondation)
-- Refonte page Bons de commande : workflow multi-statuts avec timeline visuelle
-- Lien BC -> Client -> Mission avec cascade Chaine/Unite
-- Ajout prelevements depuis BC avec selection pack d'analyses
-- Temperature de reception, code externe, responsable rencontre
-- Statut badge anime + historique des changements de statut
+**UI module Équipements** :
+- Onglet "Sondes" : liste + CRUD, génération API key (affichée 1× à la création)
+- Onglet "Relevés" : courbe (recharts) 24h/7j/30j, tableau, export CSV
+- Onglet "Alertes" : badges sur sidebar, acquittement
+- Job côté serveur : marquer hors-ligne les sondes sans relevé depuis 2× `intervalle_minutes`
 
-### SPRINT 2 — Saisie Resultats & Conformite
-- Tableau inline editable dans la page Analyses : un resultat par critere
-- Verification conformite automatique (vert/rouge) vs ValeurMin/ValeurMax des criteres
-- Incertitude de mesure par resultat
-- Bouton "Tout conforme" pour saisie rapide
-- Validation multi-niveaux : technicien -> chef labo -> qualite
+## Lot 3 — Audit visibilité & complétude modules
 
-### SPRINT 3 — Generation PDF Rapports d'Essai
-- Template PDF conforme ISO 17025 : entete LAB 21, tableau resultats, conclusion, QR code
-- Generation cote serveur via createServerFn
-- Stockage dans Lovable Cloud Storage
-- Preview avant envoi, telechargement direct
-- Lien rapport -> analyses -> prelevements -> BC
+**Audit systématique** (en parallèle) :
+1. Lister tous les fichiers `src/routes/_authenticated/*.tsx` et vérifier qu'ils sont dans la sidebar
+2. Pour chaque module : vérifier formulaire création, édition, suppression, actions métier
+3. Corriger erreurs i18n FR (libellés, messages toast)
+4. Vérifier responsive (sidebar mobile, tableaux scroll-x, modales)
 
-### SPRINT 4 — Facturation Complete & PDF
-- Refonte facturation : creation depuis BC selectionnes
-- Calcul automatique : HT, TVA 19%, Timbre 1 TND, Retenue source
-- Lignes de facture detail (reference analyse, designation, quantite, PU)
-- Generation PDF facture format tunisien
-- Gestion avoirs : creation avoir depuis facture, lignes, PDF
+**Modules à compléter en priorité** (selon audit) :
+- Missions / Prélèvements : workflow réception → étiquette → scan → analyse
+- Équipements : sondes (Lot 2)
+- RH : bulletins paie PDF, congés workflow
+- Qualité : CAPA actions, audits constats
+- Portail client : accès résultats + factures
 
-### SPRINT 5 — Reglements & Elfatoora
-- Module reglements : affectation paiement sur factures (partiel/total)
-- Modes de reglement (cheque, virement, especes, traite)
-- Suivi solde client en temps reel
-- Generation XML Elfatoora (UBL 2.1) pour soumission DGI
-- Telechargement XML, historique soumissions
+## Détails techniques
 
-### SPRINT 6 — Dashboard BI Avance
-- Graphiques Chart.js/Recharts : BC par jour, CA mensuel N vs N-1
-- Repartition analyses par super-famille (camembert)
-- Top 10 clients par CA
-- Alertes : maintenances en retard, etalonnages expires, factures impayees J+30
-- KPIs dynamiques avec refresh automatique
+- `jsbarcode` rendu en SVG dans un `<iframe>` pour impression propre (CSS print)
+- Douchette USB = HID clavier : `<input autoFocus onKeyDown={e => e.key === 'Enter' && validate()}>`
+- Webhook sondes : signature HMAC optionnelle en plus de l'API key pour LabGuard
+- Recharts pour courbes sondes (déjà installé)
+- Realtime Supabase sur `releves_sonde` + `alertes_sonde` pour dashboard live
 
-### SPRINT 7 — Referentiels Complets
-- Gestion super-familles / familles / criteres avec arborescence
-- Packs d'analyses : composition, lien famille, affectation unite
-- Regions critere, natures critere, natures analyse
-- Import/export catalogue CSV
-- Referentiels normatifs (ISO, TUNAC)
+## Ordre d'exécution
 
-### SPRINT 8 — Equipements GMAO Avance
-- Calendrier de maintenance visuel
-- Alertes etalonnage J-30
-- Fiches d'intervention detaillees
-- Cout maintenance par appareil/an
-- Upload certificats etalonnage (Storage)
-- Liaison appareil -> analyses (quel appareil pour quelle analyse)
+1. **Migration DB** (codes-barres prélèvements + tables sondes + alertes) — 1 migration
+2. **Backend** : trigger code-barres, endpoint `/api/public/sondes/ingest`
+3. **UI Réception** : composant étiquette + page scan/vérif
+4. **UI Sondes** : CRUD + relevés + alertes dans module Équipements
+5. **Audit modules** : passe systématique, corrections UI/FR/actions manquantes
+6. **Sidebar** : ajout des nouveaux écrans (Scan réception, Sondes, Alertes)
 
-### SPRINT 9 — RH & Paie Complet
-- Fiche employe complete (CIN, CNSS, RIB, contrat)
-- Calcul bulletin de paie tunisien : CNSS 9.18%/16.57%, IRPP baremes 2026
-- Generation PDF bulletin de paie
-- Calendrier conges avec validation workflow
-- Organigramme visuel
-
-### SPRINT 10 — Notifications & Centre de Messages
-- Implementation page notifications (remplacer le stub)
-- Notifications in-app temps reel (Supabase Realtime)
-- Types : BC recu, resultats disponibles, rapport pret, facture impayee, maintenance urgente
-- Marquage lu/non-lu, filtres par type
-- Preferences notification par utilisateur
-
-### SPRINT 11 — Portail Client Externe
-- Interface client separee : login par email/mot de passe
-- Dashboard client : BC en cours, resultats disponibles, factures
-- Timeline suivi BC (recu -> analyse -> rapport -> facture)
-- Telechargement rapports PDF et factures
-- Historique complet par client
-
-### SPRINT 12 — Qualite ISO 17025 & Audit
-- Amelioration module qualite existant
-- Workflow CAPA complet avec verification efficacite
-- GED documents qualite (upload/versionning Storage)
-- Indicateurs qualite automatiques (taux conformite, delai moyen)
-- Revue de direction : tableau synthetique
-
-### SPRINT 13 — Projets, Missions & Feuilles de Route
-- Projets avec diagramme de Gantt simplifie
-- Missions : lien complet avec BC, vehicule, preleveur, frais
-- Feuilles de route : affectation taches aux techniciens
-- Milieux de culture : tracabilite complete lot -> preparation -> utilisation
-
-### SPRINT 14 — Optimisation & Finalisation ✅
-- ✅ Table `audit_log` (PostgreSQL + RLS) avec index sur date et entité
-- ✅ Helper `logAudit()` réutilisable (fire-and-forget, jamais bloquant)
-- ✅ Utilitaire CSV (`src/lib/csv.ts`) : escape RFC 4180, BOM UTF-8, téléchargement direct
-- ✅ Onglet "Journal d'audit" dans Paramètres : 500 dernières entrées, filtre, export CSV
-- Pagination serveur & cache : déjà géré par React Query sur l'ensemble des modules
-
----
-
-## Details Techniques
-
-### Base de donnees
-- Tables existantes couvrent deja la majorite des besoins (64 tables avec RLS)
-- Migrations additionnelles pour : champs manquants sur factures (elfatoora_uuid, payment_status), liens BC->prelevements enrichis
-- Storage bucket pour : certificats etalonnage, rapports PDF, documents qualite, bulletins paie
-
-### Architecture
-- PDF generation via createServerFn (pas d'Edge Function) avec html-to-pdf ou jsPDF
-- Elfatoora XML generation cote serveur
-- Realtime via Supabase channels pour notifications
-- Pas de migration de donnees legacy (MySQL) dans ce scope — uniquement construction neuve
-
-### Securite
-- RLS deja active sur toutes les tables
-- Roles existants : admin, direction, commercial, chef_labo, technicien, qualite, comptable, rh, client
-- Portail client isole via role "client" + RLS policies
+Livraison itérative — je commence par le Lot 1 (codes-barres) puis enchaîne sur le Lot 2 (sondes), puis Lot 3 (audit modules) dans le même flux.
