@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { nextNumero } from "@/lib/numbering";
 import { formatDateTime } from "@/lib/format";
+import { printLabels } from "@/components/lab/PrintLabels";
 
 export const Route = createFileRoute("/_authenticated/prelevements")({
   head: () => ({ meta: [{ title: "Prélèvements — BALIMS" }] }),
