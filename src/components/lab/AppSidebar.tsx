@@ -22,6 +22,7 @@ import {
   FlaskConical as Flask,
   ScanLine,
   Radio,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
