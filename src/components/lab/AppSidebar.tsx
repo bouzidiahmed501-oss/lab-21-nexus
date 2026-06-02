@@ -60,6 +60,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { label: "Bons de commande", to: "/bons-commande", icon: ClipboardList },
       { label: "Missions", to: "/missions", icon: MapPin },
       { label: "Prélèvements", to: "/prelevements", icon: TestTubes },
+      { label: "Scan réception", to: "/reception-scan", icon: ScanLine },
       { label: "Feuilles de route", to: "/feuilles-route", icon: CalendarRange },
       { label: "Analyses", to: "/analyses", icon: FlaskConical },
       { label: "Rapports", to: "/rapports", icon: FileText },
