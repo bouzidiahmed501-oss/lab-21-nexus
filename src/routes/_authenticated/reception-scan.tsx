@@ -154,7 +154,7 @@ function ReceptionScanPage() {
                     <div className="font-medium">{h.numero}</div>
                     <div className="text-muted-foreground">{h.clients?.raison_sociale}</div>
                   </div>
-                  <StatusBadge tone={statutTone(h.statut)}>{h.statut}</StatusBadge>
+                  <StatusBadge tone={statutTone(h.statut)} label={h.statut} />
                 </div>
               ))}
             </div>
@@ -174,7 +174,7 @@ function FoundCard({ found, onValidate, pending }: { found: Found; onValidate: (
       <CardHeader>
         <CardTitle className="flex items-center justify-between text-base">
           <span>{found.numero}</span>
-          <StatusBadge tone={statutTone(found.statut)}>{found.statut}</StatusBadge>
+          <StatusBadge tone={statutTone(found.statut)} label={found.statut} />
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
