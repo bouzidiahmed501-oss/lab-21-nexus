@@ -20,7 +20,8 @@ import {
   CalendarRange,
   ShieldCheck,
   FlaskConical as Flask,
-} from "lucide-react";
+  ScanLine,
+  Radio,
 import {
   Sidebar,
   SidebarContent,
