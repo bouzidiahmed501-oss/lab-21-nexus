@@ -13,8 +13,10 @@ import { Route as PortailRouteImport } from './routes/portail'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedSondesRouteImport } from './routes/_authenticated/sondes'
 import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
 import { Route as AuthenticatedReferentielsRouteImport } from './routes/_authenticated/referentiels'
+import { Route as AuthenticatedReceptionScanRouteImport } from './routes/_authenticated/reception-scan'
 import { Route as AuthenticatedRapportsRouteImport } from './routes/_authenticated/rapports'
 import { Route as AuthenticatedQualiteRouteImport } from './routes/_authenticated/qualite'
 import { Route as AuthenticatedProjetsRouteImport } from './routes/_authenticated/projets'
@@ -30,6 +32,7 @@ import { Route as AuthenticatedEquipementsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
 import { Route as AuthenticatedBonsCommandeRouteImport } from './routes/_authenticated/bons-commande'
 import { Route as AuthenticatedAnalysesRouteImport } from './routes/_authenticated/analyses'
+import { Route as ApiPublicSondesIngestRouteImport } from './routes/api/public/sondes/ingest'
 
 const PortailRoute = PortailRouteImport.update({
   id: '/portail',
@@ -50,6 +53,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedSondesRoute = AuthenticatedSondesRouteImport.update({
+  id: '/sondes',
+  path: '/sondes',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedRhRoute = AuthenticatedRhRouteImport.update({
   id: '/rh',
   path: '/rh',
@@ -59,6 +67,12 @@ const AuthenticatedReferentielsRoute =
   AuthenticatedReferentielsRouteImport.update({
     id: '/referentiels',
     path: '/referentiels',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedReceptionScanRoute =
+  AuthenticatedReceptionScanRouteImport.update({
+    id: '/reception-scan',
+    path: '/reception-scan',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedRapportsRoute = AuthenticatedRapportsRouteImport.update({
@@ -142,6 +156,11 @@ const AuthenticatedAnalysesRoute = AuthenticatedAnalysesRouteImport.update({
   path: '/analyses',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const ApiPublicSondesIngestRoute = ApiPublicSondesIngestRouteImport.update({
+  id: '/api/public/sondes/ingest',
+  path: '/api/public/sondes/ingest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -162,8 +181,11 @@ export interface FileRoutesByFullPath {
   '/projets': typeof AuthenticatedProjetsRoute
   '/qualite': typeof AuthenticatedQualiteRoute
   '/rapports': typeof AuthenticatedRapportsRoute
+  '/reception-scan': typeof AuthenticatedReceptionScanRoute
   '/referentiels': typeof AuthenticatedReferentielsRoute
   '/rh': typeof AuthenticatedRhRoute
+  '/sondes': typeof AuthenticatedSondesRoute
+  '/api/public/sondes/ingest': typeof ApiPublicSondesIngestRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -183,9 +205,12 @@ export interface FileRoutesByTo {
   '/projets': typeof AuthenticatedProjetsRoute
   '/qualite': typeof AuthenticatedQualiteRoute
   '/rapports': typeof AuthenticatedRapportsRoute
+  '/reception-scan': typeof AuthenticatedReceptionScanRoute
   '/referentiels': typeof AuthenticatedReferentielsRoute
   '/rh': typeof AuthenticatedRhRoute
+  '/sondes': typeof AuthenticatedSondesRoute
   '/': typeof AuthenticatedIndexRoute
+  '/api/public/sondes/ingest': typeof ApiPublicSondesIngestRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -207,9 +232,12 @@ export interface FileRoutesById {
   '/_authenticated/projets': typeof AuthenticatedProjetsRoute
   '/_authenticated/qualite': typeof AuthenticatedQualiteRoute
   '/_authenticated/rapports': typeof AuthenticatedRapportsRoute
+  '/_authenticated/reception-scan': typeof AuthenticatedReceptionScanRoute
   '/_authenticated/referentiels': typeof AuthenticatedReferentielsRoute
   '/_authenticated/rh': typeof AuthenticatedRhRoute
+  '/_authenticated/sondes': typeof AuthenticatedSondesRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/api/public/sondes/ingest': typeof ApiPublicSondesIngestRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -232,8 +260,11 @@ export interface FileRouteTypes {
     | '/projets'
     | '/qualite'
     | '/rapports'
+    | '/reception-scan'
     | '/referentiels'
     | '/rh'
+    | '/sondes'
+    | '/api/public/sondes/ingest'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -253,9 +284,12 @@ export interface FileRouteTypes {
     | '/projets'
     | '/qualite'
     | '/rapports'
+    | '/reception-scan'
     | '/referentiels'
     | '/rh'
+    | '/sondes'
     | '/'
+    | '/api/public/sondes/ingest'
   id:
     | '__root__'
     | '/_authenticated'
@@ -276,15 +310,19 @@ export interface FileRouteTypes {
     | '/_authenticated/projets'
     | '/_authenticated/qualite'
     | '/_authenticated/rapports'
+    | '/_authenticated/reception-scan'
     | '/_authenticated/referentiels'
     | '/_authenticated/rh'
+    | '/_authenticated/sondes'
     | '/_authenticated/'
+    | '/api/public/sondes/ingest'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
   PortailRoute: typeof PortailRoute
+  ApiPublicSondesIngestRoute: typeof ApiPublicSondesIngestRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -317,6 +355,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/sondes': {
+      id: '/_authenticated/sondes'
+      path: '/sondes'
+      fullPath: '/sondes'
+      preLoaderRoute: typeof AuthenticatedSondesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/rh': {
       id: '/_authenticated/rh'
       path: '/rh'
@@ -329,6 +374,13 @@ declare module '@tanstack/react-router' {
       path: '/referentiels'
       fullPath: '/referentiels'
       preLoaderRoute: typeof AuthenticatedReferentielsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/reception-scan': {
+      id: '/_authenticated/reception-scan'
+      path: '/reception-scan'
+      fullPath: '/reception-scan'
+      preLoaderRoute: typeof AuthenticatedReceptionScanRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/rapports': {
@@ -436,6 +488,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAnalysesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/api/public/sondes/ingest': {
+      id: '/api/public/sondes/ingest'
+      path: '/api/public/sondes/ingest'
+      fullPath: '/api/public/sondes/ingest'
+      preLoaderRoute: typeof ApiPublicSondesIngestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -455,8 +514,10 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProjetsRoute: typeof AuthenticatedProjetsRoute
   AuthenticatedQualiteRoute: typeof AuthenticatedQualiteRoute
   AuthenticatedRapportsRoute: typeof AuthenticatedRapportsRoute
+  AuthenticatedReceptionScanRoute: typeof AuthenticatedReceptionScanRoute
   AuthenticatedReferentielsRoute: typeof AuthenticatedReferentielsRoute
   AuthenticatedRhRoute: typeof AuthenticatedRhRoute
+  AuthenticatedSondesRoute: typeof AuthenticatedSondesRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
@@ -476,8 +537,10 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedProjetsRoute: AuthenticatedProjetsRoute,
   AuthenticatedQualiteRoute: AuthenticatedQualiteRoute,
   AuthenticatedRapportsRoute: AuthenticatedRapportsRoute,
+  AuthenticatedReceptionScanRoute: AuthenticatedReceptionScanRoute,
   AuthenticatedReferentielsRoute: AuthenticatedReferentielsRoute,
   AuthenticatedRhRoute: AuthenticatedRhRoute,
+  AuthenticatedSondesRoute: AuthenticatedSondesRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 
@@ -489,6 +552,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
   PortailRoute: PortailRoute,
+  ApiPublicSondesIngestRoute: ApiPublicSondesIngestRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

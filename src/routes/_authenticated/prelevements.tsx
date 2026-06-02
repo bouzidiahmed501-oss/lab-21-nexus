@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Printer } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { nextNumero } from "@/lib/numbering";
 import { formatDateTime } from "@/lib/format";
+import { printLabels } from "@/components/lab/PrintLabels";
 
 export const Route = createFileRoute("/_authenticated/prelevements")({
   head: () => ({ meta: [{ title: "Prélèvements — BALIMS" }] }),
@@ -34,6 +35,7 @@ type Statut = (typeof STATUTS)[number];
 interface Row {
   id: string;
   numero: string;
+  code_barre: string | null;
   client_id: string;
   mission_id: string | null;
   date_prelevement: string;
@@ -101,7 +103,21 @@ function PrelevementsPage() {
         </Select>
       ),
     },
+    {
+      key: "actions", header: "", width: "60px", align: "center",
+      cell: (r) => (
+        <Button size="icon" variant="ghost" className="h-7 w-7" onClick={(e) => {
+          e.stopPropagation();
+          if (!r.code_barre) { toast.error("Code-barres manquant"); return; }
+          printLabels([{ code_barre: r.code_barre, numero: r.numero, client: r.clients?.raison_sociale, date: r.date_prelevement }]);
+        }}>
+          <Printer className="h-3.5 w-3.5" />
+        </Button>
+      ),
+    },
   ];
+
+
 
   return (
     <div>

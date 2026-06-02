@@ -20,6 +20,8 @@ import {
   CalendarRange,
   ShieldCheck,
   FlaskConical as Flask,
+  ScanLine,
+  Radio,
 } from "lucide-react";
 import {
   Sidebar,
@@ -60,6 +62,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { label: "Bons de commande", to: "/bons-commande", icon: ClipboardList },
       { label: "Missions", to: "/missions", icon: MapPin },
       { label: "Prélèvements", to: "/prelevements", icon: TestTubes },
+      { label: "Scan réception", to: "/reception-scan", icon: ScanLine },
       { label: "Feuilles de route", to: "/feuilles-route", icon: CalendarRange },
       { label: "Analyses", to: "/analyses", icon: FlaskConical },
       { label: "Rapports", to: "/rapports", icon: FileText },
@@ -79,6 +82,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     items: [
       { label: "Facturation", to: "/facturation", icon: Receipt },
       { label: "Équipements", to: "/equipements", icon: Wrench },
+      { label: "Sondes IoT", to: "/sondes", icon: Radio },
       { label: "RH & Paie", to: "/rh", icon: UserCog },
       { label: "Projets", to: "/projets", icon: Briefcase },
       { label: "Qualité", to: "/qualite", icon: ShieldCheck },

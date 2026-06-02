@@ -101,6 +101,63 @@ export type Database = {
           },
         ]
       }
+      alertes_sonde: {
+        Row: {
+          acquittee_at: string | null
+          acquittee_by: string | null
+          commentaire: string | null
+          created_at: string
+          id: string
+          message: string | null
+          mesure: number | null
+          releve_id: string | null
+          severite: string
+          sonde_id: string
+          type: Database["public"]["Enums"]["alerte_sonde_type"]
+        }
+        Insert: {
+          acquittee_at?: string | null
+          acquittee_by?: string | null
+          commentaire?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          mesure?: number | null
+          releve_id?: string | null
+          severite?: string
+          sonde_id: string
+          type: Database["public"]["Enums"]["alerte_sonde_type"]
+        }
+        Update: {
+          acquittee_at?: string | null
+          acquittee_by?: string | null
+          commentaire?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          mesure?: number | null
+          releve_id?: string | null
+          severite?: string
+          sonde_id?: string
+          type?: Database["public"]["Enums"]["alerte_sonde_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alertes_sonde_releve_id_fkey"
+            columns: ["releve_id"]
+            isOneToOne: false
+            referencedRelation: "releves_sonde"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alertes_sonde_sonde_id_fkey"
+            columns: ["sonde_id"]
+            isOneToOne: false
+            referencedRelation: "sondes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       analyse_resultats: {
         Row: {
           analyse_id: string
@@ -2650,6 +2707,7 @@ export type Database = {
       prelevements: {
         Row: {
           client_id: string
+          code_barre: string | null
           conclusion: string | null
           conditions: string | null
           conformite: boolean | null
@@ -2676,6 +2734,8 @@ export type Database = {
           referentiel_id: string | null
           region_critere_id: string | null
           remarque_non_conformite: string | null
+          scanne_at: string | null
+          scanne_by: string | null
           secteur: string | null
           statut: Database["public"]["Enums"]["prelevement_statut"]
           temperature: number | null
@@ -2683,10 +2743,13 @@ export type Database = {
           tp_produit: number | null
           updated_at: string
           validateur_id: string | null
+          verifie_at: string | null
+          verifie_by: string | null
           version: string | null
         }
         Insert: {
           client_id: string
+          code_barre?: string | null
           conclusion?: string | null
           conditions?: string | null
           conformite?: boolean | null
@@ -2713,6 +2776,8 @@ export type Database = {
           referentiel_id?: string | null
           region_critere_id?: string | null
           remarque_non_conformite?: string | null
+          scanne_at?: string | null
+          scanne_by?: string | null
           secteur?: string | null
           statut?: Database["public"]["Enums"]["prelevement_statut"]
           temperature?: number | null
@@ -2720,10 +2785,13 @@ export type Database = {
           tp_produit?: number | null
           updated_at?: string
           validateur_id?: string | null
+          verifie_at?: string | null
+          verifie_by?: string | null
           version?: string | null
         }
         Update: {
           client_id?: string
+          code_barre?: string | null
           conclusion?: string | null
           conditions?: string | null
           conformite?: boolean | null
@@ -2750,6 +2818,8 @@ export type Database = {
           referentiel_id?: string | null
           region_critere_id?: string | null
           remarque_non_conformite?: string | null
+          scanne_at?: string | null
+          scanne_by?: string | null
           secteur?: string | null
           statut?: Database["public"]["Enums"]["prelevement_statut"]
           temperature?: number | null
@@ -2757,6 +2827,8 @@ export type Database = {
           tp_produit?: number | null
           updated_at?: string
           validateur_id?: string | null
+          verifie_at?: string | null
+          verifie_by?: string | null
           version?: string | null
         }
         Relationships: [
@@ -3348,6 +3420,50 @@ export type Database = {
           },
         ]
       }
+      releves_sonde: {
+        Row: {
+          batterie_pct: number | null
+          conformite: boolean | null
+          created_at: string
+          id: string
+          mesure: number
+          mesuree_at: string
+          payload: Json | null
+          signal_pct: number | null
+          sonde_id: string
+        }
+        Insert: {
+          batterie_pct?: number | null
+          conformite?: boolean | null
+          created_at?: string
+          id?: string
+          mesure: number
+          mesuree_at?: string
+          payload?: Json | null
+          signal_pct?: number | null
+          sonde_id: string
+        }
+        Update: {
+          batterie_pct?: number | null
+          conformite?: boolean | null
+          created_at?: string
+          id?: string
+          mesure?: number
+          mesuree_at?: string
+          payload?: Json | null
+          signal_pct?: number | null
+          sonde_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "releves_sonde_sonde_id_fkey"
+            columns: ["sonde_id"]
+            isOneToOne: false
+            referencedRelation: "sondes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       revues_direction: {
         Row: {
           axes_amelioration: string | null
@@ -3410,6 +3526,75 @@ export type Database = {
           ressources_necessaires?: string | null
           statut?: Database["public"]["Enums"]["revue_statut"]
           titre?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sondes: {
+        Row: {
+          api_key_hash: string | null
+          code: string
+          created_at: string
+          created_by: string | null
+          equipement_id: string | null
+          fournisseur: string | null
+          id: string
+          intervalle_minutes: number
+          is_active: boolean
+          last_batterie: number | null
+          last_mesure: number | null
+          last_releve_at: string | null
+          libelle: string
+          localisation: string | null
+          modele: string | null
+          seuil_max: number | null
+          seuil_min: number | null
+          type: Database["public"]["Enums"]["sonde_type"]
+          unite: string
+          updated_at: string
+        }
+        Insert: {
+          api_key_hash?: string | null
+          code: string
+          created_at?: string
+          created_by?: string | null
+          equipement_id?: string | null
+          fournisseur?: string | null
+          id?: string
+          intervalle_minutes?: number
+          is_active?: boolean
+          last_batterie?: number | null
+          last_mesure?: number | null
+          last_releve_at?: string | null
+          libelle: string
+          localisation?: string | null
+          modele?: string | null
+          seuil_max?: number | null
+          seuil_min?: number | null
+          type?: Database["public"]["Enums"]["sonde_type"]
+          unite?: string
+          updated_at?: string
+        }
+        Update: {
+          api_key_hash?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          equipement_id?: string | null
+          fournisseur?: string | null
+          id?: string
+          intervalle_minutes?: number
+          is_active?: boolean
+          last_batterie?: number | null
+          last_mesure?: number | null
+          last_releve_at?: string | null
+          libelle?: string
+          localisation?: string | null
+          modele?: string | null
+          seuil_max?: number | null
+          seuil_min?: number | null
+          type?: Database["public"]["Enums"]["sonde_type"]
+          unite?: string
           updated_at?: string
         }
         Relationships: []
@@ -3601,6 +3786,11 @@ export type Database = {
       next_numero: { Args: { _code: string }; Returns: string }
     }
     Enums: {
+      alerte_sonde_type:
+        | "hors_seuil_haut"
+        | "hors_seuil_bas"
+        | "hors_ligne"
+        | "batterie_faible"
       analyse_statut:
         | "a_faire"
         | "en_cours"
@@ -3706,6 +3896,14 @@ export type Database = {
         | "cloturee"
         | "rejetee"
       revue_statut: "planifiee" | "tenue" | "cloturee"
+      sonde_type:
+        | "temperature"
+        | "humidite"
+        | "pression"
+        | "co2"
+        | "o2"
+        | "ph"
+        | "autre"
       tache_priorite: "basse" | "normale" | "haute" | "critique"
       tache_statut: "a_faire" | "en_cours" | "bloquee" | "terminee"
       type_matrice:
@@ -3844,6 +4042,12 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      alerte_sonde_type: [
+        "hors_seuil_haut",
+        "hors_seuil_bas",
+        "hors_ligne",
+        "batterie_faible",
+      ],
       analyse_statut: [
         "a_faire",
         "en_cours",
@@ -3962,6 +4166,15 @@ export const Constants = {
         "rejetee",
       ],
       revue_statut: ["planifiee", "tenue", "cloturee"],
+      sonde_type: [
+        "temperature",
+        "humidite",
+        "pression",
+        "co2",
+        "o2",
+        "ph",
+        "autre",
+      ],
       tache_priorite: ["basse", "normale", "haute", "critique"],
       tache_statut: ["a_faire", "en_cours", "bloquee", "terminee"],
       type_matrice: [
