@@ -73,11 +73,17 @@ function ReceptionScanPage() {
   const validate = useMutation({
     mutationFn: async ({ id, temperature }: { id: string; temperature?: number | null }) => {
       const { data: userRes } = await supabase.auth.getUser();
-      const patch: Record<string, unknown> = {
+      const patch: {
+        statut: "recu_labo";
+        date_reception: string;
+        verifie_at: string;
+        verifie_by: string | null;
+        temperature?: number;
+      } = {
         statut: "recu_labo",
         date_reception: new Date().toISOString(),
         verifie_at: new Date().toISOString(),
-        verifie_by: userRes.user?.id,
+        verifie_by: userRes.user?.id ?? null,
       };
       if (temperature !== undefined && temperature !== null && !Number.isNaN(temperature)) {
         patch.temperature = temperature;
