@@ -106,7 +106,6 @@ function ReceptionScanPage() {
       <PageHeader
         title="Réception — Scan code-barres"
         description="Scannez l'étiquette avec une douchette USB pour identifier et valider la réception du prélèvement."
-        icon={<ScanLine className="h-5 w-5" />}
       />
 
       <Card>
