@@ -35,6 +35,7 @@ type Statut = (typeof STATUTS)[number];
 interface Row {
   id: string;
   numero: string;
+  code_barre: string | null;
   client_id: string;
   mission_id: string | null;
   date_prelevement: string;
