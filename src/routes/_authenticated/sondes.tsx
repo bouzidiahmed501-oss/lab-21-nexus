@@ -131,10 +131,10 @@ function SondesPage() {
   const columns: Column<Sonde>[] = useMemo(() => [
     { key: "code", header: "Code", className: "font-mono text-xs" },
     { key: "libelle", header: "Libellé" },
-    { key: "type", header: "Type", render: (r) => <Badge variant="outline">{r.type}</Badge> },
-    { key: "last_mesure", header: "Dernière mesure", render: (r) => r.last_mesure !== null ? `${r.last_mesure} ${r.unite}` : "—" },
-    { key: "last_releve_at", header: "Dernier relevé", render: (r) => formatDateTime(r.last_releve_at) },
-    { key: "is_active", header: "Actif", render: (r) => r.is_active ? <Badge>Actif</Badge> : <Badge variant="secondary">Inactif</Badge> },
+    { key: "type", header: "Type", cell: (r: Sonde) => <Badge variant="outline">{r.type}</Badge> },
+    { key: "last_mesure", header: "Dernière mesure", cell: (r: Sonde) => r.last_mesure !== null ? `${r.last_mesure} ${r.unite}` : "—" },
+    { key: "last_releve_at", header: "Dernier relevé", cell: (r: Sonde) => formatDateTime(r.last_releve_at) },
+    { key: "is_active", header: "Actif", cell: (r: Sonde) => r.is_active ? <Badge>Actif</Badge> : <Badge variant="secondary">Inactif</Badge> },
   ], []);
 
   return (
@@ -142,7 +142,6 @@ function SondesPage() {
       <PageHeader
         title="Sondes IoT"
         description="Capteurs connectés (température, humidité, etc.) avec relevés automatiques et alertes."
-        icon={<Radio className="h-5 w-5" />}
         actions={
           <Button onClick={() => setOpen(true)} className="gap-2">
             <Plus className="h-4 w-4" /> Nouvelle sonde
@@ -162,16 +161,18 @@ function SondesPage() {
         <TabsContent value="sondes" className="mt-4">
           <Card>
             <CardContent className="p-0">
-              <DataTable
+              <DataTable<Sonde>
                 data={sondes}
                 columns={columns}
-                isLoading={isLoading}
+                loading={isLoading}
+                rowKey={(r) => r.id}
                 onRowClick={(r) => setSelected(r)}
                 emptyMessage="Aucune sonde configurée."
               />
             </CardContent>
           </Card>
         </TabsContent>
+
 
         <TabsContent value="alertes" className="mt-4">
           <Card>
