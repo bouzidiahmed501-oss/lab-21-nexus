@@ -82,6 +82,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     items: [
       { label: "Facturation", to: "/facturation", icon: Receipt },
       { label: "Équipements", to: "/equipements", icon: Wrench },
+      { label: "Sondes IoT", to: "/sondes", icon: Radio },
       { label: "RH & Paie", to: "/rh", icon: UserCog },
       { label: "Projets", to: "/projets", icon: Briefcase },
       { label: "Qualité", to: "/qualite", icon: ShieldCheck },
