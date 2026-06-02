@@ -103,7 +103,21 @@ function PrelevementsPage() {
         </Select>
       ),
     },
+    {
+      key: "actions", header: "", width: "60px", align: "center",
+      cell: (r) => (
+        <Button size="icon" variant="ghost" className="h-7 w-7" onClick={(e) => {
+          e.stopPropagation();
+          if (!r.code_barre) { toast.error("Code-barres manquant"); return; }
+          printLabels([{ code_barre: r.code_barre, numero: r.numero, client: r.clients?.raison_sociale, date: r.date_prelevement }]);
+        }}>
+          <Printer className="h-3.5 w-3.5" />
+        </Button>
+      ),
+    },
   ];
+
+
 
   return (
     <div>
