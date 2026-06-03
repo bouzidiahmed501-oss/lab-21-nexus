@@ -68,7 +68,7 @@ function DevisPage() {
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["devis"],
     queryFn: async () => {
-      const { data, error } = await (sb.from("devis" as never) as never)
+      const { data, error } = await sb.from("devis")
         .select("*, clients(raison_sociale, matricule_fiscal, adresse)")
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -83,7 +83,7 @@ function DevisPage() {
 
   const updateStatut = useMutation({
     mutationFn: async ({ id, statut }: { id: string; statut: DevisStatut }) => {
-      const { error } = await (sb.from("devis" as never) as never).update({ statut }).eq("id", id);
+      const { error } = await sb.from("devis").update({ statut }).eq("id", id);
       if (error) throw error;
       await logAudit({ action: "status_change", entity_type: "devis", entity_id: id, details: { statut } });
     },
@@ -93,7 +93,7 @@ function DevisPage() {
 
   const convertToBc = useMutation({
     mutationFn: async (id: string) => {
-      const { data, error } = await (supabase.rpc as never)("convert_devis_to_bc", { _devis_id: id });
+      const { data, error } = await sb.rpc("convert_devis_to_bc", { _devis_id: id });
       if (error) throw error;
       return data as string;
     },
@@ -108,7 +108,7 @@ function DevisPage() {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await (sb.from("devis" as never) as never).delete().eq("id", id);
+      const { error } = await sb.from("devis").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Devis supprimé"); qc.invalidateQueries({ queryKey: ["devis"] }); },
@@ -117,14 +117,14 @@ function DevisPage() {
 
   const duplicate = useMutation({
     mutationFn: async (id: string) => {
-      const { data: src, error: e1 } = await (sb.from("devis" as never) as never)
+      const { data: src, error: e1 } = await sb.from("devis")
         .select("*").eq("id", id).single();
       if (e1) throw e1;
-      const { data: lignes, error: e2 } = await (sb.from("devis_lignes" as never) as never)
+      const { data: lignes, error: e2 } = await sb.from("devis_lignes")
         .select("*").eq("devis_id", id).order("ordre");
       if (e2) throw e2;
       const numero = await nextNumero("DEV");
-      const { data: nd, error: e3 } = await (sb.from("devis" as never) as never).insert({
+      const { data: nd, error: e3 } = await sb.from("devis").insert({
         numero, client_id: src.client_id, date_devis: new Date().toISOString().slice(0, 10),
         validite_jours: src.validite_jours, statut: "brouillon",
         objet: src.objet, reference_client: src.reference_client, conditions: src.conditions, notes: src.notes,
@@ -132,7 +132,7 @@ function DevisPage() {
       }).select("id").single();
       if (e3) throw e3;
       if ((lignes ?? []).length) {
-        const { error: e4 } = await (sb.from("devis_lignes" as never) as never).insert(
+        const { error: e4 } = await sb.from("devis_lignes").insert(
           (lignes as never[]).map((l: never) => {
             const x = l as { ordre: number; designation: string; parametre_id: string | null; produit_id: string | null; quantite: number; prix_unitaire: number; remise_pct: number; tva_pct: number; total_ht: number };
             return { devis_id: (nd as { id: string }).id, ordre: x.ordre, designation: x.designation, parametre_id: x.parametre_id, produit_id: x.produit_id, quantite: x.quantite, prix_unitaire: x.prix_unitaire, remise_pct: x.remise_pct, tva_pct: x.tva_pct, total_ht: x.total_ht };
@@ -147,7 +147,7 @@ function DevisPage() {
 
   const handlePdf = async (d: DevisRow) => {
     try {
-      const { data: lignes, error } = await (sb.from("devis_lignes" as never) as never)
+      const { data: lignes, error } = await sb.from("devis_lignes")
         .select("*").eq("devis_id", d.id).order("ordre");
       if (error) throw error;
       const blob = await generateDevisPdf({
@@ -315,13 +315,13 @@ function NewDevisDialog({ open, onClose }: { open: boolean; onClose: () => void 
       z.string().max(200).parse(refClient);
       z.string().max(500).parse(objet);
       const numero = await nextNumero("DEV");
-      const { data: d, error: e1 } = await (supabase.from("devis" as never) as never).insert({
+      const { data: d, error: e1 } = await sb.from("devis").insert({
         numero, client_id: clientId, date_devis: dateDevis, validite_jours: validite, statut: "brouillon",
         reference_client: refClient || null, objet: objet || null, conditions: conditions || null,
         total_ht: totals.ht, total_tva: totals.tva, total_ttc: totals.ttc,
       }).select("id").single();
       if (e1) throw e1;
-      const { error: e2 } = await (supabase.from("devis_lignes" as never) as never).insert(
+      const { error: e2 } = await sb.from("devis_lignes").insert(
         validLignes.map((l, idx) => ({
           devis_id: (d as { id: string }).id, parametre_id: l.parametre_id || null,
           designation: l.designation, quantite: l.quantite, prix_unitaire: l.prix_unitaire,
@@ -447,11 +447,11 @@ function ViewDevisDialog({ id, onClose }: { id: string; onClose: () => void }) {
   const { data, isLoading } = useQuery({
     queryKey: ["devis", id],
     queryFn: async () => {
-      const { data: d, error } = await (sb.from("devis" as never) as never)
+      const { data: d, error } = await sb.from("devis")
         .select("*, clients(raison_sociale, adresse, matricule_fiscal)")
         .eq("id", id).single();
       if (error) throw error;
-      const { data: lignes } = await (sb.from("devis_lignes" as never) as never)
+      const { data: lignes } = await sb.from("devis_lignes")
         .select("*").eq("devis_id", id).order("ordre");
       return { devis: d as DevisRow, lignes: (lignes ?? []) as Ligne[] };
     },
