@@ -56,7 +56,8 @@ interface DevisRow {
   clients: { raison_sociale: string; matricule_fiscal: string | null; adresse: string | null } | null;
 }
 
-const sb = supabase as never as ReturnType<typeof supabase.from> extends infer _ ? typeof supabase : never;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const sb = supabase as any;
 
 function DevisPage() {
   const qc = useQueryClient();
