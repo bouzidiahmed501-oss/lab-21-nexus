@@ -59,6 +59,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: "Activité laboratoire",
     items: [
+      { label: "Devis", to: "/devis", icon: FileText },
       { label: "Bons de commande", to: "/bons-commande", icon: ClipboardList },
       { label: "Missions", to: "/missions", icon: MapPin },
       { label: "Prélèvements", to: "/prelevements", icon: TestTubes },

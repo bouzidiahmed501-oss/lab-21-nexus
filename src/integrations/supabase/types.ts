@@ -645,6 +645,7 @@ export type Database = {
           created_by: string | null
           date_bc: string
           date_souhaitee: string | null
+          devis_id: string | null
           id: string
           notes: string | null
           numero: string
@@ -671,6 +672,7 @@ export type Database = {
           created_by?: string | null
           date_bc?: string
           date_souhaitee?: string | null
+          devis_id?: string | null
           id?: string
           notes?: string | null
           numero: string
@@ -697,6 +699,7 @@ export type Database = {
           created_by?: string | null
           date_bc?: string
           date_souhaitee?: string | null
+          devis_id?: string | null
           id?: string
           notes?: string | null
           numero?: string
@@ -1122,6 +1125,128 @@ export type Database = {
             columns: ["type_analyse_id"]
             isOneToOne: false
             referencedRelation: "type_analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devis: {
+        Row: {
+          accepte_at: string | null
+          bc_id: string | null
+          client_id: string
+          conditions: string | null
+          created_at: string
+          created_by: string | null
+          date_devis: string
+          envoye_at: string | null
+          id: string
+          notes: string | null
+          numero: string
+          objet: string | null
+          reference_client: string | null
+          remise_pct: number
+          statut: Database["public"]["Enums"]["devis_statut"]
+          total_ht: number
+          total_ttc: number
+          total_tva: number
+          updated_at: string
+          validite_jours: number
+        }
+        Insert: {
+          accepte_at?: string | null
+          bc_id?: string | null
+          client_id: string
+          conditions?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_devis?: string
+          envoye_at?: string | null
+          id?: string
+          notes?: string | null
+          numero: string
+          objet?: string | null
+          reference_client?: string | null
+          remise_pct?: number
+          statut?: Database["public"]["Enums"]["devis_statut"]
+          total_ht?: number
+          total_ttc?: number
+          total_tva?: number
+          updated_at?: string
+          validite_jours?: number
+        }
+        Update: {
+          accepte_at?: string | null
+          bc_id?: string | null
+          client_id?: string
+          conditions?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_devis?: string
+          envoye_at?: string | null
+          id?: string
+          notes?: string | null
+          numero?: string
+          objet?: string | null
+          reference_client?: string | null
+          remise_pct?: number
+          statut?: Database["public"]["Enums"]["devis_statut"]
+          total_ht?: number
+          total_ttc?: number
+          total_tva?: number
+          updated_at?: string
+          validite_jours?: number
+        }
+        Relationships: []
+      }
+      devis_lignes: {
+        Row: {
+          created_at: string
+          designation: string
+          devis_id: string
+          id: string
+          ordre: number
+          parametre_id: string | null
+          prix_unitaire: number
+          produit_id: string | null
+          quantite: number
+          remise_pct: number
+          total_ht: number
+          tva_pct: number
+        }
+        Insert: {
+          created_at?: string
+          designation: string
+          devis_id: string
+          id?: string
+          ordre?: number
+          parametre_id?: string | null
+          prix_unitaire?: number
+          produit_id?: string | null
+          quantite?: number
+          remise_pct?: number
+          total_ht?: number
+          tva_pct?: number
+        }
+        Update: {
+          created_at?: string
+          designation?: string
+          devis_id?: string
+          id?: string
+          ordre?: number
+          parametre_id?: string | null
+          prix_unitaire?: number
+          produit_id?: string | null
+          quantite?: number
+          remise_pct?: number
+          total_ht?: number
+          tva_pct?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devis_lignes_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
             referencedColumns: ["id"]
           },
         ]
@@ -3774,6 +3899,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      convert_devis_to_bc: { Args: { _devis_id: string }; Returns: string }
       current_user_client_id: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -3852,6 +3978,13 @@ export type Database = {
         | "opportunite"
         | "point_fort"
       contrat_type: "cdi" | "cdd" | "stage" | "freelance" | "interim"
+      devis_statut:
+        | "brouillon"
+        | "envoye"
+        | "accepte"
+        | "refuse"
+        | "expire"
+        | "converti"
       equipement_statut: "actif" | "maintenance" | "hors_service" | "reforme"
       etalonnage_resultat: "conforme" | "non_conforme" | "avec_reserves"
       fr_statut: "planifiee" | "en_cours" | "terminee" | "annulee"
@@ -4117,6 +4250,14 @@ export const Constants = {
         "point_fort",
       ],
       contrat_type: ["cdi", "cdd", "stage", "freelance", "interim"],
+      devis_statut: [
+        "brouillon",
+        "envoye",
+        "accepte",
+        "refuse",
+        "expire",
+        "converti",
+      ],
       equipement_statut: ["actif", "maintenance", "hors_service", "reforme"],
       etalonnage_resultat: ["conforme", "non_conforme", "avec_reserves"],
       fr_statut: ["planifiee", "en_cours", "terminee", "annulee"],
