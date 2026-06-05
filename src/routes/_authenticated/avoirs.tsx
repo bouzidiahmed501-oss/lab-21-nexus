@@ -150,8 +150,7 @@ function AvoirsPage() {
       <PageHeader
         title="Avoirs"
         description="Avoirs commerciaux émis aux clients."
-        icon={FileMinus}
-        action={
+        actions={
           <Button onClick={() => setOpenNew(true)} size="sm">
             <Plus className="mr-1 h-4 w-4" /> Nouvel avoir
           </Button>
