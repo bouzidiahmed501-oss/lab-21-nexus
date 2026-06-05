@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -140,14 +140,14 @@ function ParametresPage() {
         <TabsContent value="societe"><SocieteTab canEdit={canEdit} /></TabsContent>
         <TabsContent value="workflow"><WorkflowTab canEdit={canEdit} /></TabsContent>
         <TabsContent value="numerotation"><NumerotationTab canEdit={isAdmin} /></TabsContent>
-        <TabsContent value="methodes"><PlaceholderTab title="Méthodes & critères d'analyse" description="Gérez vos méthodes normalisées (ISO, AFNOR, internes), critères, unités, valeurs limites et formules de calcul." badge="Module Référentiels" /></TabsContent>
-        <TabsContent value="equipements"><PlaceholderTab title="Configuration équipements" description="Catégories d'équipements, fréquences d'étalonnage, modèles de fiches de vie, intégration LabGuard." badge="Module Équipements" /></TabsContent>
+        <TabsContent value="methodes"><RedirectCard title="Méthodes & critères d'analyse" description="Gérez vos méthodes normalisées (ISO, AFNOR, internes), critères, unités et valeurs limites depuis le catalogue d'analyses." to="/referentiels" label="Ouvrir le catalogue" /></TabsContent>
+        <TabsContent value="equipements"><RedirectCard title="Configuration équipements" description="Catégories, fréquences d'étalonnage, fiches de vie et intégration sondes LabGuard depuis le module Équipements." to="/equipements" label="Ouvrir les équipements" /></TabsContent>
         <TabsContent value="facturation"><FacturationTab canEdit={canEdit} /></TabsContent>
         <TabsContent value="notifications"><NotificationsTab canEdit={canEdit} /></TabsContent>
         <TabsContent value="securite"><SecuriteTab canEdit={isAdmin} /></TabsContent>
         <TabsContent value="integrations"><IntegrationsTab canEdit={isAdmin} /></TabsContent>
         <TabsContent value="sauvegardes"><SauvegardesTab canEdit={isAdmin} /></TabsContent>
-        <TabsContent value="utilisateurs"><PlaceholderTab title="Gestion des utilisateurs & rôles" description="Créez des comptes, attribuez des rôles (admin, direction, chef labo, technicien, qualité, comptable, RH, commercial, client), gérez les permissions et les services." badge="Module Sécurité" /></TabsContent>
+        <TabsContent value="utilisateurs"><UtilisateursTab canEdit={isAdmin} /></TabsContent>
         <TabsContent value="audit"><AuditLogTab /></TabsContent>
       </Tabs>
     </div>
@@ -808,6 +808,243 @@ function AuditLogTab() {
             </Table>
           </div>
         )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ----------------------------------------------------------------------------
+// Redirect card (link to existing module page)
+// ----------------------------------------------------------------------------
+
+function RedirectCard({ title, description, to, label }: { title: string; description: string; to: string; label: string }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button asChild>
+          <Link to={to}>{label}</Link>
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ----------------------------------------------------------------------------
+// Utilisateurs & rôles (real CRUD)
+// ----------------------------------------------------------------------------
+
+type AppRoleName =
+  | "admin" | "direction" | "commercial" | "chef_labo"
+  | "technicien" | "qualite" | "comptable" | "rh" | "client";
+
+const ALL_ROLES: { value: AppRoleName; label: string }[] = [
+  { value: "admin", label: "Administrateur" },
+  { value: "direction", label: "Direction" },
+  { value: "chef_labo", label: "Chef de labo" },
+  { value: "qualite", label: "Qualité" },
+  { value: "commercial", label: "Commercial" },
+  { value: "comptable", label: "Comptable" },
+  { value: "rh", label: "RH" },
+  { value: "technicien", label: "Technicien" },
+  { value: "client", label: "Client" },
+];
+
+type ProfileRow = {
+  id: string;
+  email: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  fonction: string | null;
+  service: string | null;
+  is_active: boolean | null;
+  last_login_at: string | null;
+};
+
+function UtilisateursTab({ canEdit }: { canEdit: boolean }) {
+  const qc = useQueryClient();
+  const [filter, setFilter] = useState("");
+
+  const profilesQ = useQuery({
+    queryKey: ["admin_profiles"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id,email,first_name,last_name,fonction,service,is_active,last_login_at")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as ProfileRow[];
+    },
+  });
+
+  const rolesQ = useQuery({
+    queryKey: ["admin_user_roles"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("user_roles").select("user_id,role");
+      if (error) throw error;
+      return (data ?? []) as { user_id: string; role: AppRoleName }[];
+    },
+  });
+
+  const rolesByUser = new Map<string, Set<AppRoleName>>();
+  (rolesQ.data ?? []).forEach((r) => {
+    if (!rolesByUser.has(r.user_id)) rolesByUser.set(r.user_id, new Set());
+    rolesByUser.get(r.user_id)!.add(r.role);
+  });
+
+  const toggleRole = useMutation({
+    mutationFn: async ({ userId, role, add }: { userId: string; role: AppRoleName; add: boolean }) => {
+      if (add) {
+        const { error } = await supabase
+          .from("user_roles")
+          .insert({ user_id: userId, role } as never);
+        if (error && !error.message.includes("duplicate")) throw error;
+      } else {
+        const { error } = await supabase
+          .from("user_roles")
+          .delete()
+          .eq("user_id", userId)
+          .eq("role", role);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success("Rôles mis à jour");
+      qc.invalidateQueries({ queryKey: ["admin_user_roles"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const toggleActive = useMutation({
+    mutationFn: async ({ userId, active }: { userId: string; active: boolean }) => {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ is_active: active })
+        .eq("id", userId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Statut mis à jour");
+      qc.invalidateQueries({ queryKey: ["admin_profiles"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  if (profilesQ.isLoading || rolesQ.isLoading) return <LoadingCard />;
+
+  const profiles = (profilesQ.data ?? []).filter((p) => {
+    if (!filter) return true;
+    const q = filter.toLowerCase();
+    return (
+      (p.email ?? "").toLowerCase().includes(q) ||
+      (p.first_name ?? "").toLowerCase().includes(q) ||
+      (p.last_name ?? "").toLowerCase().includes(q) ||
+      (p.fonction ?? "").toLowerCase().includes(q)
+    );
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Utilisateurs & rôles
+            </CardTitle>
+            <CardDescription>
+              {profiles.length} compte(s). Cochez les rôles pour ajuster les permissions en temps réel.
+              Les nouveaux comptes sont créés via la page de connexion (inscription) ou par invitation depuis la fiche RH.
+            </CardDescription>
+          </div>
+          <Input
+            placeholder="Filtrer…"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="h-8 w-64"
+          />
+        </div>
+        {!canEdit && (
+          <div className="mt-2 rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-xs">
+            Lecture seule — la gestion des rôles est réservée aux administrateurs.
+          </div>
+        )}
+      </CardHeader>
+      <CardContent>
+        <div className="max-h-[65vh] overflow-auto rounded-md border">
+          <Table>
+            <TableHeader className="sticky top-0 bg-card">
+              <TableRow>
+                <TableHead>Utilisateur</TableHead>
+                <TableHead>Fonction</TableHead>
+                <TableHead>Rôles</TableHead>
+                <TableHead className="w-28">Actif</TableHead>
+                <TableHead className="w-32">Dernière connexion</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {profiles.map((p) => {
+                const userRoles = rolesByUser.get(p.id) ?? new Set();
+                const name = [p.first_name, p.last_name].filter(Boolean).join(" ") || (p.email ?? "—");
+                return (
+                  <TableRow key={p.id}>
+                    <TableCell>
+                      <div className="font-medium">{name}</div>
+                      <div className="text-xs text-muted-foreground">{p.email ?? "—"}</div>
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {p.fonction ?? "—"}
+                      {p.service && <div className="text-muted-foreground">{p.service}</div>}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {ALL_ROLES.map((r) => {
+                          const active = userRoles.has(r.value);
+                          return (
+                            <button
+                              key={r.value}
+                              type="button"
+                              disabled={!canEdit || toggleRole.isPending}
+                              onClick={() => toggleRole.mutate({ userId: p.id, role: r.value, add: !active })}
+                              className={
+                                "rounded border px-2 py-0.5 text-[10px] transition " +
+                                (active
+                                  ? "border-primary bg-primary/15 text-primary"
+                                  : "border-border bg-background text-muted-foreground hover:bg-muted")
+                              }
+                            >
+                              {r.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Switch
+                        checked={p.is_active ?? true}
+                        disabled={!canEdit || toggleActive.isPending}
+                        onCheckedChange={(v) => toggleActive.mutate({ userId: p.id, active: v })}
+                      />
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {p.last_login_at ? new Date(p.last_login_at).toLocaleDateString("fr-FR") : "—"}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+              {profiles.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} className="py-8 text-center text-sm text-muted-foreground">
+                    Aucun utilisateur.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );
