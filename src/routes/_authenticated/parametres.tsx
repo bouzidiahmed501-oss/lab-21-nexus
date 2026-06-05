@@ -140,8 +140,8 @@ function ParametresPage() {
         <TabsContent value="societe"><SocieteTab canEdit={canEdit} /></TabsContent>
         <TabsContent value="workflow"><WorkflowTab canEdit={canEdit} /></TabsContent>
         <TabsContent value="numerotation"><NumerotationTab canEdit={isAdmin} /></TabsContent>
-        <TabsContent value="methodes"><PlaceholderTab title="Méthodes & critères d'analyse" description="Gérez vos méthodes normalisées (ISO, AFNOR, internes), critères, unités, valeurs limites et formules de calcul." badge="Module Référentiels" /></TabsContent>
-        <TabsContent value="equipements"><PlaceholderTab title="Configuration équipements" description="Catégories d'équipements, fréquences d'étalonnage, modèles de fiches de vie, intégration LabGuard." badge="Module Équipements" /></TabsContent>
+        <TabsContent value="methodes"><RedirectCard title="Méthodes & critères d'analyse" description="Gérez vos méthodes normalisées (ISO, AFNOR, internes), critères, unités et valeurs limites depuis le catalogue d'analyses." to="/referentiels" label="Ouvrir le catalogue" /></TabsContent>
+        <TabsContent value="equipements"><RedirectCard title="Configuration équipements" description="Catégories, fréquences d'étalonnage, fiches de vie et intégration sondes LabGuard depuis le module Équipements." to="/equipements" label="Ouvrir les équipements" /></TabsContent>
         <TabsContent value="facturation"><FacturationTab canEdit={canEdit} /></TabsContent>
         <TabsContent value="notifications"><NotificationsTab canEdit={canEdit} /></TabsContent>
         <TabsContent value="securite"><SecuriteTab canEdit={isAdmin} /></TabsContent>
