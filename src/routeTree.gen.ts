@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedSondesRouteImport } from './routes/_authenticated/sondes'
 import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
+import { Route as AuthenticatedReglementsRouteImport } from './routes/_authenticated/reglements'
 import { Route as AuthenticatedReferentielsRouteImport } from './routes/_authenticated/referentiels'
 import { Route as AuthenticatedReceptionScanRouteImport } from './routes/_authenticated/reception-scan'
 import { Route as AuthenticatedRapportsRouteImport } from './routes/_authenticated/rapports'
@@ -32,6 +33,7 @@ import { Route as AuthenticatedEquipementsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedDevisRouteImport } from './routes/_authenticated/devis'
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
 import { Route as AuthenticatedBonsCommandeRouteImport } from './routes/_authenticated/bons-commande'
+import { Route as AuthenticatedAvoirsRouteImport } from './routes/_authenticated/avoirs'
 import { Route as AuthenticatedAnalysesRouteImport } from './routes/_authenticated/analyses'
 import { Route as ApiPublicSondesIngestRouteImport } from './routes/api/public/sondes/ingest'
 
@@ -62,6 +64,11 @@ const AuthenticatedSondesRoute = AuthenticatedSondesRouteImport.update({
 const AuthenticatedRhRoute = AuthenticatedRhRouteImport.update({
   id: '/rh',
   path: '/rh',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedReglementsRoute = AuthenticatedReglementsRouteImport.update({
+  id: '/reglements',
+  path: '/reglements',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedReferentielsRoute =
@@ -157,6 +164,11 @@ const AuthenticatedBonsCommandeRoute =
     path: '/bons-commande',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAvoirsRoute = AuthenticatedAvoirsRouteImport.update({
+  id: '/avoirs',
+  path: '/avoirs',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAnalysesRoute = AuthenticatedAnalysesRouteImport.update({
   id: '/analyses',
   path: '/analyses',
@@ -173,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/portail': typeof PortailRoute
   '/analyses': typeof AuthenticatedAnalysesRoute
+  '/avoirs': typeof AuthenticatedAvoirsRoute
   '/bons-commande': typeof AuthenticatedBonsCommandeRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/devis': typeof AuthenticatedDevisRoute
@@ -190,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/rapports': typeof AuthenticatedRapportsRoute
   '/reception-scan': typeof AuthenticatedReceptionScanRoute
   '/referentiels': typeof AuthenticatedReferentielsRoute
+  '/reglements': typeof AuthenticatedReglementsRoute
   '/rh': typeof AuthenticatedRhRoute
   '/sondes': typeof AuthenticatedSondesRoute
   '/api/public/sondes/ingest': typeof ApiPublicSondesIngestRoute
@@ -198,6 +212,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/portail': typeof PortailRoute
   '/analyses': typeof AuthenticatedAnalysesRoute
+  '/avoirs': typeof AuthenticatedAvoirsRoute
   '/bons-commande': typeof AuthenticatedBonsCommandeRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/devis': typeof AuthenticatedDevisRoute
@@ -215,6 +230,7 @@ export interface FileRoutesByTo {
   '/rapports': typeof AuthenticatedRapportsRoute
   '/reception-scan': typeof AuthenticatedReceptionScanRoute
   '/referentiels': typeof AuthenticatedReferentielsRoute
+  '/reglements': typeof AuthenticatedReglementsRoute
   '/rh': typeof AuthenticatedRhRoute
   '/sondes': typeof AuthenticatedSondesRoute
   '/': typeof AuthenticatedIndexRoute
@@ -226,6 +242,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/portail': typeof PortailRoute
   '/_authenticated/analyses': typeof AuthenticatedAnalysesRoute
+  '/_authenticated/avoirs': typeof AuthenticatedAvoirsRoute
   '/_authenticated/bons-commande': typeof AuthenticatedBonsCommandeRoute
   '/_authenticated/clients': typeof AuthenticatedClientsRoute
   '/_authenticated/devis': typeof AuthenticatedDevisRoute
@@ -243,6 +260,7 @@ export interface FileRoutesById {
   '/_authenticated/rapports': typeof AuthenticatedRapportsRoute
   '/_authenticated/reception-scan': typeof AuthenticatedReceptionScanRoute
   '/_authenticated/referentiels': typeof AuthenticatedReferentielsRoute
+  '/_authenticated/reglements': typeof AuthenticatedReglementsRoute
   '/_authenticated/rh': typeof AuthenticatedRhRoute
   '/_authenticated/sondes': typeof AuthenticatedSondesRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -255,6 +273,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/portail'
     | '/analyses'
+    | '/avoirs'
     | '/bons-commande'
     | '/clients'
     | '/devis'
@@ -272,6 +291,7 @@ export interface FileRouteTypes {
     | '/rapports'
     | '/reception-scan'
     | '/referentiels'
+    | '/reglements'
     | '/rh'
     | '/sondes'
     | '/api/public/sondes/ingest'
@@ -280,6 +300,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/portail'
     | '/analyses'
+    | '/avoirs'
     | '/bons-commande'
     | '/clients'
     | '/devis'
@@ -297,6 +318,7 @@ export interface FileRouteTypes {
     | '/rapports'
     | '/reception-scan'
     | '/referentiels'
+    | '/reglements'
     | '/rh'
     | '/sondes'
     | '/'
@@ -307,6 +329,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/portail'
     | '/_authenticated/analyses'
+    | '/_authenticated/avoirs'
     | '/_authenticated/bons-commande'
     | '/_authenticated/clients'
     | '/_authenticated/devis'
@@ -324,6 +347,7 @@ export interface FileRouteTypes {
     | '/_authenticated/rapports'
     | '/_authenticated/reception-scan'
     | '/_authenticated/referentiels'
+    | '/_authenticated/reglements'
     | '/_authenticated/rh'
     | '/_authenticated/sondes'
     | '/_authenticated/'
@@ -379,6 +403,13 @@ declare module '@tanstack/react-router' {
       path: '/rh'
       fullPath: '/rh'
       preLoaderRoute: typeof AuthenticatedRhRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/reglements': {
+      id: '/_authenticated/reglements'
+      path: '/reglements'
+      fullPath: '/reglements'
+      preLoaderRoute: typeof AuthenticatedReglementsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/referentiels': {
@@ -500,6 +531,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBonsCommandeRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/avoirs': {
+      id: '/_authenticated/avoirs'
+      path: '/avoirs'
+      fullPath: '/avoirs'
+      preLoaderRoute: typeof AuthenticatedAvoirsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/analyses': {
       id: '/_authenticated/analyses'
       path: '/analyses'
@@ -519,6 +557,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAnalysesRoute: typeof AuthenticatedAnalysesRoute
+  AuthenticatedAvoirsRoute: typeof AuthenticatedAvoirsRoute
   AuthenticatedBonsCommandeRoute: typeof AuthenticatedBonsCommandeRoute
   AuthenticatedClientsRoute: typeof AuthenticatedClientsRoute
   AuthenticatedDevisRoute: typeof AuthenticatedDevisRoute
@@ -536,6 +575,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedRapportsRoute: typeof AuthenticatedRapportsRoute
   AuthenticatedReceptionScanRoute: typeof AuthenticatedReceptionScanRoute
   AuthenticatedReferentielsRoute: typeof AuthenticatedReferentielsRoute
+  AuthenticatedReglementsRoute: typeof AuthenticatedReglementsRoute
   AuthenticatedRhRoute: typeof AuthenticatedRhRoute
   AuthenticatedSondesRoute: typeof AuthenticatedSondesRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -543,6 +583,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAnalysesRoute: AuthenticatedAnalysesRoute,
+  AuthenticatedAvoirsRoute: AuthenticatedAvoirsRoute,
   AuthenticatedBonsCommandeRoute: AuthenticatedBonsCommandeRoute,
   AuthenticatedClientsRoute: AuthenticatedClientsRoute,
   AuthenticatedDevisRoute: AuthenticatedDevisRoute,
@@ -560,6 +601,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedRapportsRoute: AuthenticatedRapportsRoute,
   AuthenticatedReceptionScanRoute: AuthenticatedReceptionScanRoute,
   AuthenticatedReferentielsRoute: AuthenticatedReferentielsRoute,
+  AuthenticatedReglementsRoute: AuthenticatedReglementsRoute,
   AuthenticatedRhRoute: AuthenticatedRhRoute,
   AuthenticatedSondesRoute: AuthenticatedSondesRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
