@@ -32,6 +32,7 @@ import { Route as AuthenticatedEquipementsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedDevisRouteImport } from './routes/_authenticated/devis'
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
 import { Route as AuthenticatedBonsCommandeRouteImport } from './routes/_authenticated/bons-commande'
+import { Route as AuthenticatedAvoirsRouteImport } from './routes/_authenticated/avoirs'
 import { Route as AuthenticatedAnalysesRouteImport } from './routes/_authenticated/analyses'
 import { Route as ApiPublicSondesIngestRouteImport } from './routes/api/public/sondes/ingest'
 
@@ -157,6 +158,11 @@ const AuthenticatedBonsCommandeRoute =
     path: '/bons-commande',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAvoirsRoute = AuthenticatedAvoirsRouteImport.update({
+  id: '/avoirs',
+  path: '/avoirs',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAnalysesRoute = AuthenticatedAnalysesRouteImport.update({
   id: '/analyses',
   path: '/analyses',
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/portail': typeof PortailRoute
   '/analyses': typeof AuthenticatedAnalysesRoute
+  '/avoirs': typeof AuthenticatedAvoirsRoute
   '/bons-commande': typeof AuthenticatedBonsCommandeRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/devis': typeof AuthenticatedDevisRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/portail': typeof PortailRoute
   '/analyses': typeof AuthenticatedAnalysesRoute
+  '/avoirs': typeof AuthenticatedAvoirsRoute
   '/bons-commande': typeof AuthenticatedBonsCommandeRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/devis': typeof AuthenticatedDevisRoute
@@ -226,6 +234,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/portail': typeof PortailRoute
   '/_authenticated/analyses': typeof AuthenticatedAnalysesRoute
+  '/_authenticated/avoirs': typeof AuthenticatedAvoirsRoute
   '/_authenticated/bons-commande': typeof AuthenticatedBonsCommandeRoute
   '/_authenticated/clients': typeof AuthenticatedClientsRoute
   '/_authenticated/devis': typeof AuthenticatedDevisRoute
@@ -255,6 +264,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/portail'
     | '/analyses'
+    | '/avoirs'
     | '/bons-commande'
     | '/clients'
     | '/devis'
@@ -280,6 +290,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/portail'
     | '/analyses'
+    | '/avoirs'
     | '/bons-commande'
     | '/clients'
     | '/devis'
@@ -307,6 +318,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/portail'
     | '/_authenticated/analyses'
+    | '/_authenticated/avoirs'
     | '/_authenticated/bons-commande'
     | '/_authenticated/clients'
     | '/_authenticated/devis'
@@ -500,6 +512,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBonsCommandeRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/avoirs': {
+      id: '/_authenticated/avoirs'
+      path: '/avoirs'
+      fullPath: '/avoirs'
+      preLoaderRoute: typeof AuthenticatedAvoirsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/analyses': {
       id: '/_authenticated/analyses'
       path: '/analyses'
@@ -519,6 +538,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAnalysesRoute: typeof AuthenticatedAnalysesRoute
+  AuthenticatedAvoirsRoute: typeof AuthenticatedAvoirsRoute
   AuthenticatedBonsCommandeRoute: typeof AuthenticatedBonsCommandeRoute
   AuthenticatedClientsRoute: typeof AuthenticatedClientsRoute
   AuthenticatedDevisRoute: typeof AuthenticatedDevisRoute
@@ -543,6 +563,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAnalysesRoute: AuthenticatedAnalysesRoute,
+  AuthenticatedAvoirsRoute: AuthenticatedAvoirsRoute,
   AuthenticatedBonsCommandeRoute: AuthenticatedBonsCommandeRoute,
   AuthenticatedClientsRoute: AuthenticatedClientsRoute,
   AuthenticatedDevisRoute: AuthenticatedDevisRoute,
