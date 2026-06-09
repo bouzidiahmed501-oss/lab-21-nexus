@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Download, Loader2, BarChart3, TrendingUp, Clock, AlertTriangle, MapPin, TestTubes, Users as UsersIcon, CreditCard } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/format";
-import { exportToCsv } from "@/lib/csv";
+import { exportCSV } from "@/lib/csv";
 
 export const Route = createFileRoute("/_authenticated/rapports-metier")({
   head: () => ({ meta: [{ title: "Rapports métier — BALIMS" }] }),

@@ -21,6 +21,7 @@ import { Route as AuthenticatedReglementsRouteImport } from './routes/_authentic
 import { Route as AuthenticatedReferentielsRouteImport } from './routes/_authenticated/referentiels'
 import { Route as AuthenticatedRecouvrementRouteImport } from './routes/_authenticated/recouvrement'
 import { Route as AuthenticatedReceptionScanRouteImport } from './routes/_authenticated/reception-scan'
+import { Route as AuthenticatedRapportsMetierRouteImport } from './routes/_authenticated/rapports-metier'
 import { Route as AuthenticatedRapportsRouteImport } from './routes/_authenticated/rapports'
 import { Route as AuthenticatedQualiteRouteImport } from './routes/_authenticated/qualite'
 import { Route as AuthenticatedProjetsRouteImport } from './routes/_authenticated/projets'
@@ -104,6 +105,12 @@ const AuthenticatedReceptionScanRoute =
   AuthenticatedReceptionScanRouteImport.update({
     id: '/reception-scan',
     path: '/reception-scan',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedRapportsMetierRoute =
+  AuthenticatedRapportsMetierRouteImport.update({
+    id: '/rapports-metier',
+    path: '/rapports-metier',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedRapportsRoute = AuthenticatedRapportsRouteImport.update({
@@ -237,6 +244,7 @@ export interface FileRoutesByFullPath {
   '/projets': typeof AuthenticatedProjetsRoute
   '/qualite': typeof AuthenticatedQualiteRoute
   '/rapports': typeof AuthenticatedRapportsRoute
+  '/rapports-metier': typeof AuthenticatedRapportsMetierRoute
   '/reception-scan': typeof AuthenticatedReceptionScanRoute
   '/recouvrement': typeof AuthenticatedRecouvrementRoute
   '/referentiels': typeof AuthenticatedReferentielsRoute
@@ -269,6 +277,7 @@ export interface FileRoutesByTo {
   '/projets': typeof AuthenticatedProjetsRoute
   '/qualite': typeof AuthenticatedQualiteRoute
   '/rapports': typeof AuthenticatedRapportsRoute
+  '/rapports-metier': typeof AuthenticatedRapportsMetierRoute
   '/reception-scan': typeof AuthenticatedReceptionScanRoute
   '/recouvrement': typeof AuthenticatedRecouvrementRoute
   '/referentiels': typeof AuthenticatedReferentielsRoute
@@ -304,6 +313,7 @@ export interface FileRoutesById {
   '/_authenticated/projets': typeof AuthenticatedProjetsRoute
   '/_authenticated/qualite': typeof AuthenticatedQualiteRoute
   '/_authenticated/rapports': typeof AuthenticatedRapportsRoute
+  '/_authenticated/rapports-metier': typeof AuthenticatedRapportsMetierRoute
   '/_authenticated/reception-scan': typeof AuthenticatedReceptionScanRoute
   '/_authenticated/recouvrement': typeof AuthenticatedRecouvrementRoute
   '/_authenticated/referentiels': typeof AuthenticatedReferentielsRoute
@@ -340,6 +350,7 @@ export interface FileRouteTypes {
     | '/projets'
     | '/qualite'
     | '/rapports'
+    | '/rapports-metier'
     | '/reception-scan'
     | '/recouvrement'
     | '/referentiels'
@@ -372,6 +383,7 @@ export interface FileRouteTypes {
     | '/projets'
     | '/qualite'
     | '/rapports'
+    | '/rapports-metier'
     | '/reception-scan'
     | '/recouvrement'
     | '/referentiels'
@@ -406,6 +418,7 @@ export interface FileRouteTypes {
     | '/_authenticated/projets'
     | '/_authenticated/qualite'
     | '/_authenticated/rapports'
+    | '/_authenticated/rapports-metier'
     | '/_authenticated/reception-scan'
     | '/_authenticated/recouvrement'
     | '/_authenticated/referentiels'
@@ -509,6 +522,13 @@ declare module '@tanstack/react-router' {
       path: '/reception-scan'
       fullPath: '/reception-scan'
       preLoaderRoute: typeof AuthenticatedReceptionScanRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/rapports-metier': {
+      id: '/_authenticated/rapports-metier'
+      path: '/rapports-metier'
+      fullPath: '/rapports-metier'
+      preLoaderRoute: typeof AuthenticatedRapportsMetierRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/rapports': {
@@ -674,6 +694,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProjetsRoute: typeof AuthenticatedProjetsRoute
   AuthenticatedQualiteRoute: typeof AuthenticatedQualiteRoute
   AuthenticatedRapportsRoute: typeof AuthenticatedRapportsRoute
+  AuthenticatedRapportsMetierRoute: typeof AuthenticatedRapportsMetierRoute
   AuthenticatedReceptionScanRoute: typeof AuthenticatedReceptionScanRoute
   AuthenticatedRecouvrementRoute: typeof AuthenticatedRecouvrementRoute
   AuthenticatedReferentielsRoute: typeof AuthenticatedReferentielsRoute
@@ -705,6 +726,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedProjetsRoute: AuthenticatedProjetsRoute,
   AuthenticatedQualiteRoute: AuthenticatedQualiteRoute,
   AuthenticatedRapportsRoute: AuthenticatedRapportsRoute,
+  AuthenticatedRapportsMetierRoute: AuthenticatedRapportsMetierRoute,
   AuthenticatedReceptionScanRoute: AuthenticatedReceptionScanRoute,
   AuthenticatedRecouvrementRoute: AuthenticatedRecouvrementRoute,
   AuthenticatedReferentielsRoute: AuthenticatedReferentielsRoute,
