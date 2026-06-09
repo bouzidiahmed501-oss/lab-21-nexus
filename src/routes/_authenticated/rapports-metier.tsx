@@ -275,7 +275,7 @@ function ReportCard({ title, rows, columns, filename }: { title: string; rows: a
     <Card className="mt-4">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-base">{title}</CardTitle>
-        <Button size="sm" variant="outline" onClick={() => exportToCsv(filename, rows)}><Download className="h-3 w-3 mr-1" />Exporter CSV</Button>
+        <Button size="sm" variant="outline" onClick={() => exportCSV(filename, rows)}><Download className="h-3 w-3 mr-1" />Exporter CSV</Button>
       </CardHeader>
       <CardContent>
         {rows.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">Aucune donnée sur cette période.</p>
