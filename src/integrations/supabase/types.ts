@@ -915,6 +915,98 @@ export type Database = {
           },
         ]
       }
+      chaine_etapes: {
+        Row: {
+          chaine_id: string
+          created_at: string
+          duree_minutes: number | null
+          equipement_id: string | null
+          id: string
+          instructions: string | null
+          libelle: string
+          ordre: number
+          technicien_role: string | null
+        }
+        Insert: {
+          chaine_id: string
+          created_at?: string
+          duree_minutes?: number | null
+          equipement_id?: string | null
+          id?: string
+          instructions?: string | null
+          libelle: string
+          ordre?: number
+          technicien_role?: string | null
+        }
+        Update: {
+          chaine_id?: string
+          created_at?: string
+          duree_minutes?: number | null
+          equipement_id?: string | null
+          id?: string
+          instructions?: string | null
+          libelle?: string
+          ordre?: number
+          technicien_role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chaine_etapes_chaine_id_fkey"
+            columns: ["chaine_id"]
+            isOneToOne: false
+            referencedRelation: "chaines_analyse"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chaine_etapes_equipement_id_fkey"
+            columns: ["equipement_id"]
+            isOneToOne: false
+            referencedRelation: "equipements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chaines_analyse: {
+        Row: {
+          catalogue_analyse_id: string | null
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          libelle: string
+          updated_at: string
+        }
+        Insert: {
+          catalogue_analyse_id?: string | null
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          libelle: string
+          updated_at?: string
+        }
+        Update: {
+          catalogue_analyse_id?: string | null
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          libelle?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chaines_analyse_catalogue_analyse_id_fkey"
+            columns: ["catalogue_analyse_id"]
+            isOneToOne: false
+            referencedRelation: "catalogue_analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           adresse: string | null
@@ -1125,6 +1217,91 @@ export type Database = {
             columns: ["type_analyse_id"]
             isOneToOne: false
             referencedRelation: "type_analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      depenses: {
+        Row: {
+          beneficiaire: string | null
+          categorie: string
+          created_at: string
+          created_by: string | null
+          date_depense: string
+          employe_id: string | null
+          id: string
+          libelle: string
+          mission_id: string | null
+          mode_paiement: string | null
+          montant_ht: number
+          montant_ttc: number
+          notes: string | null
+          numero: string
+          projet_id: string | null
+          reference_piece: string | null
+          tva_pct: number
+          updated_at: string
+        }
+        Insert: {
+          beneficiaire?: string | null
+          categorie: string
+          created_at?: string
+          created_by?: string | null
+          date_depense?: string
+          employe_id?: string | null
+          id?: string
+          libelle: string
+          mission_id?: string | null
+          mode_paiement?: string | null
+          montant_ht?: number
+          montant_ttc?: number
+          notes?: string | null
+          numero: string
+          projet_id?: string | null
+          reference_piece?: string | null
+          tva_pct?: number
+          updated_at?: string
+        }
+        Update: {
+          beneficiaire?: string | null
+          categorie?: string
+          created_at?: string
+          created_by?: string | null
+          date_depense?: string
+          employe_id?: string | null
+          id?: string
+          libelle?: string
+          mission_id?: string | null
+          mode_paiement?: string | null
+          montant_ht?: number
+          montant_ttc?: number
+          notes?: string | null
+          numero?: string
+          projet_id?: string | null
+          reference_piece?: string | null
+          tva_pct?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "depenses_employe_id_fkey"
+            columns: ["employe_id"]
+            isOneToOne: false
+            referencedRelation: "employes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "depenses_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "depenses_projet_id_fkey"
+            columns: ["projet_id"]
+            isOneToOne: false
+            referencedRelation: "projets"
             referencedColumns: ["id"]
           },
         ]
@@ -3545,6 +3722,69 @@ export type Database = {
           },
         ]
       }
+      relances: {
+        Row: {
+          client_id: string | null
+          contenu: string | null
+          created_at: string
+          created_by: string | null
+          date_envoi: string
+          facture_id: string | null
+          id: string
+          mode: string
+          montant_relance: number | null
+          niveau: number
+          numero: string
+          statut: string
+          updated_at: string
+        }
+        Insert: {
+          client_id?: string | null
+          contenu?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_envoi?: string
+          facture_id?: string | null
+          id?: string
+          mode?: string
+          montant_relance?: number | null
+          niveau?: number
+          numero: string
+          statut?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string | null
+          contenu?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_envoi?: string
+          facture_id?: string | null
+          id?: string
+          mode?: string
+          montant_relance?: number | null
+          niveau?: number
+          numero?: string
+          statut?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "relances_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "relances_facture_id_fkey"
+            columns: ["facture_id"]
+            isOneToOne: false
+            referencedRelation: "factures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       releves_sonde: {
         Row: {
           batterie_pct: number | null
@@ -3585,6 +3825,59 @@ export type Database = {
             columns: ["sonde_id"]
             isOneToOne: false
             referencedRelation: "sondes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reservations_equipement: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date_debut: string
+          date_fin: string
+          equipement_id: string
+          id: string
+          motif: string | null
+          notes: string | null
+          numero: string
+          statut: string
+          updated_at: string
+          utilisateur_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date_debut: string
+          date_fin: string
+          equipement_id: string
+          id?: string
+          motif?: string | null
+          notes?: string | null
+          numero: string
+          statut?: string
+          updated_at?: string
+          utilisateur_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string
+          date_fin?: string
+          equipement_id?: string
+          id?: string
+          motif?: string | null
+          notes?: string | null
+          numero?: string
+          statut?: string
+          updated_at?: string
+          utilisateur_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_equipement_equipement_id_fkey"
+            columns: ["equipement_id"]
+            isOneToOne: false
+            referencedRelation: "equipements"
             referencedColumns: ["id"]
           },
         ]
@@ -3813,6 +4106,42 @@ export type Database = {
           created_at?: string
           id?: string
           libelle?: string | null
+        }
+        Relationships: []
+      }
+      type_prelevements: {
+        Row: {
+          categorie: string | null
+          champs_specifiques: Json
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          libelle: string
+          updated_at: string
+        }
+        Insert: {
+          categorie?: string | null
+          champs_specifiques?: Json
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          libelle: string
+          updated_at?: string
+        }
+        Update: {
+          categorie?: string | null
+          champs_specifiques?: Json
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          libelle?: string
+          updated_at?: string
         }
         Relationships: []
       }
