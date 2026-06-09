@@ -24,6 +24,12 @@ import {
   Radio,
   FileMinus,
   CreditCard,
+  Wallet,
+  CalendarClock,
+  AlertTriangle,
+  Package2,
+  BarChart3,
+  Layers,
 } from "lucide-react";
 import {
   Sidebar,
@@ -68,7 +74,10 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { label: "Scan réception", to: "/reception-scan", icon: ScanLine },
       { label: "Feuilles de route", to: "/feuilles-route", icon: CalendarRange },
       { label: "Analyses", to: "/analyses", icon: FlaskConical },
+      { label: "Packs d'analyses", to: "/pack-analyses", icon: Package2 },
+      { label: "Types prélèvement", to: "/type-prelevements", icon: Layers },
       { label: "Rapports", to: "/rapports", icon: FileText },
+      { label: "Rapports métier", to: "/rapports-metier", icon: BarChart3 },
     ],
   },
   {
