@@ -38,6 +38,7 @@ import { Route as AuthenticatedEquipementsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedDevisRouteImport } from './routes/_authenticated/devis'
 import { Route as AuthenticatedDepensesRouteImport } from './routes/_authenticated/depenses'
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
+import { Route as AuthenticatedChainesAnalyseRouteImport } from './routes/_authenticated/chaines-analyse'
 import { Route as AuthenticatedBonsCommandeRouteImport } from './routes/_authenticated/bons-commande'
 import { Route as AuthenticatedAvoirsRouteImport } from './routes/_authenticated/avoirs'
 import { Route as AuthenticatedAnalysesRouteImport } from './routes/_authenticated/analyses'
@@ -199,6 +200,12 @@ const AuthenticatedClientsRoute = AuthenticatedClientsRouteImport.update({
   path: '/clients',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedChainesAnalyseRoute =
+  AuthenticatedChainesAnalyseRouteImport.update({
+    id: '/chaines-analyse',
+    path: '/chaines-analyse',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedBonsCommandeRoute =
   AuthenticatedBonsCommandeRouteImport.update({
     id: '/bons-commande',
@@ -228,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/analyses': typeof AuthenticatedAnalysesRoute
   '/avoirs': typeof AuthenticatedAvoirsRoute
   '/bons-commande': typeof AuthenticatedBonsCommandeRoute
+  '/chaines-analyse': typeof AuthenticatedChainesAnalyseRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/depenses': typeof AuthenticatedDepensesRoute
   '/devis': typeof AuthenticatedDevisRoute
@@ -261,6 +269,7 @@ export interface FileRoutesByTo {
   '/analyses': typeof AuthenticatedAnalysesRoute
   '/avoirs': typeof AuthenticatedAvoirsRoute
   '/bons-commande': typeof AuthenticatedBonsCommandeRoute
+  '/chaines-analyse': typeof AuthenticatedChainesAnalyseRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/depenses': typeof AuthenticatedDepensesRoute
   '/devis': typeof AuthenticatedDevisRoute
@@ -297,6 +306,7 @@ export interface FileRoutesById {
   '/_authenticated/analyses': typeof AuthenticatedAnalysesRoute
   '/_authenticated/avoirs': typeof AuthenticatedAvoirsRoute
   '/_authenticated/bons-commande': typeof AuthenticatedBonsCommandeRoute
+  '/_authenticated/chaines-analyse': typeof AuthenticatedChainesAnalyseRoute
   '/_authenticated/clients': typeof AuthenticatedClientsRoute
   '/_authenticated/depenses': typeof AuthenticatedDepensesRoute
   '/_authenticated/devis': typeof AuthenticatedDevisRoute
@@ -334,6 +344,7 @@ export interface FileRouteTypes {
     | '/analyses'
     | '/avoirs'
     | '/bons-commande'
+    | '/chaines-analyse'
     | '/clients'
     | '/depenses'
     | '/devis'
@@ -367,6 +378,7 @@ export interface FileRouteTypes {
     | '/analyses'
     | '/avoirs'
     | '/bons-commande'
+    | '/chaines-analyse'
     | '/clients'
     | '/depenses'
     | '/devis'
@@ -402,6 +414,7 @@ export interface FileRouteTypes {
     | '/_authenticated/analyses'
     | '/_authenticated/avoirs'
     | '/_authenticated/bons-commande'
+    | '/_authenticated/chaines-analyse'
     | '/_authenticated/clients'
     | '/_authenticated/depenses'
     | '/_authenticated/devis'
@@ -643,6 +656,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/chaines-analyse': {
+      id: '/_authenticated/chaines-analyse'
+      path: '/chaines-analyse'
+      fullPath: '/chaines-analyse'
+      preLoaderRoute: typeof AuthenticatedChainesAnalyseRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/bons-commande': {
       id: '/_authenticated/bons-commande'
       path: '/bons-commande'
@@ -678,6 +698,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAnalysesRoute: typeof AuthenticatedAnalysesRoute
   AuthenticatedAvoirsRoute: typeof AuthenticatedAvoirsRoute
   AuthenticatedBonsCommandeRoute: typeof AuthenticatedBonsCommandeRoute
+  AuthenticatedChainesAnalyseRoute: typeof AuthenticatedChainesAnalyseRoute
   AuthenticatedClientsRoute: typeof AuthenticatedClientsRoute
   AuthenticatedDepensesRoute: typeof AuthenticatedDepensesRoute
   AuthenticatedDevisRoute: typeof AuthenticatedDevisRoute
@@ -710,6 +731,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAnalysesRoute: AuthenticatedAnalysesRoute,
   AuthenticatedAvoirsRoute: AuthenticatedAvoirsRoute,
   AuthenticatedBonsCommandeRoute: AuthenticatedBonsCommandeRoute,
+  AuthenticatedChainesAnalyseRoute: AuthenticatedChainesAnalyseRoute,
   AuthenticatedClientsRoute: AuthenticatedClientsRoute,
   AuthenticatedDepensesRoute: AuthenticatedDepensesRoute,
   AuthenticatedDevisRoute: AuthenticatedDevisRoute,
@@ -752,12 +774,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
