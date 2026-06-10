@@ -142,7 +142,7 @@ function ChainesPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Chaînes d'analyse" description="Workflow standardisé d'étapes par paramètre analytique" icon={Workflow}>
+      <PageHeader title="Chaînes d'analyse" description="Workflow standardisé d'étapes par paramètre analytique">
         <Button onClick={openNew}><Plus className="mr-2 h-4 w-4" />Nouvelle chaîne</Button>
       </PageHeader>
 

@@ -30,6 +30,7 @@ import {
   Package2,
   BarChart3,
   Layers,
+  Workflow,
 } from "lucide-react";
 import {
   Sidebar,
@@ -75,6 +76,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { label: "Feuilles de route", to: "/feuilles-route", icon: CalendarRange },
       { label: "Analyses", to: "/analyses", icon: FlaskConical },
       { label: "Packs d'analyses", to: "/pack-analyses", icon: Package2 },
+      { label: "Chaînes d'analyse", to: "/chaines-analyse", icon: Workflow },
       { label: "Types prélèvement", to: "/type-prelevements", icon: Layers },
       { label: "Rapports", to: "/rapports", icon: FileText },
       { label: "Rapports métier", to: "/rapports-metier", icon: BarChart3 },
