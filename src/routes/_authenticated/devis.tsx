@@ -343,7 +343,7 @@ function NewDevisDialog({ open, onClose }: { open: boolean; onClose: () => void 
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Nouveau devis</DialogTitle></DialogHeader>
         <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); create.mutate(); }}>
           <div className="grid gap-4 md:grid-cols-3">
@@ -459,7 +459,7 @@ function ViewDevisDialog({ id, onClose }: { id: string; onClose: () => void }) {
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Devis {data?.devis?.numero ?? ""}</DialogTitle></DialogHeader>
         {isLoading || !data ? (
           <div className="py-8 text-center text-sm text-muted-foreground">Chargement…</div>

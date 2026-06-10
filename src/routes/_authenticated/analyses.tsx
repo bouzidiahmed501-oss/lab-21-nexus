@@ -247,7 +247,7 @@ function NewDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-xl">
+      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nouvelle analyse</DialogTitle>
           <DialogDescription>Créer une analyse à partir d'un prélèvement reçu.</DialogDescription>

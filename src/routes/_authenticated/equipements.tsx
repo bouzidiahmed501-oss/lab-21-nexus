@@ -373,7 +373,7 @@ function EquipementForm({ onClose, onSaved }: { onClose: () => void; onSaved: ()
   };
 
   return (
-    <DialogContent className="max-w-2xl">
+    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
       <DialogHeader><DialogTitle>Nouvel équipement</DialogTitle></DialogHeader>
       <div className="grid grid-cols-2 gap-4">
         <Field label="Désignation *" value={form.designation} onChange={(v) => setForm({ ...form, designation: v })} />
@@ -457,7 +457,7 @@ function EquipementDetail({ equipement, onClose, onChanged }: { equipement: any;
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>{equipement.numero} — {equipement.designation}</DialogTitle></DialogHeader>
         <Tabs defaultValue="info">
           <TabsList>

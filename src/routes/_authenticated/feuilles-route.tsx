@@ -188,7 +188,7 @@ function NewDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Nouvelle feuille de route</DialogTitle></DialogHeader>
         <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); create.mutate(); }}>
           <div className="space-y-2"><Label>Date *</Label><Input type="date" value={dateFr} onChange={(e) => setDateFr(e.target.value)} /></div>

@@ -191,7 +191,7 @@ function EmployeDetail({ employe, onClose }: { employe: any; onClose: () => void
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Fiche employé — {employe.prenom} {employe.nom}</DialogTitle></DialogHeader>
         <div className="space-y-2">
           <InfoRow label="Matricule" value={employe.matricule || employe.numero} />

@@ -229,7 +229,7 @@ function SondeFormDialog({ open, onOpenChange, onSubmit, pending }: {
   });
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Nouvelle sonde</DialogTitle></DialogHeader>
         <div className="grid grid-cols-2 gap-3">
           <div><Label>Code *</Label><Input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} placeholder="SND-001" /></div>
@@ -327,7 +327,7 @@ function SondeDetailDialog({ sonde, onClose }: { sonde: Sonde; onClose: () => vo
 
   return (
     <Dialog open onOpenChange={(b) => !b && onClose()}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{sonde.code} — {sonde.libelle}</DialogTitle>
         </DialogHeader>

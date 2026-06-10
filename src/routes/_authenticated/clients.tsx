@@ -150,7 +150,7 @@ function ClientsPage() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? "Modifier client" : "Nouveau client"}</DialogTitle>
             <DialogDescription>Identification, adresse et contact principal.</DialogDescription>

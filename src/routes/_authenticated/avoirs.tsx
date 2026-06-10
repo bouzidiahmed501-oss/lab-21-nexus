@@ -204,7 +204,7 @@ function AvoirsPage() {
       </Card>
 
       <Dialog open={openNew} onOpenChange={setOpenNew}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Nouvel avoir</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="grid gap-3 md:grid-cols-3">
