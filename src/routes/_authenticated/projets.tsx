@@ -347,7 +347,7 @@ function ProjetDetail({ projet, onClose, onChanged }: { projet: any; onClose: ()
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>{projet.numero} — {projet.nom}</DialogTitle></DialogHeader>
         <Tabs defaultValue="info">
           <TabsList>

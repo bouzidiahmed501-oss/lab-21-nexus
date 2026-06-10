@@ -334,7 +334,7 @@ function NotificationsPage() {
 
       {/* Preferences dialog */}
       <Dialog open={prefsOpen} onOpenChange={setPrefsOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Préférences de notification</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="flex items-center justify-between">

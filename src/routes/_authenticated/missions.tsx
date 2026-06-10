@@ -393,7 +393,7 @@ function ViewMissionDialog({ id, onClose }: { id: string; onClose: () => void })
   });
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Détail de la mission</DialogTitle></DialogHeader>
         {mission && (
           <div className="grid grid-cols-2 gap-3 text-sm mb-4">

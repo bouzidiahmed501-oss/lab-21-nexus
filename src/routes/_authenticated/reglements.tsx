@@ -196,7 +196,7 @@ function ReglementsPage() {
       </Card>
 
       <Dialog open={openNew} onOpenChange={setOpenNew}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Nouveau règlement</DialogTitle></DialogHeader>
           <div className="grid gap-3 md:grid-cols-2">
             <div>
