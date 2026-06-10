@@ -206,9 +206,7 @@ function ChaineDialog(props: {
   onSave: (f: any) => void; saving: boolean;
 }) {
   const { open, onOpenChange, editing, catalogue, equipements, etapes } = props;
-  const [form, setForm] = useState<any>({});
-  useState(() => { setForm(editing ?? { code: "", libelle: "", catalogue_analyse_id: "", description: "", is_active: true }); return undefined; });
-  // sync when editing changes
+  const [form, setForm] = useState<any>(editing ?? { code: "", libelle: "", catalogue_analyse_id: "", description: "", is_active: true });
   useMemo(() => {
     setForm(editing ?? { code: "", libelle: "", catalogue_analyse_id: "", description: "", is_active: true });
   }, [editing, open]);
