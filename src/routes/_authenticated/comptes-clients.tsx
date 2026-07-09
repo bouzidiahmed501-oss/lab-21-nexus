@@ -32,7 +32,7 @@ function ComptesClientsPage() {
   const { data: clients = [] } = useQuery({
     queryKey: ["clients-compta"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("clients").select("id, raison_sociale, code_client").order("raison_sociale");
+      const { data, error } = await supabase.from("clients").select("id, raison_sociale, code").order("raison_sociale");
       if (error) throw error;
       return data ?? [];
     },
@@ -86,7 +86,7 @@ function ComptesClientsPage() {
 
   const filteredClients = clients.filter((c) => {
     const q = search.toLowerCase();
-    return !q || c.raison_sociale?.toLowerCase().includes(q) || c.code_client?.toLowerCase().includes(q);
+    return !q || c.raison_sociale?.toLowerCase().includes(q) || c.code?.toLowerCase().includes(q);
   });
 
   const totals = useMemo(() => {
@@ -120,7 +120,6 @@ function ComptesClientsPage() {
   return (
     <div className="flex h-full flex-col">
       <PageHeader
-        icon={Wallet}
         title="Comptabilité clients"
         description="Solde, historique des factures, règlements et avoirs par client."
       />
@@ -152,7 +151,7 @@ function ComptesClientsPage() {
                   >
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{c.raison_sociale}</p>
-                      <p className="text-[11px] text-muted-foreground">{c.code_client}</p>
+                      <p className="text-[11px] text-muted-foreground">{c.code}</p>
                     </div>
                     <span className={`text-sm font-semibold ${s.solde > 0 ? "text-destructive" : s.solde < 0 ? "text-emerald-600" : "text-muted-foreground"}`}>
                       {formatTND(s.solde)}
@@ -180,7 +179,7 @@ function ComptesClientsPage() {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => exportCSV(`compte-${selectedClient.code_client ?? selectedClient.id}.csv`,
+                  onClick={() => exportCSV(`compte-${selectedClient.code ?? selectedClient.id}.csv`,
                     mouvements.map((m) => ({ Date: formatDate(m.date), Type: m.type, Numero: m.numero, Debit: m.debit, Credit: m.credit }))
                   )}
                 >
