@@ -97,6 +97,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { label: "Facturation", to: "/facturation", icon: Receipt },
       { label: "Avoirs", to: "/avoirs", icon: FileMinus },
       { label: "Règlements", to: "/reglements", icon: CreditCard },
+      { label: "Comptes clients", to: "/comptes-clients", icon: Wallet },
       { label: "Recouvrement", to: "/recouvrement", icon: AlertTriangle },
       { label: "Dépenses", to: "/depenses", icon: Wallet },
       { label: "Équipements", to: "/equipements", icon: Wrench },
