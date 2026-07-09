@@ -12,6 +12,12 @@
  */
 
 @theme inline {
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --color-ocean-deep: #0c2340;
+  --color-ocean-mid: #1a4a6e;
+  --color-ocean-teal: #2d8a9e;
+  --color-ocean-mint: #5cbdb9;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

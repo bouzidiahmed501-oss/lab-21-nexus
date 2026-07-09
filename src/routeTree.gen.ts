@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PortailRouteImport } from './routes/portail'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
@@ -48,6 +49,11 @@ import { Route as ApiPublicSondesIngestRouteImport } from './routes/api/public/s
 const PortailRoute = PortailRouteImport.update({
   id: '/portail',
   path: '/portail',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -238,6 +244,7 @@ const ApiPublicSondesIngestRoute = ApiPublicSondesIngestRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/portail': typeof PortailRoute
   '/analyses': typeof AuthenticatedAnalysesRoute
   '/avoirs': typeof AuthenticatedAvoirsRoute
@@ -273,6 +280,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/portail': typeof PortailRoute
   '/analyses': typeof AuthenticatedAnalysesRoute
   '/avoirs': typeof AuthenticatedAvoirsRoute
@@ -311,6 +319,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/portail': typeof PortailRoute
   '/_authenticated/analyses': typeof AuthenticatedAnalysesRoute
   '/_authenticated/avoirs': typeof AuthenticatedAvoirsRoute
@@ -350,6 +359,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/onboarding'
     | '/portail'
     | '/analyses'
     | '/avoirs'
@@ -385,6 +395,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/onboarding'
     | '/portail'
     | '/analyses'
     | '/avoirs'
@@ -422,6 +433,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/login'
+    | '/onboarding'
     | '/portail'
     | '/_authenticated/analyses'
     | '/_authenticated/avoirs'
@@ -460,6 +472,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  OnboardingRoute: typeof OnboardingRoute
   PortailRoute: typeof PortailRoute
   ApiPublicSondesIngestRoute: typeof ApiPublicSondesIngestRoute
 }
@@ -471,6 +484,13 @@ declare module '@tanstack/react-router' {
       path: '/portail'
       fullPath: '/portail'
       preLoaderRoute: typeof PortailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -790,6 +810,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
+  OnboardingRoute: OnboardingRoute,
   PortailRoute: PortailRoute,
   ApiPublicSondesIngestRoute: ApiPublicSondesIngestRoute,
 }
