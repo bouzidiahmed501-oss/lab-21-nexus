@@ -70,6 +70,12 @@ function OnboardingPage() {
           </nav>
           <div className="flex items-center gap-2">
             <Link
+              to="/portail"
+              className="hidden rounded-md px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 sm:inline-flex"
+            >
+              Portail client
+            </Link>
+            <Link
               to="/login"
               className="hidden rounded-md px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:text-slate-900 sm:inline-flex"
             >
