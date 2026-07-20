@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import {
-  ClipboardList, FileText, Receipt, Download, LogOut, Loader2, Package, CheckCircle2, Clock, AlertCircle,
+  ClipboardList, FileText, Receipt, Download, LogOut, Loader2, Package, CheckCircle2, Clock, AlertCircle, ArrowLeft,
 } from "lucide-react";
 import { formatDate } from "@/lib/format";
 import { generateRapportPdf } from "@/lib/pdf/rapport";
