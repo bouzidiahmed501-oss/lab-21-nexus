@@ -44,6 +44,7 @@ import { Route as AuthenticatedChainesAnalyseRouteImport } from './routes/_authe
 import { Route as AuthenticatedBonsCommandeRouteImport } from './routes/_authenticated/bons-commande'
 import { Route as AuthenticatedAvoirsRouteImport } from './routes/_authenticated/avoirs'
 import { Route as AuthenticatedAnalysesRouteImport } from './routes/_authenticated/analyses'
+import { Route as AuthenticatedParametresSocieteRouteImport } from './routes/_authenticated/parametres.societe'
 import { Route as ApiPublicSondesIngestRouteImport } from './routes/api/public/sondes/ingest'
 
 const PortailRoute = PortailRouteImport.update({
@@ -235,6 +236,12 @@ const AuthenticatedAnalysesRoute = AuthenticatedAnalysesRouteImport.update({
   path: '/analyses',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedParametresSocieteRoute =
+  AuthenticatedParametresSocieteRouteImport.update({
+    id: '/societe',
+    path: '/societe',
+    getParentRoute: () => AuthenticatedParametresRoute,
+  } as any)
 const ApiPublicSondesIngestRoute = ApiPublicSondesIngestRouteImport.update({
   id: '/api/public/sondes/ingest',
   path: '/api/public/sondes/ingest',
@@ -261,7 +268,7 @@ export interface FileRoutesByFullPath {
   '/missions': typeof AuthenticatedMissionsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/pack-analyses': typeof AuthenticatedPackAnalysesRoute
-  '/parametres': typeof AuthenticatedParametresRoute
+  '/parametres': typeof AuthenticatedParametresRouteWithChildren
   '/prelevements': typeof AuthenticatedPrelevementsRoute
   '/produits': typeof AuthenticatedProduitsRoute
   '/projets': typeof AuthenticatedProjetsRoute
@@ -276,6 +283,7 @@ export interface FileRoutesByFullPath {
   '/rh': typeof AuthenticatedRhRoute
   '/sondes': typeof AuthenticatedSondesRoute
   '/type-prelevements': typeof AuthenticatedTypePrelevementsRoute
+  '/parametres/societe': typeof AuthenticatedParametresSocieteRoute
   '/api/public/sondes/ingest': typeof ApiPublicSondesIngestRoute
 }
 export interface FileRoutesByTo {
@@ -297,7 +305,7 @@ export interface FileRoutesByTo {
   '/missions': typeof AuthenticatedMissionsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/pack-analyses': typeof AuthenticatedPackAnalysesRoute
-  '/parametres': typeof AuthenticatedParametresRoute
+  '/parametres': typeof AuthenticatedParametresRouteWithChildren
   '/prelevements': typeof AuthenticatedPrelevementsRoute
   '/produits': typeof AuthenticatedProduitsRoute
   '/projets': typeof AuthenticatedProjetsRoute
@@ -313,6 +321,7 @@ export interface FileRoutesByTo {
   '/sondes': typeof AuthenticatedSondesRoute
   '/type-prelevements': typeof AuthenticatedTypePrelevementsRoute
   '/': typeof AuthenticatedIndexRoute
+  '/parametres/societe': typeof AuthenticatedParametresSocieteRoute
   '/api/public/sondes/ingest': typeof ApiPublicSondesIngestRoute
 }
 export interface FileRoutesById {
@@ -336,7 +345,7 @@ export interface FileRoutesById {
   '/_authenticated/missions': typeof AuthenticatedMissionsRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/pack-analyses': typeof AuthenticatedPackAnalysesRoute
-  '/_authenticated/parametres': typeof AuthenticatedParametresRoute
+  '/_authenticated/parametres': typeof AuthenticatedParametresRouteWithChildren
   '/_authenticated/prelevements': typeof AuthenticatedPrelevementsRoute
   '/_authenticated/produits': typeof AuthenticatedProduitsRoute
   '/_authenticated/projets': typeof AuthenticatedProjetsRoute
@@ -352,6 +361,7 @@ export interface FileRoutesById {
   '/_authenticated/sondes': typeof AuthenticatedSondesRoute
   '/_authenticated/type-prelevements': typeof AuthenticatedTypePrelevementsRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/parametres/societe': typeof AuthenticatedParametresSocieteRoute
   '/api/public/sondes/ingest': typeof ApiPublicSondesIngestRoute
 }
 export interface FileRouteTypes {
@@ -391,6 +401,7 @@ export interface FileRouteTypes {
     | '/rh'
     | '/sondes'
     | '/type-prelevements'
+    | '/parametres/societe'
     | '/api/public/sondes/ingest'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -428,6 +439,7 @@ export interface FileRouteTypes {
     | '/sondes'
     | '/type-prelevements'
     | '/'
+    | '/parametres/societe'
     | '/api/public/sondes/ingest'
   id:
     | '__root__'
@@ -466,6 +478,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sondes'
     | '/_authenticated/type-prelevements'
     | '/_authenticated/'
+    | '/_authenticated/parametres/societe'
     | '/api/public/sondes/ingest'
   fileRoutesById: FileRoutesById
 }
@@ -724,6 +737,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAnalysesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/parametres/societe': {
+      id: '/_authenticated/parametres/societe'
+      path: '/societe'
+      fullPath: '/parametres/societe'
+      preLoaderRoute: typeof AuthenticatedParametresSocieteRouteImport
+      parentRoute: typeof AuthenticatedParametresRoute
+    }
     '/api/public/sondes/ingest': {
       id: '/api/public/sondes/ingest'
       path: '/api/public/sondes/ingest'
@@ -733,6 +753,20 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthenticatedParametresRouteChildren {
+  AuthenticatedParametresSocieteRoute: typeof AuthenticatedParametresSocieteRoute
+}
+
+const AuthenticatedParametresRouteChildren: AuthenticatedParametresRouteChildren =
+  {
+    AuthenticatedParametresSocieteRoute: AuthenticatedParametresSocieteRoute,
+  }
+
+const AuthenticatedParametresRouteWithChildren =
+  AuthenticatedParametresRoute._addFileChildren(
+    AuthenticatedParametresRouteChildren,
+  )
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAnalysesRoute: typeof AuthenticatedAnalysesRoute
@@ -750,7 +784,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedMissionsRoute: typeof AuthenticatedMissionsRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPackAnalysesRoute: typeof AuthenticatedPackAnalysesRoute
-  AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
+  AuthenticatedParametresRoute: typeof AuthenticatedParametresRouteWithChildren
   AuthenticatedPrelevementsRoute: typeof AuthenticatedPrelevementsRoute
   AuthenticatedProduitsRoute: typeof AuthenticatedProduitsRoute
   AuthenticatedProjetsRoute: typeof AuthenticatedProjetsRoute
@@ -784,7 +818,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedMissionsRoute: AuthenticatedMissionsRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPackAnalysesRoute: AuthenticatedPackAnalysesRoute,
-  AuthenticatedParametresRoute: AuthenticatedParametresRoute,
+  AuthenticatedParametresRoute: AuthenticatedParametresRouteWithChildren,
   AuthenticatedPrelevementsRoute: AuthenticatedPrelevementsRoute,
   AuthenticatedProduitsRoute: AuthenticatedProduitsRoute,
   AuthenticatedProjetsRoute: AuthenticatedProjetsRoute,
