@@ -2773,6 +2773,62 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_rules: {
+        Row: {
+          actif: boolean
+          canal_email: boolean
+          canal_in_app: boolean
+          conditions: Json | null
+          created_at: string
+          delai_minutes: number | null
+          destinataires_roles: string[] | null
+          destinataires_users: string[] | null
+          evenement: string
+          id: string
+          libelle: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          actif?: boolean
+          canal_email?: boolean
+          canal_in_app?: boolean
+          conditions?: Json | null
+          created_at?: string
+          delai_minutes?: number | null
+          destinataires_roles?: string[] | null
+          destinataires_users?: string[] | null
+          evenement: string
+          id?: string
+          libelle: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          actif?: boolean
+          canal_email?: boolean
+          canal_in_app?: boolean
+          conditions?: Json | null
+          created_at?: string
+          delai_minutes?: number | null
+          destinataires_roles?: string[] | null
+          destinataires_users?: string[] | null
+          evenement?: string
+          id?: string
+          libelle?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_rules_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -2821,6 +2877,7 @@ export type Database = {
           padding: number
           prefix: string
           suffix: string
+          tenant_id: string | null
           updated_at: string
           year_reset: boolean
         }
@@ -2835,6 +2892,7 @@ export type Database = {
           padding?: number
           prefix?: string
           suffix?: string
+          tenant_id?: string | null
           updated_at?: string
           year_reset?: boolean
         }
@@ -2849,10 +2907,19 @@ export type Database = {
           padding?: number
           prefix?: string
           suffix?: string
+          tenant_id?: string | null
           updated_at?: string
           year_reset?: boolean
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "numbering_sequences_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pack_analyses: {
         Row: {
@@ -3233,6 +3300,7 @@ export type Database = {
           matricule: string | null
           phone: string | null
           service: string | null
+          tenant_id: string | null
           updated_at: string
         }
         Insert: {
@@ -3249,6 +3317,7 @@ export type Database = {
           matricule?: string | null
           phone?: string | null
           service?: string | null
+          tenant_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -3265,9 +3334,18 @@ export type Database = {
           matricule?: string | null
           phone?: string | null
           service?: string | null
+          tenant_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       projet_taches: {
         Row: {
@@ -4047,6 +4125,134 @@ export type Database = {
         }
         Relationships: []
       }
+      tenant_settings: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          tenant_id: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          tenant_id: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          tenant_id?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          adresse: string | null
+          code_postal: string | null
+          couleur_primaire: string | null
+          couleur_secondaire: string | null
+          created_at: string
+          email: string | null
+          favicon_url: string | null
+          format_date: string | null
+          fuseau: string | null
+          id: string
+          is_active: boolean
+          langue: string | null
+          logo_url: string | null
+          matricule_fiscal: string | null
+          mentions_legales: string | null
+          monnaie: string | null
+          nom: string
+          pays: string | null
+          retenue_source: number | null
+          rib: string | null
+          signature_scan_url: string | null
+          site_web: string | null
+          slug: string
+          telephone: string | null
+          timbre_fiscal: number | null
+          tva_defaut: number | null
+          updated_at: string
+          ville: string | null
+        }
+        Insert: {
+          adresse?: string | null
+          code_postal?: string | null
+          couleur_primaire?: string | null
+          couleur_secondaire?: string | null
+          created_at?: string
+          email?: string | null
+          favicon_url?: string | null
+          format_date?: string | null
+          fuseau?: string | null
+          id?: string
+          is_active?: boolean
+          langue?: string | null
+          logo_url?: string | null
+          matricule_fiscal?: string | null
+          mentions_legales?: string | null
+          monnaie?: string | null
+          nom: string
+          pays?: string | null
+          retenue_source?: number | null
+          rib?: string | null
+          signature_scan_url?: string | null
+          site_web?: string | null
+          slug: string
+          telephone?: string | null
+          timbre_fiscal?: number | null
+          tva_defaut?: number | null
+          updated_at?: string
+          ville?: string | null
+        }
+        Update: {
+          adresse?: string | null
+          code_postal?: string | null
+          couleur_primaire?: string | null
+          couleur_secondaire?: string | null
+          created_at?: string
+          email?: string | null
+          favicon_url?: string | null
+          format_date?: string | null
+          fuseau?: string | null
+          id?: string
+          is_active?: boolean
+          langue?: string | null
+          logo_url?: string | null
+          matricule_fiscal?: string | null
+          mentions_legales?: string | null
+          monnaie?: string | null
+          nom?: string
+          pays?: string | null
+          retenue_source?: number | null
+          rib?: string | null
+          signature_scan_url?: string | null
+          site_web?: string | null
+          slug?: string
+          telephone?: string | null
+          timbre_fiscal?: number | null
+          tva_defaut?: number | null
+          updated_at?: string
+          ville?: string | null
+        }
+        Relationships: []
+      }
       type_analyses: {
         Row: {
           code: string
@@ -4229,6 +4435,7 @@ export type Database = {
     }
     Functions: {
       convert_devis_to_bc: { Args: { _devis_id: string }; Returns: string }
+      current_tenant_id: { Args: never; Returns: string }
       current_user_client_id: { Args: never; Returns: string }
       has_role: {
         Args: {

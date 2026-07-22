@@ -1,114 +1,117 @@
 
-# Plan d'amélioration complet — BALIMS LIMS
+# Plan — BALIMS SaaS complet, workflow modifiable par société
 
-Objectif : atteindre la **parité fonctionnelle** avec le LIMS PHP legacy (analysé depuis `lims.zip`), compléter tous les modules "en construction", aligner la logique métier (papiers, standards, workflows) et finaliser l'UI.
-
----
-
-## Audit de l'écart (legacy vs actuel)
-
-**Modules legacy détectés dans le zip** (≈70 modules PHP) vs **modules BALIMS existants** :
-
-| Domaine | Legacy | BALIMS actuel | État |
-|---|---|---|---|
-| Commercial | BonCommande, Avoir, Facture, FacturationAuto, Reglement, Recouvrement, ModeReglement | bons-commande, facturation, devis | ⚠️ Avoir, Règlements détaillés, Recouvrement, FacturationAuto manquants |
-| Pré-analytique | Mission, FeuilleRoute, Prelevement, TypePrelevement, MoyenLocomotion | missions, feuilles-route, prelevements | ✓ presque complet (TypePrelevement à ajouter) |
-| Analytique | Analyse, PackAnalyse, Critere, Validation, Chaine, RapportEssai | analyses, rapports | ⚠️ PackAnalyse UI, Chaîne d'analyse, Validation multi-niveaux à compléter |
-| Référentiels | Famille, SuperFamille, ExtraFamille, TypeAnalyse, NatureAnalyse, Unite, Referentiel, Region, Milieu | referentiels, milieux, produits | ⚠️ Familles hiérarchiques (Super/Famille/Extra) à exposer |
-| Équipements | FicheAppareil, TypeAppareil, RequeteAppareil | equipements, sondes | ⚠️ Requêtes/réservations appareil manquantes |
-| Qualité | ActionCorrective, DocumentQualite, NonConformite | qualite | ⚠️ Workflow CAPA + GED à compléter |
-| Compta | Compte, CompteHistorique, CompteSolde, Transaction, Depense | facturation | ❌ Comptabilité client (solde, historique, dépenses) manquante |
-| RH/Users | Utilisateur, CatUtilisateur, Permission, USession, UtilisateurLog | rh, parametres | ⚠️ Gestion permissions fines + journal sessions à compléter |
-| Rapports | rapportBilan, rapportCA, rapportDelaiPayement, rapportImpaye, rapportKilometrage, rapportPrelevement, rapportPreleveur, rapportReglement | rapports (basique) | ❌ 8 rapports métier à recréer |
+Ordre demandé : **Phase 3 (visible) → Phase 2 (cœur workflow) → Phase 1 (fondations)**. Chaque phase = 1 migration DB + modules UI + vérification build. Je livre en séquence sans re-demander.
 
 ---
 
-## Lot 1 — Finitions UI & modules "à activer" (rapide)
+## Phase A — Personnalisation société (branding, numérotation, PDF, notifications)
 
-- **Popups responsives** : auditer & corriger toutes les modales débordantes (client, équipement, employé, BC, facture). Standardiser à `max-w-2xl` / `4xl` / `6xl` + `max-h-[90vh]`.
-- **Modules paramètres "à activer"** : compléter Sécurité (CRUD users + rôles + sessions), Audit (filtres + export), Sauvegardes (export ZIP multi-tables), Intégrations (status + test), Notifications (préférences).
-- **Sidebar** : ajouter entrées manquantes (Avoirs, Règlements, Comptabilité, Dépenses).
+Objectif : chaque société voit son identité sur toutes les sorties (écran + PDF + emails) et paramètre ses règles.
 
-## Lot 2 — Workflow commercial complet (papier-conforme legacy)
+### Base de données
+- Table `tenants` (société SaaS) : nom, logo_url, couleur_primaire, adresse, ninea/matricule fiscal, téléphone, email, mentions légales PDF, TVA par défaut, timbre fiscal, monnaie, langue.
+- Table `tenant_settings` (clé/valeur JSON) : préférences notifications, seuils IoT par défaut, format date, fuseau.
+- Extension `numbering_sequences` : `tenant_id`, `format_template` déjà présent → exposer via UI (prefix, padding, reset annuel, suffix).
+- Table `notification_rules` : événement (facture_impayee, seuil_iot, echeance_etalonnage, nc_ouverte…) × canaux (in-app / email) × destinataires (rôle ou user) × délai.
+- Table `tenant_branding_assets` : logos (entête, favicon, filigrane PDF) via `storage`.
 
-**DB + UI**
-- **Avoirs** (`avoirs`, `lignes_avoir` déjà en DB) → page `/avoirs` : création depuis facture, PDF, numérotation `AV-YYYY-XXXXX`.
-- **Règlements détaillés** (`reglements`, `lignes_reglement`, `modes_reglement` déjà en DB) → page `/reglements` : multi-modes (chèque/virement/espèces/traite), lettrage facture↔règlement, échéances.
-- **Recouvrement** : tableau de bord créances, relances automatiques (J+15/J+30/J+60), génération lettres de relance PDF.
-- **Facturation automatique** : génération mensuelle des factures depuis BC clôturés, paramétrable par client.
-- **Comptabilité client** : page `/clients/:id/compte` avec solde, historique mouvements (factures + règlements + avoirs).
-- **Dépenses** (nouvelle table `depenses`) : saisie + catégorisation + rattachement projet/mission.
+### Modules UI
+- Page `/parametres/societe` refonte complète en 6 onglets :
+  1. **Identité** : logo (upload), couleurs, coordonnées, mentions légales.
+  2. **Fiscalité** : TVA, timbre, retenue à la source, format Elfatoora, RIB.
+  3. **Numérotation** : éditeur visuel des séquences (DEV, BC, MIS, PRL, FR, ANA, RAP, FAC, AV, REG, DEP) avec aperçu live.
+  4. **PDF & Emails** : templates en-tête/pied, choix polices, signature scannée, aperçu.
+  5. **Notifications** : matrice événement × canal × destinataire.
+  6. **Préférences** : fuseau, langue, format date, seuils IoT par défaut.
+- Refactor `src/lib/pdf/*` pour lire `tenant` (logo, couleurs, mentions, RIB, TVA) au lieu des constantes.
+- `AppLayout` header : logo société dynamique.
 
-## Lot 3 — Workflow analytique conforme (chaîne + validation)
-
-- **Chaîne d'analyse** (table `chaines` à créer) : ordre des étapes par paramètre, technicien assigné par étape, durée standard.
-- **Validation multi-niveaux** (`validations` existe) : workflow technicien → chef labo → direction, signatures électroniques horodatées.
-- **Pack analyses** : UI complète CRUD (`pack_analyses`, `lignes_pack_analyse` en DB) avec application en 1 clic dans BC/devis.
-- **Catalogue analyses hiérarchique** : exposer Super-famille / Famille / Extra-famille avec navigation arborescente.
-- **Critères & seuils par région** : `region_criteres` existe → UI d'édition + application automatique selon région client.
-- **Types de prélèvement** : nouvelle table `type_prelevements` (eau, surface, air, aliment…) + champs spécifiques par type.
-
-## Lot 4 — Équipements & maintenance
-
-- **Requête appareil** (réservation) : nouvelle table `reservations_equipement` (qui utilise quoi quand), calendrier de disponibilité.
-- **Étalonnages** (`etalonnages` existe) : workflow complet alertes échéance + historique + certificats PDF.
-- **Maintenance** (`maintenances` existe) : planification préventive + curative + coûts.
-
-## Lot 5 — Qualité ISO 17025
-
-- **CAPA workflow** (`actions_capa` existe) : ouverture NC → action immédiate → action corrective → vérification d'efficacité → clôture.
-- **GED qualité** (`documents_qualite` existe) : versionning, diffusion contrôlée, accusé de lecture, archivage.
-- **Revue de direction** (`revues_direction` existe) : agenda type ISO, compte-rendu auto, indicateurs.
-- **Audits internes** (`audits` existe) : planification + grilles + constats + suivi.
-- **Indicateurs qualité** : tableau de bord avec objectifs/réalisé.
-
-## Lot 6 — Rapports métier (8 rapports legacy)
-
-Recréer en PDF + export Excel :
-1. **Bilan d'activité** (volumes / CA / délais)
-2. **Chiffre d'affaires** (par client / période / commercial)
-3. **Délai de paiement** moyen par client
-4. **Factures impayées** + ancienneté créance
-5. **Kilométrage** missions (par véhicule / préleveur)
-6. **Prélèvements** (volumes / types / régions)
-7. **Préleveur** (productivité par technicien)
-8. **Règlements** (par mode / période)
-
-## Lot 7 — Permissions & sécurité fines
-
-- **Permissions granulaires** (table `permissions` à créer) : par module × action (lire/écrire/valider/supprimer/exporter).
-- **Catégories utilisateurs** : presets de permissions réutilisables.
-- **Journal sessions** (`audit_log` + filtre session_id) : qui s'est connecté, IP, durée, actions.
-- **Verrouillage compte** après N échecs.
-
-## Lot 8 — Finitions transversales
-
-- i18n FR cohérent partout (corriger mélanges FR/EN restants).
-- Tooltips d'aide sur tous les champs métier complexes.
-- Raccourcis clavier (sauvegarder Ctrl+S, nouveau Ctrl+N).
-- Export Excel généralisé sur toutes les listes (déjà CSV).
-- Mode impression optimisé pour tous les PDF (entête société dynamique).
-- Numérotation centralisée : ajouter séquences `AV`, `REG`, `DEP`, `RES` à `numbering_sequences`.
+Livrable : toute sortie visuelle reflète la société connectée.
 
 ---
 
-## Ordre d'exécution proposé
+## Phase B — Éditeur de workflow (statuts, transitions, validations, signatures)
 
+Objectif : chaque société modifie ses étapes métier via UI, sans intervention développeur.
+
+### Base de données
+- Table `workflows` : `entity` (devis|bc|mission|prelevement|analyse|rapport|facture), `tenant_id`, nom, actif.
+- Table `workflow_states` : ordre, code, libellé, couleur, is_initial, is_final.
+- Table `workflow_transitions` : from_state, to_state, libellé, rôles autorisés, condition (JSON), action_hook.
+- Table `workflow_validations` : state cible → niveaux de validation ordonnés (rôle, is_signature, quorum).
+- Table `workflow_signatures` : entity_type, entity_id, state, user_id, signed_at, hash, ip.
+- Migration : remplace la colonne `statut` texte libre par FK `state_id` sur chaque entité métier, avec fallback compat.
+
+### Modules UI
+- Page `/parametres/workflows` — éditeur visuel :
+  - Liste des entités (Devis, BC, Mission, Prélèvement, Analyse, Rapport, Facture).
+  - Vue "kanban builder" : ajout/suppression/renommage/couleur des états, drag pour réordonner.
+  - Éditeur de transitions (flèches) avec panneau de règles : rôles, conditions, notifications déclenchées.
+  - Onglet "Validations & signatures" par état : niveaux, rôles, signature obligatoire.
+- Widget global `<StateTransitionButton>` : remplace tous les boutons de changement de statut existants. Vérifie transitions autorisées, rôle, déclenche validation + signature.
+- Historique par entité : timeline des transitions (qui, quand, IP, signature).
+- Templates prêts (ISO 17025 par défaut) importables en 1 clic pour démarrer.
+
+Livrable : toutes les entités métier passent par le moteur configurable, sans casser les workflows existants (préréglage = workflow actuel).
+
+---
+
+## Phase C — Fondations multi-tenant + permissions fines
+
+Objectif : isolation totale entre sociétés + matrice permissions granulaire.
+
+### Base de données
+- Ajout `tenant_id UUID` sur toutes les tables métier (50+), FK vers `tenants`, non-null, index.
+- Ajout `tenant_id` sur `profiles` (société active) et `user_tenants` (multi-adhésion : user × tenant × rôle).
+- Fonction SDF `current_tenant_id()` (lit `profiles.tenant_id` de `auth.uid()`).
+- **Réécriture de toutes les policies RLS** : `USING (tenant_id = public.current_tenant_id())`, plus les règles rôle existantes.
+- Backfill des données existantes vers un tenant "BALIMS Origine".
+- Table `permissions` : module × action (lire, écrire, valider, supprimer, exporter, imprimer).
+- Table `role_permissions` : rôle × permission, par tenant (overrides).
+- Fonction `has_permission(_user_id, _module, _action)` SDF.
+
+### Modules UI
+- Onboarding SaaS : `/inscription-societe` — création d'un tenant (nom, logo, admin initial), envoi email confirmation, provisioning.
+- Sélecteur de société dans le header (pour users multi-tenants).
+- Page `/parametres/permissions` : matrice interactive rôle × module × action, presets (ISO 17025, Labo privé, Labo public).
+- Page `/parametres/utilisateurs` : invitation par email, assignation rôle, désactivation, journal sessions.
+- Middleware côté client : masque les entrées sidebar + boutons selon `has_permission()`.
+- Middleware serverFn : vérifie `has_permission()` avant chaque écriture sensible.
+
+Livrable : plusieurs sociétés cohabitent sans se voir, chacune configure ses rôles.
+
+---
+
+## Détails techniques
+
+### Ordre d'implémentation
 ```
-Lot 1 (UI fixes)            → 1 itération  [bloquant UX]
-Lot 2 (Commercial)          → 2 itérations [haute valeur]
-Lot 3 (Analytique)          → 2 itérations [cœur métier ISO]
-Lot 6 (Rapports)            → 2 itérations [demandé direction]
-Lot 5 (Qualité ISO 17025)   → 1 itération
-Lot 4 (Équipements)         → 1 itération
-Lot 7 (Permissions)         → 1 itération
-Lot 8 (Finitions)           → 1 itération continue
+Phase A  → 3 itérations (DB, UI paramètres, refactor PDF/emails)
+Phase B  → 4 itérations (DB workflow, éditeur UI, widget transitions, migration statuts)
+Phase C  → 4 itérations (schema tenant_id + RLS, permissions, UI, onboarding SaaS)
 ```
+Total ~11 itérations. Build vert après chaque itération.
 
-Chaque lot = **1 migration DB consolidée** + **pages UI** + **PDF/exports** + **vérification build**.
+### Compatibilité & non-régression
+- Toutes les migrations sont additives ; un tenant par défaut "BALIMS Origine" absorbe l'existant.
+- Le moteur de workflow est préréglé avec les statuts actuels — aucun écran ne casse.
+- Les policies RLS sont réécrites en un seul passage transactionnel avec `GRANT` restauré.
+- Le linter Supabase est passé après chaque migration.
+
+### Sécurité
+- `tenant_id` non modifiable côté client (trigger `BEFORE UPDATE`).
+- Signature électronique : hash SHA-256 du snapshot entité + timestamp + user + IP, stocké en `workflow_signatures`.
+- Permissions vérifiées **côté serveur** via server functions ; UI masque = confort, pas sécurité.
+- Onboarding tenant : email confirmé obligatoire avant activation.
+
+### Ce que je NE fais PAS (hors scope demandé)
+- Facturation Stripe du SaaS lui-même (abonnements par tenant).
+- Auto-scaling / sharding DB.
+- Mobile natif.
 
 ---
 
 ## Démarrage
 
-Dites simplement **"go Lot 1"** (ou un autre numéro) pour que je lance l'implémentation. Par défaut j'enchaîne dans l'ordre proposé : **Lot 1 puis Lot 2** sans attendre validation intermédiaire.
+Dès approbation, j'attaque **Phase A itération 1** (migration `tenants` + `tenant_settings` + `notification_rules` + branding assets). Je poursuis la séquence sans attendre validation intermédiaire, sauf si un choix produit apparaît (ex. modèle de signature, format Elfatoora spécifique).

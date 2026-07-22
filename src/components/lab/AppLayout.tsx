@@ -8,6 +8,7 @@ import { Bell, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { useTenant } from "@/hooks/useTenant";
 
 interface AppLayoutProps {
   user: User;
@@ -102,6 +103,7 @@ function NotificationsBell({ userId }: { userId: string }) {
 
 export function AppLayout({ user }: AppLayoutProps) {
   const { roles, primaryRole, loading } = useUserRoles(user.id);
+  const { tenant } = useTenant();
 
   return (
     <SidebarProvider defaultOpen>
@@ -111,6 +113,12 @@ export function AppLayout({ user }: AppLayoutProps) {
           <header className="sticky top-0 z-30 flex h-11 items-center gap-3 border-b border-border bg-card/95 px-3 backdrop-blur">
             <SidebarTrigger className="h-7 w-7" />
             <Breadcrumbs />
+            {tenant && (
+              <div className="hidden items-center gap-2 border-l border-border/60 pl-3 md:flex">
+                {tenant.logo_url && <img src={tenant.logo_url} alt={tenant.nom} className="h-5 w-5 rounded object-contain" />}
+                <span className="text-xs font-medium text-foreground">{tenant.nom}</span>
+              </div>
+            )}
             <div className="ml-auto flex items-center gap-1">
               <NotificationsBell userId={user.id} />
             </div>
