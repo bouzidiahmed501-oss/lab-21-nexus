@@ -1135,6 +1135,148 @@ export type Database = {
           },
         ]
       }
+      cq_cartes_controle: {
+        Row: {
+          code: string
+          created_at: string | null
+          ecart_type: number | null
+          id: string
+          is_actif: boolean | null
+          limite_inf_action: number | null
+          limite_inf_avert: number | null
+          limite_sup_action: number | null
+          limite_sup_avert: number | null
+          methode_id: string | null
+          nom: string
+          notes: string | null
+          parametre_id: string | null
+          tenant_id: string | null
+          type_carte: string | null
+          updated_at: string | null
+          valeur_cible: number | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          ecart_type?: number | null
+          id?: string
+          is_actif?: boolean | null
+          limite_inf_action?: number | null
+          limite_inf_avert?: number | null
+          limite_sup_action?: number | null
+          limite_sup_avert?: number | null
+          methode_id?: string | null
+          nom: string
+          notes?: string | null
+          parametre_id?: string | null
+          tenant_id?: string | null
+          type_carte?: string | null
+          updated_at?: string | null
+          valeur_cible?: number | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          ecart_type?: number | null
+          id?: string
+          is_actif?: boolean | null
+          limite_inf_action?: number | null
+          limite_inf_avert?: number | null
+          limite_sup_action?: number | null
+          limite_sup_avert?: number | null
+          methode_id?: string | null
+          nom?: string
+          notes?: string | null
+          parametre_id?: string | null
+          tenant_id?: string | null
+          type_carte?: string | null
+          updated_at?: string | null
+          valeur_cible?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cq_cartes_controle_methode_id_fkey"
+            columns: ["methode_id"]
+            isOneToOne: false
+            referencedRelation: "methodes_analyse"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cq_cartes_controle_parametre_id_fkey"
+            columns: ["parametre_id"]
+            isOneToOne: false
+            referencedRelation: "parametres_analyse"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cq_cartes_controle_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cq_mesures: {
+        Row: {
+          carte_id: string
+          commentaire: string | null
+          created_at: string | null
+          date_mesure: string
+          equipement_id: string | null
+          hors_limite: boolean | null
+          id: string
+          reactif_lot: string | null
+          regle_violee: string | null
+          technicien_id: string | null
+          type_echantillon_cq: string | null
+          valeur: number
+        }
+        Insert: {
+          carte_id: string
+          commentaire?: string | null
+          created_at?: string | null
+          date_mesure?: string
+          equipement_id?: string | null
+          hors_limite?: boolean | null
+          id?: string
+          reactif_lot?: string | null
+          regle_violee?: string | null
+          technicien_id?: string | null
+          type_echantillon_cq?: string | null
+          valeur: number
+        }
+        Update: {
+          carte_id?: string
+          commentaire?: string | null
+          created_at?: string | null
+          date_mesure?: string
+          equipement_id?: string | null
+          hors_limite?: boolean | null
+          id?: string
+          reactif_lot?: string | null
+          regle_violee?: string | null
+          technicien_id?: string | null
+          type_echantillon_cq?: string | null
+          valeur?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cq_mesures_carte_id_fkey"
+            columns: ["carte_id"]
+            isOneToOne: false
+            referencedRelation: "cq_cartes_controle"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cq_mesures_equipement_id_fkey"
+            columns: ["equipement_id"]
+            isOneToOne: false
+            referencedRelation: "equipements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       criteres: {
         Row: {
           code: string
@@ -1466,6 +1608,187 @@ export type Database = {
           version?: string | null
         }
         Relationships: []
+      }
+      echantillon_historique: {
+        Row: {
+          action: string
+          ancien_statut: string | null
+          created_at: string | null
+          echantillon_id: string
+          emplacement: string | null
+          id: string
+          notes: string | null
+          nouveau_statut: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          ancien_statut?: string | null
+          created_at?: string | null
+          echantillon_id: string
+          emplacement?: string | null
+          id?: string
+          notes?: string | null
+          nouveau_statut?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          ancien_statut?: string | null
+          created_at?: string | null
+          echantillon_id?: string
+          emplacement?: string | null
+          id?: string
+          notes?: string | null
+          nouveau_statut?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "echantillon_historique_echantillon_id_fkey"
+            columns: ["echantillon_id"]
+            isOneToOne: false
+            referencedRelation: "echantillons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      echantillons: {
+        Row: {
+          code_barre: string
+          created_at: string | null
+          created_by: string | null
+          date_conservation_fin: string | null
+          date_destruction: string | null
+          date_reception: string | null
+          designation: string
+          emplacement: string | null
+          id: string
+          notes: string | null
+          prelevement_id: string | null
+          statut: string
+          temperature_stockage: number | null
+          tenant_id: string | null
+          type_echantillon: string | null
+          updated_at: string | null
+          volume_quantite: string | null
+        }
+        Insert: {
+          code_barre: string
+          created_at?: string | null
+          created_by?: string | null
+          date_conservation_fin?: string | null
+          date_destruction?: string | null
+          date_reception?: string | null
+          designation: string
+          emplacement?: string | null
+          id?: string
+          notes?: string | null
+          prelevement_id?: string | null
+          statut?: string
+          temperature_stockage?: number | null
+          tenant_id?: string | null
+          type_echantillon?: string | null
+          updated_at?: string | null
+          volume_quantite?: string | null
+        }
+        Update: {
+          code_barre?: string
+          created_at?: string | null
+          created_by?: string | null
+          date_conservation_fin?: string | null
+          date_destruction?: string | null
+          date_reception?: string | null
+          designation?: string
+          emplacement?: string | null
+          id?: string
+          notes?: string | null
+          prelevement_id?: string | null
+          statut?: string
+          temperature_stockage?: number | null
+          tenant_id?: string | null
+          type_echantillon?: string | null
+          updated_at?: string | null
+          volume_quantite?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "echantillons_prelevement_id_fkey"
+            columns: ["prelevement_id"]
+            isOneToOne: false
+            referencedRelation: "prelevements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "echantillons_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      eil_participations: {
+        Row: {
+          actions_correctives: string | null
+          created_at: string | null
+          date_participation: string | null
+          date_resultat: string | null
+          id: string
+          organisme: string
+          parametre: string | null
+          rapport_url: string | null
+          reference: string | null
+          resultat: string | null
+          tenant_id: string | null
+          updated_at: string | null
+          valeur_assignee: number | null
+          valeur_labo: number | null
+          z_score: number | null
+        }
+        Insert: {
+          actions_correctives?: string | null
+          created_at?: string | null
+          date_participation?: string | null
+          date_resultat?: string | null
+          id?: string
+          organisme: string
+          parametre?: string | null
+          rapport_url?: string | null
+          reference?: string | null
+          resultat?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+          valeur_assignee?: number | null
+          valeur_labo?: number | null
+          z_score?: number | null
+        }
+        Update: {
+          actions_correctives?: string | null
+          created_at?: string | null
+          date_participation?: string | null
+          date_resultat?: string | null
+          id?: string
+          organisme?: string
+          parametre?: string | null
+          rapport_url?: string | null
+          reference?: string | null
+          resultat?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+          valeur_assignee?: number | null
+          valeur_labo?: number | null
+          z_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eil_participations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       employes: {
         Row: {
@@ -3577,6 +3900,131 @@ export type Database = {
           },
         ]
       }
+      reactif_mouvements: {
+        Row: {
+          analyse_id: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          quantite: number
+          reactif_id: string
+          type_mouvement: string
+          user_id: string | null
+        }
+        Insert: {
+          analyse_id?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          quantite: number
+          reactif_id: string
+          type_mouvement: string
+          user_id?: string | null
+        }
+        Update: {
+          analyse_id?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          quantite?: number
+          reactif_id?: string
+          type_mouvement?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reactif_mouvements_analyse_id_fkey"
+            columns: ["analyse_id"]
+            isOneToOne: false
+            referencedRelation: "analyses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reactif_mouvements_reactif_id_fkey"
+            columns: ["reactif_id"]
+            isOneToOne: false
+            referencedRelation: "reactifs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reactifs: {
+        Row: {
+          code: string
+          created_at: string | null
+          date_ouverture: string | null
+          date_peremption: string | null
+          date_reception: string | null
+          emplacement: string | null
+          fds_url: string | null
+          fournisseur: string | null
+          id: string
+          is_actif: boolean | null
+          nom: string
+          notes: string | null
+          numero_lot: string | null
+          quantite_actuelle: number | null
+          quantite_initiale: number | null
+          seuil_alerte: number | null
+          temperature_stockage: string | null
+          tenant_id: string | null
+          unite: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          date_ouverture?: string | null
+          date_peremption?: string | null
+          date_reception?: string | null
+          emplacement?: string | null
+          fds_url?: string | null
+          fournisseur?: string | null
+          id?: string
+          is_actif?: boolean | null
+          nom: string
+          notes?: string | null
+          numero_lot?: string | null
+          quantite_actuelle?: number | null
+          quantite_initiale?: number | null
+          seuil_alerte?: number | null
+          temperature_stockage?: string | null
+          tenant_id?: string | null
+          unite?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          date_ouverture?: string | null
+          date_peremption?: string | null
+          date_reception?: string | null
+          emplacement?: string | null
+          fds_url?: string | null
+          fournisseur?: string | null
+          id?: string
+          is_actif?: boolean | null
+          nom?: string
+          notes?: string | null
+          numero_lot?: string | null
+          quantite_actuelle?: number | null
+          quantite_initiale?: number | null
+          seuil_alerte?: number | null
+          temperature_stockage?: string | null
+          tenant_id?: string | null
+          unite?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reactifs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reclamations: {
         Row: {
           analyse_id: string | null
@@ -4428,6 +4876,56 @@ export type Database = {
           validateur_id?: string
         }
         Relationships: []
+      }
+      validations_rapport: {
+        Row: {
+          commentaire: string | null
+          created_at: string | null
+          id: string
+          niveau: string
+          rapport_id: string
+          signature_hash: string | null
+          signature_ip: string | null
+          signed_at: string | null
+          statut: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          commentaire?: string | null
+          created_at?: string | null
+          id?: string
+          niveau: string
+          rapport_id: string
+          signature_hash?: string | null
+          signature_ip?: string | null
+          signed_at?: string | null
+          statut?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          commentaire?: string | null
+          created_at?: string | null
+          id?: string
+          niveau?: string
+          rapport_id?: string
+          signature_hash?: string | null
+          signature_ip?: string | null
+          signed_at?: string | null
+          statut?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "validations_rapport_rapport_id_fkey"
+            columns: ["rapport_id"]
+            isOneToOne: false
+            referencedRelation: "rapports"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

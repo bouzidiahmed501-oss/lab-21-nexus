@@ -14,6 +14,7 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedValidationsRouteImport } from './routes/_authenticated/validations'
 import { Route as AuthenticatedTypePrelevementsRouteImport } from './routes/_authenticated/type-prelevements'
 import { Route as AuthenticatedSondesRouteImport } from './routes/_authenticated/sondes'
 import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
@@ -22,6 +23,7 @@ import { Route as AuthenticatedReglementsRouteImport } from './routes/_authentic
 import { Route as AuthenticatedReferentielsRouteImport } from './routes/_authenticated/referentiels'
 import { Route as AuthenticatedRecouvrementRouteImport } from './routes/_authenticated/recouvrement'
 import { Route as AuthenticatedReceptionScanRouteImport } from './routes/_authenticated/reception-scan'
+import { Route as AuthenticatedReactifsRouteImport } from './routes/_authenticated/reactifs'
 import { Route as AuthenticatedRapportsMetierRouteImport } from './routes/_authenticated/rapports-metier'
 import { Route as AuthenticatedRapportsRouteImport } from './routes/_authenticated/rapports'
 import { Route as AuthenticatedQualiteRouteImport } from './routes/_authenticated/qualite'
@@ -36,8 +38,10 @@ import { Route as AuthenticatedMilieuxRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedFeuillesRouteRouteImport } from './routes/_authenticated/feuilles-route'
 import { Route as AuthenticatedFacturationRouteImport } from './routes/_authenticated/facturation'
 import { Route as AuthenticatedEquipementsRouteImport } from './routes/_authenticated/equipements'
+import { Route as AuthenticatedEchantillonsRouteImport } from './routes/_authenticated/echantillons'
 import { Route as AuthenticatedDevisRouteImport } from './routes/_authenticated/devis'
 import { Route as AuthenticatedDepensesRouteImport } from './routes/_authenticated/depenses'
+import { Route as AuthenticatedControleQualiteRouteImport } from './routes/_authenticated/controle-qualite'
 import { Route as AuthenticatedComptesClientsRouteImport } from './routes/_authenticated/comptes-clients'
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
 import { Route as AuthenticatedChainesAnalyseRouteImport } from './routes/_authenticated/chaines-analyse'
@@ -71,6 +75,12 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedValidationsRoute =
+  AuthenticatedValidationsRouteImport.update({
+    id: '/validations',
+    path: '/validations',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedTypePrelevementsRoute =
   AuthenticatedTypePrelevementsRouteImport.update({
     id: '/type-prelevements',
@@ -116,6 +126,11 @@ const AuthenticatedReceptionScanRoute =
     path: '/reception-scan',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedReactifsRoute = AuthenticatedReactifsRouteImport.update({
+  id: '/reactifs',
+  path: '/reactifs',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedRapportsMetierRoute =
   AuthenticatedRapportsMetierRouteImport.update({
     id: '/rapports-metier',
@@ -193,6 +208,12 @@ const AuthenticatedEquipementsRoute =
     path: '/equipements',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedEchantillonsRoute =
+  AuthenticatedEchantillonsRouteImport.update({
+    id: '/echantillons',
+    path: '/echantillons',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedDevisRoute = AuthenticatedDevisRouteImport.update({
   id: '/devis',
   path: '/devis',
@@ -203,6 +224,12 @@ const AuthenticatedDepensesRoute = AuthenticatedDepensesRouteImport.update({
   path: '/depenses',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedControleQualiteRoute =
+  AuthenticatedControleQualiteRouteImport.update({
+    id: '/controle-qualite',
+    path: '/controle-qualite',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedComptesClientsRoute =
   AuthenticatedComptesClientsRouteImport.update({
     id: '/comptes-clients',
@@ -259,8 +286,10 @@ export interface FileRoutesByFullPath {
   '/chaines-analyse': typeof AuthenticatedChainesAnalyseRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/comptes-clients': typeof AuthenticatedComptesClientsRoute
+  '/controle-qualite': typeof AuthenticatedControleQualiteRoute
   '/depenses': typeof AuthenticatedDepensesRoute
   '/devis': typeof AuthenticatedDevisRoute
+  '/echantillons': typeof AuthenticatedEchantillonsRoute
   '/equipements': typeof AuthenticatedEquipementsRoute
   '/facturation': typeof AuthenticatedFacturationRoute
   '/feuilles-route': typeof AuthenticatedFeuillesRouteRoute
@@ -275,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/qualite': typeof AuthenticatedQualiteRoute
   '/rapports': typeof AuthenticatedRapportsRoute
   '/rapports-metier': typeof AuthenticatedRapportsMetierRoute
+  '/reactifs': typeof AuthenticatedReactifsRoute
   '/reception-scan': typeof AuthenticatedReceptionScanRoute
   '/recouvrement': typeof AuthenticatedRecouvrementRoute
   '/referentiels': typeof AuthenticatedReferentielsRoute
@@ -283,6 +313,7 @@ export interface FileRoutesByFullPath {
   '/rh': typeof AuthenticatedRhRoute
   '/sondes': typeof AuthenticatedSondesRoute
   '/type-prelevements': typeof AuthenticatedTypePrelevementsRoute
+  '/validations': typeof AuthenticatedValidationsRoute
   '/parametres/societe': typeof AuthenticatedParametresSocieteRoute
   '/api/public/sondes/ingest': typeof ApiPublicSondesIngestRoute
 }
@@ -296,8 +327,10 @@ export interface FileRoutesByTo {
   '/chaines-analyse': typeof AuthenticatedChainesAnalyseRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/comptes-clients': typeof AuthenticatedComptesClientsRoute
+  '/controle-qualite': typeof AuthenticatedControleQualiteRoute
   '/depenses': typeof AuthenticatedDepensesRoute
   '/devis': typeof AuthenticatedDevisRoute
+  '/echantillons': typeof AuthenticatedEchantillonsRoute
   '/equipements': typeof AuthenticatedEquipementsRoute
   '/facturation': typeof AuthenticatedFacturationRoute
   '/feuilles-route': typeof AuthenticatedFeuillesRouteRoute
@@ -312,6 +345,7 @@ export interface FileRoutesByTo {
   '/qualite': typeof AuthenticatedQualiteRoute
   '/rapports': typeof AuthenticatedRapportsRoute
   '/rapports-metier': typeof AuthenticatedRapportsMetierRoute
+  '/reactifs': typeof AuthenticatedReactifsRoute
   '/reception-scan': typeof AuthenticatedReceptionScanRoute
   '/recouvrement': typeof AuthenticatedRecouvrementRoute
   '/referentiels': typeof AuthenticatedReferentielsRoute
@@ -320,6 +354,7 @@ export interface FileRoutesByTo {
   '/rh': typeof AuthenticatedRhRoute
   '/sondes': typeof AuthenticatedSondesRoute
   '/type-prelevements': typeof AuthenticatedTypePrelevementsRoute
+  '/validations': typeof AuthenticatedValidationsRoute
   '/': typeof AuthenticatedIndexRoute
   '/parametres/societe': typeof AuthenticatedParametresSocieteRoute
   '/api/public/sondes/ingest': typeof ApiPublicSondesIngestRoute
@@ -336,8 +371,10 @@ export interface FileRoutesById {
   '/_authenticated/chaines-analyse': typeof AuthenticatedChainesAnalyseRoute
   '/_authenticated/clients': typeof AuthenticatedClientsRoute
   '/_authenticated/comptes-clients': typeof AuthenticatedComptesClientsRoute
+  '/_authenticated/controle-qualite': typeof AuthenticatedControleQualiteRoute
   '/_authenticated/depenses': typeof AuthenticatedDepensesRoute
   '/_authenticated/devis': typeof AuthenticatedDevisRoute
+  '/_authenticated/echantillons': typeof AuthenticatedEchantillonsRoute
   '/_authenticated/equipements': typeof AuthenticatedEquipementsRoute
   '/_authenticated/facturation': typeof AuthenticatedFacturationRoute
   '/_authenticated/feuilles-route': typeof AuthenticatedFeuillesRouteRoute
@@ -352,6 +389,7 @@ export interface FileRoutesById {
   '/_authenticated/qualite': typeof AuthenticatedQualiteRoute
   '/_authenticated/rapports': typeof AuthenticatedRapportsRoute
   '/_authenticated/rapports-metier': typeof AuthenticatedRapportsMetierRoute
+  '/_authenticated/reactifs': typeof AuthenticatedReactifsRoute
   '/_authenticated/reception-scan': typeof AuthenticatedReceptionScanRoute
   '/_authenticated/recouvrement': typeof AuthenticatedRecouvrementRoute
   '/_authenticated/referentiels': typeof AuthenticatedReferentielsRoute
@@ -360,6 +398,7 @@ export interface FileRoutesById {
   '/_authenticated/rh': typeof AuthenticatedRhRoute
   '/_authenticated/sondes': typeof AuthenticatedSondesRoute
   '/_authenticated/type-prelevements': typeof AuthenticatedTypePrelevementsRoute
+  '/_authenticated/validations': typeof AuthenticatedValidationsRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/parametres/societe': typeof AuthenticatedParametresSocieteRoute
   '/api/public/sondes/ingest': typeof ApiPublicSondesIngestRoute
@@ -377,8 +416,10 @@ export interface FileRouteTypes {
     | '/chaines-analyse'
     | '/clients'
     | '/comptes-clients'
+    | '/controle-qualite'
     | '/depenses'
     | '/devis'
+    | '/echantillons'
     | '/equipements'
     | '/facturation'
     | '/feuilles-route'
@@ -393,6 +434,7 @@ export interface FileRouteTypes {
     | '/qualite'
     | '/rapports'
     | '/rapports-metier'
+    | '/reactifs'
     | '/reception-scan'
     | '/recouvrement'
     | '/referentiels'
@@ -401,6 +443,7 @@ export interface FileRouteTypes {
     | '/rh'
     | '/sondes'
     | '/type-prelevements'
+    | '/validations'
     | '/parametres/societe'
     | '/api/public/sondes/ingest'
   fileRoutesByTo: FileRoutesByTo
@@ -414,8 +457,10 @@ export interface FileRouteTypes {
     | '/chaines-analyse'
     | '/clients'
     | '/comptes-clients'
+    | '/controle-qualite'
     | '/depenses'
     | '/devis'
+    | '/echantillons'
     | '/equipements'
     | '/facturation'
     | '/feuilles-route'
@@ -430,6 +475,7 @@ export interface FileRouteTypes {
     | '/qualite'
     | '/rapports'
     | '/rapports-metier'
+    | '/reactifs'
     | '/reception-scan'
     | '/recouvrement'
     | '/referentiels'
@@ -438,6 +484,7 @@ export interface FileRouteTypes {
     | '/rh'
     | '/sondes'
     | '/type-prelevements'
+    | '/validations'
     | '/'
     | '/parametres/societe'
     | '/api/public/sondes/ingest'
@@ -453,8 +500,10 @@ export interface FileRouteTypes {
     | '/_authenticated/chaines-analyse'
     | '/_authenticated/clients'
     | '/_authenticated/comptes-clients'
+    | '/_authenticated/controle-qualite'
     | '/_authenticated/depenses'
     | '/_authenticated/devis'
+    | '/_authenticated/echantillons'
     | '/_authenticated/equipements'
     | '/_authenticated/facturation'
     | '/_authenticated/feuilles-route'
@@ -469,6 +518,7 @@ export interface FileRouteTypes {
     | '/_authenticated/qualite'
     | '/_authenticated/rapports'
     | '/_authenticated/rapports-metier'
+    | '/_authenticated/reactifs'
     | '/_authenticated/reception-scan'
     | '/_authenticated/recouvrement'
     | '/_authenticated/referentiels'
@@ -477,6 +527,7 @@ export interface FileRouteTypes {
     | '/_authenticated/rh'
     | '/_authenticated/sondes'
     | '/_authenticated/type-prelevements'
+    | '/_authenticated/validations'
     | '/_authenticated/'
     | '/_authenticated/parametres/societe'
     | '/api/public/sondes/ingest'
@@ -525,6 +576,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/validations': {
+      id: '/_authenticated/validations'
+      path: '/validations'
+      fullPath: '/validations'
+      preLoaderRoute: typeof AuthenticatedValidationsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/type-prelevements': {
@@ -581,6 +639,13 @@ declare module '@tanstack/react-router' {
       path: '/reception-scan'
       fullPath: '/reception-scan'
       preLoaderRoute: typeof AuthenticatedReceptionScanRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/reactifs': {
+      id: '/_authenticated/reactifs'
+      path: '/reactifs'
+      fullPath: '/reactifs'
+      preLoaderRoute: typeof AuthenticatedReactifsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/rapports-metier': {
@@ -681,6 +746,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEquipementsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/echantillons': {
+      id: '/_authenticated/echantillons'
+      path: '/echantillons'
+      fullPath: '/echantillons'
+      preLoaderRoute: typeof AuthenticatedEchantillonsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/devis': {
       id: '/_authenticated/devis'
       path: '/devis'
@@ -693,6 +765,13 @@ declare module '@tanstack/react-router' {
       path: '/depenses'
       fullPath: '/depenses'
       preLoaderRoute: typeof AuthenticatedDepensesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/controle-qualite': {
+      id: '/_authenticated/controle-qualite'
+      path: '/controle-qualite'
+      fullPath: '/controle-qualite'
+      preLoaderRoute: typeof AuthenticatedControleQualiteRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/comptes-clients': {
@@ -775,8 +854,10 @@ interface AuthenticatedRouteChildren {
   AuthenticatedChainesAnalyseRoute: typeof AuthenticatedChainesAnalyseRoute
   AuthenticatedClientsRoute: typeof AuthenticatedClientsRoute
   AuthenticatedComptesClientsRoute: typeof AuthenticatedComptesClientsRoute
+  AuthenticatedControleQualiteRoute: typeof AuthenticatedControleQualiteRoute
   AuthenticatedDepensesRoute: typeof AuthenticatedDepensesRoute
   AuthenticatedDevisRoute: typeof AuthenticatedDevisRoute
+  AuthenticatedEchantillonsRoute: typeof AuthenticatedEchantillonsRoute
   AuthenticatedEquipementsRoute: typeof AuthenticatedEquipementsRoute
   AuthenticatedFacturationRoute: typeof AuthenticatedFacturationRoute
   AuthenticatedFeuillesRouteRoute: typeof AuthenticatedFeuillesRouteRoute
@@ -791,6 +872,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedQualiteRoute: typeof AuthenticatedQualiteRoute
   AuthenticatedRapportsRoute: typeof AuthenticatedRapportsRoute
   AuthenticatedRapportsMetierRoute: typeof AuthenticatedRapportsMetierRoute
+  AuthenticatedReactifsRoute: typeof AuthenticatedReactifsRoute
   AuthenticatedReceptionScanRoute: typeof AuthenticatedReceptionScanRoute
   AuthenticatedRecouvrementRoute: typeof AuthenticatedRecouvrementRoute
   AuthenticatedReferentielsRoute: typeof AuthenticatedReferentielsRoute
@@ -799,6 +881,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedRhRoute: typeof AuthenticatedRhRoute
   AuthenticatedSondesRoute: typeof AuthenticatedSondesRoute
   AuthenticatedTypePrelevementsRoute: typeof AuthenticatedTypePrelevementsRoute
+  AuthenticatedValidationsRoute: typeof AuthenticatedValidationsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
@@ -809,8 +892,10 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedChainesAnalyseRoute: AuthenticatedChainesAnalyseRoute,
   AuthenticatedClientsRoute: AuthenticatedClientsRoute,
   AuthenticatedComptesClientsRoute: AuthenticatedComptesClientsRoute,
+  AuthenticatedControleQualiteRoute: AuthenticatedControleQualiteRoute,
   AuthenticatedDepensesRoute: AuthenticatedDepensesRoute,
   AuthenticatedDevisRoute: AuthenticatedDevisRoute,
+  AuthenticatedEchantillonsRoute: AuthenticatedEchantillonsRoute,
   AuthenticatedEquipementsRoute: AuthenticatedEquipementsRoute,
   AuthenticatedFacturationRoute: AuthenticatedFacturationRoute,
   AuthenticatedFeuillesRouteRoute: AuthenticatedFeuillesRouteRoute,
@@ -825,6 +910,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedQualiteRoute: AuthenticatedQualiteRoute,
   AuthenticatedRapportsRoute: AuthenticatedRapportsRoute,
   AuthenticatedRapportsMetierRoute: AuthenticatedRapportsMetierRoute,
+  AuthenticatedReactifsRoute: AuthenticatedReactifsRoute,
   AuthenticatedReceptionScanRoute: AuthenticatedReceptionScanRoute,
   AuthenticatedRecouvrementRoute: AuthenticatedRecouvrementRoute,
   AuthenticatedReferentielsRoute: AuthenticatedReferentielsRoute,
@@ -834,6 +920,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedRhRoute: AuthenticatedRhRoute,
   AuthenticatedSondesRoute: AuthenticatedSondesRoute,
   AuthenticatedTypePrelevementsRoute: AuthenticatedTypePrelevementsRoute,
+  AuthenticatedValidationsRoute: AuthenticatedValidationsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 
