@@ -132,7 +132,6 @@ function EchantillonsPage() {
       <PageHeader
         title="Échantillons"
         description="Cycle de vie complet : réception, analyse, archivage, destruction (ISO 17025 §7.4)"
-        icon={TestTubes}
         actions={
           <Button onClick={() => setOpen(true)}>
             <Plus className="mr-2 h-4 w-4" /> Nouvel échantillon
