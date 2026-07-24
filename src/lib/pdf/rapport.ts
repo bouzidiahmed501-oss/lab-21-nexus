@@ -73,7 +73,7 @@ function drawIsoHeader(doc: jsPDF, societe: Societe, rap: PdfRapportData, pr: nu
   return 50;
 }
 
-function drawClientBlock(doc: jsPDF, rap: PdfRapportData, startY: number): number {
+function drawClientBlock(doc: jsPDF, rap: PdfRapportData, startY: number, pr: number, pg: number, pb: number): number {
   const w = doc.internal.pageSize.getWidth();
   let y = startY;
 
@@ -107,7 +107,7 @@ export async function generateRapportPdf(rap: PdfRapportData): Promise<Blob> {
   const pageH = doc.internal.pageSize.getHeight();
 
   let y = drawIsoHeader(doc, societe, rap, pr, pg, pb);
-  y = drawClientBlock(doc, rap, y);
+  y = drawClientBlock(doc, rap, y, pr, pg, pb);
 
   // Count conformity
   let totalParams = 0;
