@@ -28,6 +28,7 @@ export interface PdfDevisData {
 
 export async function generateDevisPdf(d: PdfDevisData): Promise<Blob> {
   const societe = await getSociete();
+  const [pr, pg, pb] = hexToRgb(societe.couleur_primaire);
   const doc = new jsPDF();
   const w = doc.internal.pageSize.getWidth();
 
@@ -66,7 +67,7 @@ export async function generateDevisPdf(d: PdfDevisData): Promise<Blob> {
       l.tva_pct.toFixed(2),
       l.total_ht.toFixed(3),
     ]),
-    headStyles: { fillColor: [40, 60, 100] },
+    headStyles: { fillColor: [pr, pg, pb] },
     styles: { fontSize: 9 },
     columnStyles: { 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" }, 5: { halign: "right" } },
   });

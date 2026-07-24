@@ -57,15 +57,16 @@ function amountToWords(amount: number): string {
 
 export async function generateFacturePdf(fac: PdfFactureData): Promise<Blob> {
   const societe = await getSociete();
+  const [pr, pg, pb] = hexToRgb(societe.couleur_primaire);
   const doc = new jsPDF();
   const w = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
 
   // Header
-  doc.setDrawColor(40, 60, 100).setLineWidth(1.2);
+  doc.setDrawColor(pr, pg, pb).setLineWidth(1.2);
   doc.line(10, 10, w - 10, 10);
 
-  doc.setFontSize(14).setFont("helvetica", "bold").setTextColor(40, 60, 100);
+  doc.setFontSize(14).setFont("helvetica", "bold").setTextColor(pr, pg, pb);
   doc.text(societe.raison_sociale || "BALIMS", 14, 20);
   doc.setFontSize(8).setFont("helvetica", "normal").setTextColor(80);
   let sy = 25;
@@ -75,7 +76,7 @@ export async function generateFacturePdf(fac: PdfFactureData): Promise<Blob> {
   if (societe.matricule_fiscal) { doc.text(`MF : ${societe.matricule_fiscal}`, 14, sy); }
 
   // Title
-  doc.setFontSize(18).setFont("helvetica", "bold").setTextColor(40, 60, 100);
+  doc.setFontSize(18).setFont("helvetica", "bold").setTextColor(pr, pg, pb);
   doc.text("FACTURE", w - 14, 20, { align: "right" });
   doc.setFontSize(10).setFont("helvetica", "normal").setTextColor(60);
   doc.text(`N° ${fac.numero}`, w - 14, 27, { align: "right" });
@@ -86,7 +87,7 @@ export async function generateFacturePdf(fac: PdfFactureData): Promise<Blob> {
   doc.setDrawColor(200).line(10, 46, w - 10, 46);
   doc.setFillColor(245, 247, 250);
   doc.roundedRect(w / 2 + 5, 50, w / 2 - 19, 28, 2, 2, "F");
-  doc.setFontSize(9).setFont("helvetica", "bold").setTextColor(40, 60, 100);
+  doc.setFontSize(9).setFont("helvetica", "bold").setTextColor(pr, pg, pb);
   doc.text("DOIT :", w / 2 + 10, 56);
   doc.setFont("helvetica", "normal").setTextColor(50);
   doc.text(fac.client.raison_sociale, w / 2 + 10, 62);
@@ -113,7 +114,7 @@ export async function generateFacturePdf(fac: PdfFactureData): Promise<Blob> {
       l.tva.toFixed(0) + "%",
       l.total_ht.toFixed(3),
     ]),
-    headStyles: { fillColor: [40, 60, 100], fontSize: 8 },
+    headStyles: { fillColor: [pr, pg, pb], fontSize: 8 },
     styles: { fontSize: 8 },
     columnStyles: {
       2: { halign: "right" }, 3: { halign: "right" },
@@ -141,7 +142,7 @@ export async function generateFacturePdf(fac: PdfFactureData): Promise<Blob> {
     doc.text(val, w - 18, ty, { align: "right" });
     ty += 6;
   }
-  doc.setFont("helvetica", "bold").setTextColor(40, 60, 100);
+  doc.setFont("helvetica", "bold").setTextColor(pr, pg, pb);
   doc.text("NET À PAYER", totX, ty + 2);
   doc.setFontSize(11);
   doc.text(`${fac.net_a_payer.toFixed(3)} DT`, w - 18, ty + 2, { align: "right" });
@@ -164,7 +165,7 @@ export async function generateFacturePdf(fac: PdfFactureData): Promise<Blob> {
   const pages = doc.getNumberOfPages();
   for (let i = 1; i <= pages; i++) {
     doc.setPage(i);
-    doc.setDrawColor(40, 60, 100).setLineWidth(0.3);
+    doc.setDrawColor(pr, pg, pb).setLineWidth(0.3);
     doc.line(10, pageH - 12, w - 10, pageH - 12);
     doc.setFontSize(6).setTextColor(120);
     doc.text(`${societe.raison_sociale || "BALIMS"} — Facture N° ${fac.numero}`, 14, pageH - 7);
