@@ -1,22 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { supabase } from "@/integrations/supabase/client";
+import { getSociete, type Societe, hexToRgb } from "./societe";
 
-interface Societe {
-  raison_sociale?: string;
-  adresse?: string;
-  matricule_fiscal?: string;
-  telephone?: string;
-  email?: string;
-  ville?: string;
-  accreditation?: string;
-  logo_url?: string;
-}
-
-async function getSociete(): Promise<Societe> {
-  const { data } = await supabase.from("app_settings").select("settings").eq("category", "societe").maybeSingle();
-  return ((data?.settings as Societe) ?? {}) as Societe;
-}
 
 export interface PdfRapportResultat {
   parametre: string;

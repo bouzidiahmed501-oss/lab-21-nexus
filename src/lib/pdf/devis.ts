@@ -1,24 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { supabase } from "@/integrations/supabase/client";
+import { getSociete, hexToRgb } from "./societe";
 
-interface Societe {
-  raison_sociale?: string;
-  adresse?: string;
-  matricule_fiscal?: string;
-  telephone?: string;
-  email?: string;
-  ville?: string;
-}
-
-async function getSociete(): Promise<Societe> {
-  const { data } = await supabase
-    .from("app_settings")
-    .select("settings")
-    .eq("category", "societe")
-    .maybeSingle();
-  return ((data?.settings as Societe) ?? {}) as Societe;
-}
 
 export interface PdfDevisLine {
   designation: string;
