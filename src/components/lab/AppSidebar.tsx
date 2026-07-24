@@ -109,6 +109,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { label: "RH & Paie", to: "/rh", icon: UserCog },
       { label: "Projets", to: "/projets", icon: Briefcase },
       { label: "Qualité", to: "/qualite", icon: ShieldCheck },
+      { label: "Contrôle Qualité", to: "/controle-qualite", icon: BarChart3 },
     ],
   },
 ];
