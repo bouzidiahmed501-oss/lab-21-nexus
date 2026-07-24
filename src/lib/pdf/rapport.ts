@@ -31,7 +31,7 @@ export interface PdfRapportData {
   analyses: PdfRapportAnalyse[];
 }
 
-function drawIsoHeader(doc: jsPDF, societe: Societe, rap: PdfRapportData) {
+function drawIsoHeader(doc: jsPDF, societe: Societe, rap: PdfRapportData, pr: number, pg: number, pb: number) {
   const w = doc.internal.pageSize.getWidth();
 
   // Top border line
@@ -106,7 +106,7 @@ export async function generateRapportPdf(rap: PdfRapportData): Promise<Blob> {
   const w = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
 
-  let y = drawIsoHeader(doc, societe, rap);
+  let y = drawIsoHeader(doc, societe, rap, pr, pg, pb);
   y = drawClientBlock(doc, rap, y);
 
   // Count conformity
@@ -132,7 +132,7 @@ export async function generateRapportPdf(rap: PdfRapportData): Promise<Blob> {
 
   // Analyses tables
   for (const a of rap.analyses) {
-    if (y > pageH - 60) { doc.addPage(); y = drawPageHeader(doc, societe, rap); }
+    if (y > pageH - 60) { doc.addPage(); y = drawPageHeader(doc, societe, rap, pr, pg, pb); }
     doc.setFontSize(10).setFont("helvetica", "bold").setTextColor(pr, pg, pb);
     doc.text(`Analyse ${a.numero}${a.prelevement ? ` — Prél. ${a.prelevement}` : ""}`, 14, y);
     if (a.date_debut) {
@@ -175,7 +175,7 @@ export async function generateRapportPdf(rap: PdfRapportData): Promise<Blob> {
 
   // Conclusion
   if (rap.conclusion) {
-    if (y > pageH - 50) { doc.addPage(); y = drawPageHeader(doc, societe, rap); }
+    if (y > pageH - 50) { doc.addPage(); y = drawPageHeader(doc, societe, rap, pr, pg, pb); }
     doc.setFillColor(250, 250, 245);
     const concLines = doc.splitTextToSize(rap.conclusion, w - 36);
     const concH = concLines.length * 4 + 12;
@@ -188,7 +188,7 @@ export async function generateRapportPdf(rap: PdfRapportData): Promise<Blob> {
   }
 
   // Signature block
-  if (y > pageH - 45) { doc.addPage(); y = drawPageHeader(doc, societe, rap); }
+  if (y > pageH - 45) { doc.addPage(); y = drawPageHeader(doc, societe, rap, pr, pg, pb); }
   y += 5;
   doc.setDrawColor(200).setLineWidth(0.3);
 
@@ -219,7 +219,7 @@ export async function generateRapportPdf(rap: PdfRapportData): Promise<Blob> {
   return doc.output("blob");
 }
 
-function drawPageHeader(doc: jsPDF, societe: Societe, rap: PdfRapportData): number {
+function drawPageHeader(doc: jsPDF, societe: Societe, rap: PdfRapportData, pr: number, pg: number, pb: number): number {
   const w = doc.internal.pageSize.getWidth();
   doc.setDrawColor(pr, pg, pb).setLineWidth(0.5);
   doc.line(10, 10, w - 10, 10);
