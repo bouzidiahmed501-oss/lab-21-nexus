@@ -119,9 +119,11 @@ export function AppLayout({ user }: AppLayoutProps) {
                 <span className="text-xs font-medium text-foreground">{tenant.nom}</span>
               </div>
             )}
-            <div className="ml-auto flex items-center gap-1">
+            <div className="ml-auto flex items-center gap-2">
+              <CommandPalette />
               <NotificationsBell userId={user.id} />
             </div>
+
           </header>
           <main className="flex-1 overflow-x-hidden bg-background">
             {loading ? (
