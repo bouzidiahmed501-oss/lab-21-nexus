@@ -16,6 +16,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedValidationsRouteImport } from './routes/_authenticated/validations'
 import { Route as AuthenticatedTypePrelevementsRouteImport } from './routes/_authenticated/type-prelevements'
+import { Route as AuthenticatedStockageRouteImport } from './routes/_authenticated/stockage'
 import { Route as AuthenticatedSondesRouteImport } from './routes/_authenticated/sondes'
 import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
 import { Route as AuthenticatedReservationsEquipementRouteImport } from './routes/_authenticated/reservations-equipement'
@@ -35,6 +36,7 @@ import { Route as AuthenticatedPackAnalysesRouteImport } from './routes/_authent
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedMissionsRouteImport } from './routes/_authenticated/missions'
 import { Route as AuthenticatedMilieuxRouteImport } from './routes/_authenticated/milieux'
+import { Route as AuthenticatedFormationsRouteImport } from './routes/_authenticated/formations'
 import { Route as AuthenticatedFeuillesRouteRouteImport } from './routes/_authenticated/feuilles-route'
 import { Route as AuthenticatedFacturationRouteImport } from './routes/_authenticated/facturation'
 import { Route as AuthenticatedEquipementsRouteImport } from './routes/_authenticated/equipements'
@@ -87,6 +89,11 @@ const AuthenticatedTypePrelevementsRoute =
     path: '/type-prelevements',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedStockageRoute = AuthenticatedStockageRouteImport.update({
+  id: '/stockage',
+  path: '/stockage',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedSondesRoute = AuthenticatedSondesRouteImport.update({
   id: '/sondes',
   path: '/sondes',
@@ -188,6 +195,11 @@ const AuthenticatedMissionsRoute = AuthenticatedMissionsRouteImport.update({
 const AuthenticatedMilieuxRoute = AuthenticatedMilieuxRouteImport.update({
   id: '/milieux',
   path: '/milieux',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedFormationsRoute = AuthenticatedFormationsRouteImport.update({
+  id: '/formations',
+  path: '/formations',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedFeuillesRouteRoute =
@@ -293,6 +305,7 @@ export interface FileRoutesByFullPath {
   '/equipements': typeof AuthenticatedEquipementsRoute
   '/facturation': typeof AuthenticatedFacturationRoute
   '/feuilles-route': typeof AuthenticatedFeuillesRouteRoute
+  '/formations': typeof AuthenticatedFormationsRoute
   '/milieux': typeof AuthenticatedMilieuxRoute
   '/missions': typeof AuthenticatedMissionsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
@@ -312,6 +325,7 @@ export interface FileRoutesByFullPath {
   '/reservations-equipement': typeof AuthenticatedReservationsEquipementRoute
   '/rh': typeof AuthenticatedRhRoute
   '/sondes': typeof AuthenticatedSondesRoute
+  '/stockage': typeof AuthenticatedStockageRoute
   '/type-prelevements': typeof AuthenticatedTypePrelevementsRoute
   '/validations': typeof AuthenticatedValidationsRoute
   '/parametres/societe': typeof AuthenticatedParametresSocieteRoute
@@ -334,6 +348,7 @@ export interface FileRoutesByTo {
   '/equipements': typeof AuthenticatedEquipementsRoute
   '/facturation': typeof AuthenticatedFacturationRoute
   '/feuilles-route': typeof AuthenticatedFeuillesRouteRoute
+  '/formations': typeof AuthenticatedFormationsRoute
   '/milieux': typeof AuthenticatedMilieuxRoute
   '/missions': typeof AuthenticatedMissionsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
@@ -353,6 +368,7 @@ export interface FileRoutesByTo {
   '/reservations-equipement': typeof AuthenticatedReservationsEquipementRoute
   '/rh': typeof AuthenticatedRhRoute
   '/sondes': typeof AuthenticatedSondesRoute
+  '/stockage': typeof AuthenticatedStockageRoute
   '/type-prelevements': typeof AuthenticatedTypePrelevementsRoute
   '/validations': typeof AuthenticatedValidationsRoute
   '/': typeof AuthenticatedIndexRoute
@@ -378,6 +394,7 @@ export interface FileRoutesById {
   '/_authenticated/equipements': typeof AuthenticatedEquipementsRoute
   '/_authenticated/facturation': typeof AuthenticatedFacturationRoute
   '/_authenticated/feuilles-route': typeof AuthenticatedFeuillesRouteRoute
+  '/_authenticated/formations': typeof AuthenticatedFormationsRoute
   '/_authenticated/milieux': typeof AuthenticatedMilieuxRoute
   '/_authenticated/missions': typeof AuthenticatedMissionsRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
@@ -397,6 +414,7 @@ export interface FileRoutesById {
   '/_authenticated/reservations-equipement': typeof AuthenticatedReservationsEquipementRoute
   '/_authenticated/rh': typeof AuthenticatedRhRoute
   '/_authenticated/sondes': typeof AuthenticatedSondesRoute
+  '/_authenticated/stockage': typeof AuthenticatedStockageRoute
   '/_authenticated/type-prelevements': typeof AuthenticatedTypePrelevementsRoute
   '/_authenticated/validations': typeof AuthenticatedValidationsRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -423,6 +441,7 @@ export interface FileRouteTypes {
     | '/equipements'
     | '/facturation'
     | '/feuilles-route'
+    | '/formations'
     | '/milieux'
     | '/missions'
     | '/notifications'
@@ -442,6 +461,7 @@ export interface FileRouteTypes {
     | '/reservations-equipement'
     | '/rh'
     | '/sondes'
+    | '/stockage'
     | '/type-prelevements'
     | '/validations'
     | '/parametres/societe'
@@ -464,6 +484,7 @@ export interface FileRouteTypes {
     | '/equipements'
     | '/facturation'
     | '/feuilles-route'
+    | '/formations'
     | '/milieux'
     | '/missions'
     | '/notifications'
@@ -483,6 +504,7 @@ export interface FileRouteTypes {
     | '/reservations-equipement'
     | '/rh'
     | '/sondes'
+    | '/stockage'
     | '/type-prelevements'
     | '/validations'
     | '/'
@@ -507,6 +529,7 @@ export interface FileRouteTypes {
     | '/_authenticated/equipements'
     | '/_authenticated/facturation'
     | '/_authenticated/feuilles-route'
+    | '/_authenticated/formations'
     | '/_authenticated/milieux'
     | '/_authenticated/missions'
     | '/_authenticated/notifications'
@@ -526,6 +549,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reservations-equipement'
     | '/_authenticated/rh'
     | '/_authenticated/sondes'
+    | '/_authenticated/stockage'
     | '/_authenticated/type-prelevements'
     | '/_authenticated/validations'
     | '/_authenticated/'
@@ -590,6 +614,13 @@ declare module '@tanstack/react-router' {
       path: '/type-prelevements'
       fullPath: '/type-prelevements'
       preLoaderRoute: typeof AuthenticatedTypePrelevementsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/stockage': {
+      id: '/_authenticated/stockage'
+      path: '/stockage'
+      fullPath: '/stockage'
+      preLoaderRoute: typeof AuthenticatedStockageRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/sondes': {
@@ -723,6 +754,13 @@ declare module '@tanstack/react-router' {
       path: '/milieux'
       fullPath: '/milieux'
       preLoaderRoute: typeof AuthenticatedMilieuxRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/formations': {
+      id: '/_authenticated/formations'
+      path: '/formations'
+      fullPath: '/formations'
+      preLoaderRoute: typeof AuthenticatedFormationsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/feuilles-route': {
@@ -861,6 +899,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedEquipementsRoute: typeof AuthenticatedEquipementsRoute
   AuthenticatedFacturationRoute: typeof AuthenticatedFacturationRoute
   AuthenticatedFeuillesRouteRoute: typeof AuthenticatedFeuillesRouteRoute
+  AuthenticatedFormationsRoute: typeof AuthenticatedFormationsRoute
   AuthenticatedMilieuxRoute: typeof AuthenticatedMilieuxRoute
   AuthenticatedMissionsRoute: typeof AuthenticatedMissionsRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
@@ -880,6 +919,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedReservationsEquipementRoute: typeof AuthenticatedReservationsEquipementRoute
   AuthenticatedRhRoute: typeof AuthenticatedRhRoute
   AuthenticatedSondesRoute: typeof AuthenticatedSondesRoute
+  AuthenticatedStockageRoute: typeof AuthenticatedStockageRoute
   AuthenticatedTypePrelevementsRoute: typeof AuthenticatedTypePrelevementsRoute
   AuthenticatedValidationsRoute: typeof AuthenticatedValidationsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -899,6 +939,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedEquipementsRoute: AuthenticatedEquipementsRoute,
   AuthenticatedFacturationRoute: AuthenticatedFacturationRoute,
   AuthenticatedFeuillesRouteRoute: AuthenticatedFeuillesRouteRoute,
+  AuthenticatedFormationsRoute: AuthenticatedFormationsRoute,
   AuthenticatedMilieuxRoute: AuthenticatedMilieuxRoute,
   AuthenticatedMissionsRoute: AuthenticatedMissionsRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
@@ -919,6 +960,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
     AuthenticatedReservationsEquipementRoute,
   AuthenticatedRhRoute: AuthenticatedRhRoute,
   AuthenticatedSondesRoute: AuthenticatedSondesRoute,
+  AuthenticatedStockageRoute: AuthenticatedStockageRoute,
   AuthenticatedTypePrelevementsRoute: AuthenticatedTypePrelevementsRoute,
   AuthenticatedValidationsRoute: AuthenticatedValidationsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
