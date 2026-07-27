@@ -1663,6 +1663,7 @@ export type Database = {
           date_reception: string | null
           designation: string
           emplacement: string | null
+          emplacement_id: string | null
           id: string
           notes: string | null
           prelevement_id: string | null
@@ -1682,6 +1683,7 @@ export type Database = {
           date_reception?: string | null
           designation: string
           emplacement?: string | null
+          emplacement_id?: string | null
           id?: string
           notes?: string | null
           prelevement_id?: string | null
@@ -1701,6 +1703,7 @@ export type Database = {
           date_reception?: string | null
           designation?: string
           emplacement?: string | null
+          emplacement_id?: string | null
           id?: string
           notes?: string | null
           prelevement_id?: string | null
@@ -1712,6 +1715,13 @@ export type Database = {
           volume_quantite?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "echantillons_emplacement_id_fkey"
+            columns: ["emplacement_id"]
+            isOneToOne: false
+            referencedRelation: "emplacements_stockage"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "echantillons_prelevement_id_fkey"
             columns: ["prelevement_id"]
@@ -1786,6 +1796,71 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      emplacements_stockage: {
+        Row: {
+          capacite: number | null
+          code: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          libelle: string
+          notes: string | null
+          occupation: number
+          parent_id: string | null
+          temperature_cible: number | null
+          temperature_max: number | null
+          temperature_min: number | null
+          tenant_id: string | null
+          type_emplacement: string
+          updated_at: string
+        }
+        Insert: {
+          capacite?: number | null
+          code: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          libelle: string
+          notes?: string | null
+          occupation?: number
+          parent_id?: string | null
+          temperature_cible?: number | null
+          temperature_max?: number | null
+          temperature_min?: number | null
+          tenant_id?: string | null
+          type_emplacement?: string
+          updated_at?: string
+        }
+        Update: {
+          capacite?: number | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          libelle?: string
+          notes?: string | null
+          occupation?: number
+          parent_id?: string | null
+          temperature_cible?: number | null
+          temperature_max?: number | null
+          temperature_min?: number | null
+          tenant_id?: string | null
+          type_emplacement?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emplacements_stockage_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "emplacements_stockage"
             referencedColumns: ["id"]
           },
         ]
@@ -2224,6 +2299,74 @@ export type Database = {
         }
         Relationships: []
       }
+      formations: {
+        Row: {
+          attestation_url: string | null
+          cout: number | null
+          created_at: string
+          created_by: string | null
+          date_debut: string | null
+          date_fin: string | null
+          duree_heures: number | null
+          employe_id: string
+          id: string
+          intitule: string
+          notes: string | null
+          organisme: string | null
+          resultat: string
+          score: number | null
+          tenant_id: string | null
+          type_formation: string
+          updated_at: string
+        }
+        Insert: {
+          attestation_url?: string | null
+          cout?: number | null
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string | null
+          date_fin?: string | null
+          duree_heures?: number | null
+          employe_id: string
+          id?: string
+          intitule: string
+          notes?: string | null
+          organisme?: string | null
+          resultat?: string
+          score?: number | null
+          tenant_id?: string | null
+          type_formation?: string
+          updated_at?: string
+        }
+        Update: {
+          attestation_url?: string | null
+          cout?: number | null
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string | null
+          date_fin?: string | null
+          duree_heures?: number | null
+          employe_id?: string
+          id?: string
+          intitule?: string
+          notes?: string | null
+          organisme?: string | null
+          resultat?: string
+          score?: number | null
+          tenant_id?: string | null
+          type_formation?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "formations_employe_id_fkey"
+            columns: ["employe_id"]
+            isOneToOne: false
+            referencedRelation: "employes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fr_taches: {
         Row: {
           created_at: string
@@ -2275,6 +2418,95 @@ export type Database = {
             columns: ["prelevement_id"]
             isOneToOne: false
             referencedRelation: "prelevements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      habilitations: {
+        Row: {
+          commentaire: string | null
+          created_at: string
+          created_by: string | null
+          date_expiration: string | null
+          date_habilitation: string
+          employe_id: string
+          equipement_id: string | null
+          evaluateur_id: string | null
+          id: string
+          intitule: string
+          methode_id: string | null
+          niveau: string
+          parametre_id: string | null
+          preuve_url: string | null
+          statut: string
+          tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_expiration?: string | null
+          date_habilitation?: string
+          employe_id: string
+          equipement_id?: string | null
+          evaluateur_id?: string | null
+          id?: string
+          intitule: string
+          methode_id?: string | null
+          niveau?: string
+          parametre_id?: string | null
+          preuve_url?: string | null
+          statut?: string
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_expiration?: string | null
+          date_habilitation?: string
+          employe_id?: string
+          equipement_id?: string | null
+          evaluateur_id?: string | null
+          id?: string
+          intitule?: string
+          methode_id?: string | null
+          niveau?: string
+          parametre_id?: string | null
+          preuve_url?: string | null
+          statut?: string
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habilitations_employe_id_fkey"
+            columns: ["employe_id"]
+            isOneToOne: false
+            referencedRelation: "employes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "habilitations_equipement_id_fkey"
+            columns: ["equipement_id"]
+            isOneToOne: false
+            referencedRelation: "equipements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "habilitations_methode_id_fkey"
+            columns: ["methode_id"]
+            isOneToOne: false
+            referencedRelation: "methodes_analyse"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "habilitations_parametre_id_fkey"
+            columns: ["parametre_id"]
+            isOneToOne: false
+            referencedRelation: "parametres_analyse"
             referencedColumns: ["id"]
           },
         ]
