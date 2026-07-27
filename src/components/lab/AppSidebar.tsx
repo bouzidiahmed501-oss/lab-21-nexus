@@ -31,6 +31,8 @@ import {
   BarChart3,
   Layers,
   Workflow,
+  Boxes,
+  GraduationCap,
 } from "lucide-react";
 import {
   Sidebar,
@@ -74,6 +76,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { label: "Prélèvements", to: "/prelevements", icon: TestTubes },
       { label: "Scan réception", to: "/reception-scan", icon: ScanLine },
       { label: "Échantillons", to: "/echantillons", icon: TestTubes },
+      { label: "Plan de stockage", to: "/stockage", icon: Boxes },
       { label: "Feuilles de route", to: "/feuilles-route", icon: CalendarRange },
       { label: "Analyses", to: "/analyses", icon: FlaskConical },
       { label: "Packs d'analyses", to: "/pack-analyses", icon: Package2 },
@@ -107,6 +110,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { label: "Réservations équip.", to: "/reservations-equipement", icon: CalendarClock },
       { label: "Sondes IoT", to: "/sondes", icon: Radio },
       { label: "RH & Paie", to: "/rh", icon: UserCog },
+      { label: "Formations & habilitations", to: "/formations", icon: GraduationCap },
       { label: "Projets", to: "/projets", icon: Briefcase },
       { label: "Qualité", to: "/qualite", icon: ShieldCheck },
       { label: "Contrôle Qualité", to: "/controle-qualite", icon: BarChart3 },
