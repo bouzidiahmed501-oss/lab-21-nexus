@@ -16,6 +16,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedValidationsRouteImport } from './routes/_authenticated/validations'
 import { Route as AuthenticatedTypePrelevementsRouteImport } from './routes/_authenticated/type-prelevements'
+import { Route as AuthenticatedStockageRouteImport } from './routes/_authenticated/stockage'
 import { Route as AuthenticatedSondesRouteImport } from './routes/_authenticated/sondes'
 import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
 import { Route as AuthenticatedReservationsEquipementRouteImport } from './routes/_authenticated/reservations-equipement'
@@ -87,6 +88,11 @@ const AuthenticatedTypePrelevementsRoute =
     path: '/type-prelevements',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedStockageRoute = AuthenticatedStockageRouteImport.update({
+  id: '/stockage',
+  path: '/stockage',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedSondesRoute = AuthenticatedSondesRouteImport.update({
   id: '/sondes',
   path: '/sondes',
@@ -312,6 +318,7 @@ export interface FileRoutesByFullPath {
   '/reservations-equipement': typeof AuthenticatedReservationsEquipementRoute
   '/rh': typeof AuthenticatedRhRoute
   '/sondes': typeof AuthenticatedSondesRoute
+  '/stockage': typeof AuthenticatedStockageRoute
   '/type-prelevements': typeof AuthenticatedTypePrelevementsRoute
   '/validations': typeof AuthenticatedValidationsRoute
   '/parametres/societe': typeof AuthenticatedParametresSocieteRoute
@@ -353,6 +360,7 @@ export interface FileRoutesByTo {
   '/reservations-equipement': typeof AuthenticatedReservationsEquipementRoute
   '/rh': typeof AuthenticatedRhRoute
   '/sondes': typeof AuthenticatedSondesRoute
+  '/stockage': typeof AuthenticatedStockageRoute
   '/type-prelevements': typeof AuthenticatedTypePrelevementsRoute
   '/validations': typeof AuthenticatedValidationsRoute
   '/': typeof AuthenticatedIndexRoute
@@ -397,6 +405,7 @@ export interface FileRoutesById {
   '/_authenticated/reservations-equipement': typeof AuthenticatedReservationsEquipementRoute
   '/_authenticated/rh': typeof AuthenticatedRhRoute
   '/_authenticated/sondes': typeof AuthenticatedSondesRoute
+  '/_authenticated/stockage': typeof AuthenticatedStockageRoute
   '/_authenticated/type-prelevements': typeof AuthenticatedTypePrelevementsRoute
   '/_authenticated/validations': typeof AuthenticatedValidationsRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -442,6 +451,7 @@ export interface FileRouteTypes {
     | '/reservations-equipement'
     | '/rh'
     | '/sondes'
+    | '/stockage'
     | '/type-prelevements'
     | '/validations'
     | '/parametres/societe'
@@ -483,6 +493,7 @@ export interface FileRouteTypes {
     | '/reservations-equipement'
     | '/rh'
     | '/sondes'
+    | '/stockage'
     | '/type-prelevements'
     | '/validations'
     | '/'
@@ -526,6 +537,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reservations-equipement'
     | '/_authenticated/rh'
     | '/_authenticated/sondes'
+    | '/_authenticated/stockage'
     | '/_authenticated/type-prelevements'
     | '/_authenticated/validations'
     | '/_authenticated/'
@@ -590,6 +602,13 @@ declare module '@tanstack/react-router' {
       path: '/type-prelevements'
       fullPath: '/type-prelevements'
       preLoaderRoute: typeof AuthenticatedTypePrelevementsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/stockage': {
+      id: '/_authenticated/stockage'
+      path: '/stockage'
+      fullPath: '/stockage'
+      preLoaderRoute: typeof AuthenticatedStockageRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/sondes': {
@@ -880,6 +899,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedReservationsEquipementRoute: typeof AuthenticatedReservationsEquipementRoute
   AuthenticatedRhRoute: typeof AuthenticatedRhRoute
   AuthenticatedSondesRoute: typeof AuthenticatedSondesRoute
+  AuthenticatedStockageRoute: typeof AuthenticatedStockageRoute
   AuthenticatedTypePrelevementsRoute: typeof AuthenticatedTypePrelevementsRoute
   AuthenticatedValidationsRoute: typeof AuthenticatedValidationsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -919,6 +939,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
     AuthenticatedReservationsEquipementRoute,
   AuthenticatedRhRoute: AuthenticatedRhRoute,
   AuthenticatedSondesRoute: AuthenticatedSondesRoute,
+  AuthenticatedStockageRoute: AuthenticatedStockageRoute,
   AuthenticatedTypePrelevementsRoute: AuthenticatedTypePrelevementsRoute,
   AuthenticatedValidationsRoute: AuthenticatedValidationsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
