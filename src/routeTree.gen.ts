@@ -36,6 +36,7 @@ import { Route as AuthenticatedPackAnalysesRouteImport } from './routes/_authent
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedMissionsRouteImport } from './routes/_authenticated/missions'
 import { Route as AuthenticatedMilieuxRouteImport } from './routes/_authenticated/milieux'
+import { Route as AuthenticatedFormationsRouteImport } from './routes/_authenticated/formations'
 import { Route as AuthenticatedFeuillesRouteRouteImport } from './routes/_authenticated/feuilles-route'
 import { Route as AuthenticatedFacturationRouteImport } from './routes/_authenticated/facturation'
 import { Route as AuthenticatedEquipementsRouteImport } from './routes/_authenticated/equipements'
@@ -196,6 +197,11 @@ const AuthenticatedMilieuxRoute = AuthenticatedMilieuxRouteImport.update({
   path: '/milieux',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedFormationsRoute = AuthenticatedFormationsRouteImport.update({
+  id: '/formations',
+  path: '/formations',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedFeuillesRouteRoute =
   AuthenticatedFeuillesRouteRouteImport.update({
     id: '/feuilles-route',
@@ -299,6 +305,7 @@ export interface FileRoutesByFullPath {
   '/equipements': typeof AuthenticatedEquipementsRoute
   '/facturation': typeof AuthenticatedFacturationRoute
   '/feuilles-route': typeof AuthenticatedFeuillesRouteRoute
+  '/formations': typeof AuthenticatedFormationsRoute
   '/milieux': typeof AuthenticatedMilieuxRoute
   '/missions': typeof AuthenticatedMissionsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
@@ -341,6 +348,7 @@ export interface FileRoutesByTo {
   '/equipements': typeof AuthenticatedEquipementsRoute
   '/facturation': typeof AuthenticatedFacturationRoute
   '/feuilles-route': typeof AuthenticatedFeuillesRouteRoute
+  '/formations': typeof AuthenticatedFormationsRoute
   '/milieux': typeof AuthenticatedMilieuxRoute
   '/missions': typeof AuthenticatedMissionsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
@@ -386,6 +394,7 @@ export interface FileRoutesById {
   '/_authenticated/equipements': typeof AuthenticatedEquipementsRoute
   '/_authenticated/facturation': typeof AuthenticatedFacturationRoute
   '/_authenticated/feuilles-route': typeof AuthenticatedFeuillesRouteRoute
+  '/_authenticated/formations': typeof AuthenticatedFormationsRoute
   '/_authenticated/milieux': typeof AuthenticatedMilieuxRoute
   '/_authenticated/missions': typeof AuthenticatedMissionsRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
@@ -432,6 +441,7 @@ export interface FileRouteTypes {
     | '/equipements'
     | '/facturation'
     | '/feuilles-route'
+    | '/formations'
     | '/milieux'
     | '/missions'
     | '/notifications'
@@ -474,6 +484,7 @@ export interface FileRouteTypes {
     | '/equipements'
     | '/facturation'
     | '/feuilles-route'
+    | '/formations'
     | '/milieux'
     | '/missions'
     | '/notifications'
@@ -518,6 +529,7 @@ export interface FileRouteTypes {
     | '/_authenticated/equipements'
     | '/_authenticated/facturation'
     | '/_authenticated/feuilles-route'
+    | '/_authenticated/formations'
     | '/_authenticated/milieux'
     | '/_authenticated/missions'
     | '/_authenticated/notifications'
@@ -744,6 +756,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMilieuxRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/formations': {
+      id: '/_authenticated/formations'
+      path: '/formations'
+      fullPath: '/formations'
+      preLoaderRoute: typeof AuthenticatedFormationsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/feuilles-route': {
       id: '/_authenticated/feuilles-route'
       path: '/feuilles-route'
@@ -880,6 +899,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedEquipementsRoute: typeof AuthenticatedEquipementsRoute
   AuthenticatedFacturationRoute: typeof AuthenticatedFacturationRoute
   AuthenticatedFeuillesRouteRoute: typeof AuthenticatedFeuillesRouteRoute
+  AuthenticatedFormationsRoute: typeof AuthenticatedFormationsRoute
   AuthenticatedMilieuxRoute: typeof AuthenticatedMilieuxRoute
   AuthenticatedMissionsRoute: typeof AuthenticatedMissionsRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
@@ -919,6 +939,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedEquipementsRoute: AuthenticatedEquipementsRoute,
   AuthenticatedFacturationRoute: AuthenticatedFacturationRoute,
   AuthenticatedFeuillesRouteRoute: AuthenticatedFeuillesRouteRoute,
+  AuthenticatedFormationsRoute: AuthenticatedFormationsRoute,
   AuthenticatedMilieuxRoute: AuthenticatedMilieuxRoute,
   AuthenticatedMissionsRoute: AuthenticatedMissionsRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
