@@ -135,7 +135,7 @@ Le problème n'est pas la couverture fonctionnelle, c'est **la lisibilité du pa
 - [ ] `TRV-55` **P2** — Pas d'envoi par e-mail du rapport ou de la facture depuis l'écran.
 
 ### 3.7 Paramétrage
-- [ ] `TRV-60` **P0** — `/parametres/societe` et `/parametres` rendent le même écran : la sous-route ne s'affiche pas correctement.
+- [ ] `TRV-60` **P0** — Doublon d'écran société : la page `Paramètres` contient déjà un onglet « Société », et une seconde route `/parametres/societe` existe sans lien ni rendu propre (la page parente n'affiche pas de sous-route). Garder un seul écran.
 - [ ] `TRV-61` **P1** — Pas d'assistant de première configuration (société → logo → numérotation → utilisateurs → catalogue).
 - [ ] `TRV-62` **P1** — Pas d'aperçu en direct du branding sur un document.
 - [ ] `TRV-63` **P1** — Numérotation paramétrable mais sans exemple de rendu.
@@ -299,7 +299,7 @@ Rôle : point d'entrée quotidien.
 - [ ] `CQU-02` **P2** — Pas de rattachement d'une dérive CQ à une NC automatique.
 
 ### 4.33 Paramètres — `PAR`
-- [ ] `PAR-01` **P0** — Sous-route société non rendue (voir `TRV-60`).
+- [ ] `PAR-01` **P0** — Écran société en double (voir `TRV-60`).
 - [ ] `PAR-02` **P1** — Pas d'éditeur de workflow par société (états, transitions, obligations) alors que c'est une promesse produit.
 - [ ] `PAR-03` **P1** — Droits par rôle non paramétrables dans l'écran.
 - [ ] `PAR-04` **P2** — Journal d'audit non filtrable par utilisateur/objet/période.
