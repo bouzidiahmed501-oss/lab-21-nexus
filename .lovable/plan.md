@@ -1,117 +1,56 @@
+# Audit UX/UI BALIMS vs LabWare — plan d'exécution
 
-# Plan — BALIMS SaaS complet, workflow modifiable par société
+## Objectif
+Produire un **fichier repère unique** (`docs/AUDIT-UX.md`) qui liste, module par module, chaque défaut UX/UI et chaque écart de workflow face aux LIMS du marché (LabWare, LabVantage, STARLIMS, Labguru), puis corriger point par point avec un suivi coché dans ce même fichier.
 
-Ordre demandé : **Phase 3 (visible) → Phase 2 (cœur workflow) → Phase 1 (fondations)**. Chaque phase = 1 migration DB + modules UI + vérification build. Je livre en séquence sans re-demander.
+## Étape 1 — Audit réel, pas théorique
+Passage sur les 38 écrans authentifiés (déjà inventoriés : de `type-prelevements` 154 lignes à `qualite` 1314 lignes) avec, pour chacun :
+- parcours réel dans le navigateur (captures d'écran), en tant que nouvel utilisateur : « j'ouvre le module, qu'est-ce que je comprends, que puis-je faire, où je bloque ? »
+- vérification des états : liste vide, chargement, erreur, données nombreuses (tri/filtre/pagination), mobile 375px et desktop
+- vérification des formulaires : champs obligatoires, messages d'erreur, sauvegarde, feedback après action
+- vérification du chaînage métier : depuis un module, puis-je aller à l'étape suivante sans passer par le menu ?
 
----
+## Étape 2 — Le fichier repère
+`docs/AUDIT-UX.md`, structuré ainsi :
 
-## Phase A — Personnalisation société (branding, numérotation, PDF, notifications)
+```text
+1. Synthèse (score par module, priorités P0/P1/P2)
+2. Référentiel concurrentiel (ce que fait LabWare et qui nous manque)
+3. Défauts transverses (navigation, thème, tableaux, modales, impression)
+4. Fiche par module x38
+     - Rôle métier | Parcours actuel | Défauts UX | Écarts workflow
+     - Actions correctives numérotées [ ] à cocher
+5. Tests de bout en bout (scénarios client)
+6. Journal d'avancement
+```
+Chaque point est numéroté (ex. `CLI-03`) pour pouvoir dire « fais CLI-03 et FAC-07 ».
 
-Objectif : chaque société voit son identité sur toutes les sorties (écran + PDF + emails) et paramètre ses règles.
+## Étape 3 — Axes de correction déjà identifiés
+**Navigation** : 40+ entrées de menu à plat, sans regroupement repliable ni favoris ; pas de fil workflow (Devis → BC → Mission → Prélèvement → Échantillon → Analyse → Rapport → Facture) visible depuis les fiches.
 
-### Base de données
-- Table `tenants` (société SaaS) : nom, logo_url, couleur_primaire, adresse, ninea/matricule fiscal, téléphone, email, mentions légales PDF, TVA par défaut, timbre fiscal, monnaie, langue.
-- Table `tenant_settings` (clé/valeur JSON) : préférences notifications, seuils IoT par défaut, format date, fuseau.
-- Extension `numbering_sequences` : `tenant_id`, `format_template` déjà présent → exposer via UI (prefix, padding, reset annuel, suffix).
-- Table `notification_rules` : événement (facture_impayee, seuil_iot, echeance_etalonnage, nc_ouverte…) × canaux (in-app / email) × destinataires (rôle ou user) × délai.
-- Table `tenant_branding_assets` : logos (entête, favicon, filigrane PDF) via `storage`.
+**Thème** : le rendu actuel est correct mais « ERP générique ». Passage à une identité laboratoire : densité maîtrisée, typographie technique, codes couleur d'état normalisés (en attente / en cours / conforme / non conforme / hors limites), badges et tableaux unifiés, mode sombre labo, meilleure lisibilité des chiffres et des unités.
 
-### Modules UI
-- Page `/parametres/societe` refonte complète en 6 onglets :
-  1. **Identité** : logo (upload), couleurs, coordonnées, mentions légales.
-  2. **Fiscalité** : TVA, timbre, retenue à la source, format Elfatoora, RIB.
-  3. **Numérotation** : éditeur visuel des séquences (DEV, BC, MIS, PRL, FR, ANA, RAP, FAC, AV, REG, DEP) avec aperçu live.
-  4. **PDF & Emails** : templates en-tête/pied, choix polices, signature scannée, aperçu.
-  5. **Notifications** : matrice événement × canal × destinataire.
-  6. **Préférences** : fuseau, langue, format date, seuils IoT par défaut.
-- Refactor `src/lib/pdf/*` pour lire `tenant` (logo, couleurs, mentions, RIB, TVA) au lieu des constantes.
-- `AppLayout` header : logo société dynamique.
+**Tableaux** : comportement unifié (recherche, filtres persistants, tri, colonnes ajustables, sélection multiple, actions groupées, export) — aujourd'hui inégal d'un module à l'autre.
 
-Livrable : toute sortie visuelle reflète la société connectée.
+**Formulaires et modales** : tailles hétérogènes, formulaires longs sans sections ni étapes, peu de validation immédiate.
 
----
+**Impression / documents** : contrôle visuel de chaque sortie (étiquettes A6 code-barres, devis, bon de commande, facture + Elfatoora, rapport ISO 17025, feuille de route) — marges, en-tête tenant, logo, pieds de page, pagination, aperçu avant impression.
 
-## Phase B — Éditeur de workflow (statuts, transitions, validations, signatures)
+**Paramétrage** : rendre le paramétrage compréhensible pour une société qui démarre (assistant de configuration initiale, valeurs par défaut sensées, aperçu en direct du branding).
 
-Objectif : chaque société modifie ses étapes métier via UI, sans intervention développeur.
-
-### Base de données
-- Table `workflows` : `entity` (devis|bc|mission|prelevement|analyse|rapport|facture), `tenant_id`, nom, actif.
-- Table `workflow_states` : ordre, code, libellé, couleur, is_initial, is_final.
-- Table `workflow_transitions` : from_state, to_state, libellé, rôles autorisés, condition (JSON), action_hook.
-- Table `workflow_validations` : state cible → niveaux de validation ordonnés (rôle, is_signature, quorum).
-- Table `workflow_signatures` : entity_type, entity_id, state, user_id, signed_at, hash, ip.
-- Migration : remplace la colonne `statut` texte libre par FK `state_id` sur chaque entité métier, avec fallback compat.
-
-### Modules UI
-- Page `/parametres/workflows` — éditeur visuel :
-  - Liste des entités (Devis, BC, Mission, Prélèvement, Analyse, Rapport, Facture).
-  - Vue "kanban builder" : ajout/suppression/renommage/couleur des états, drag pour réordonner.
-  - Éditeur de transitions (flèches) avec panneau de règles : rôles, conditions, notifications déclenchées.
-  - Onglet "Validations & signatures" par état : niveaux, rôles, signature obligatoire.
-- Widget global `<StateTransitionButton>` : remplace tous les boutons de changement de statut existants. Vérifie transitions autorisées, rôle, déclenche validation + signature.
-- Historique par entité : timeline des transitions (qui, quand, IP, signature).
-- Templates prêts (ISO 17025 par défaut) importables en 1 clic pour démarrer.
-
-Livrable : toutes les entités métier passent par le moteur configurable, sans casser les workflows existants (préréglage = workflow actuel).
-
----
-
-## Phase C — Fondations multi-tenant + permissions fines
-
-Objectif : isolation totale entre sociétés + matrice permissions granulaire.
-
-### Base de données
-- Ajout `tenant_id UUID` sur toutes les tables métier (50+), FK vers `tenants`, non-null, index.
-- Ajout `tenant_id` sur `profiles` (société active) et `user_tenants` (multi-adhésion : user × tenant × rôle).
-- Fonction SDF `current_tenant_id()` (lit `profiles.tenant_id` de `auth.uid()`).
-- **Réécriture de toutes les policies RLS** : `USING (tenant_id = public.current_tenant_id())`, plus les règles rôle existantes.
-- Backfill des données existantes vers un tenant "BALIMS Origine".
-- Table `permissions` : module × action (lire, écrire, valider, supprimer, exporter, imprimer).
-- Table `role_permissions` : rôle × permission, par tenant (overrides).
-- Fonction `has_permission(_user_id, _module, _action)` SDF.
-
-### Modules UI
-- Onboarding SaaS : `/inscription-societe` — création d'un tenant (nom, logo, admin initial), envoi email confirmation, provisioning.
-- Sélecteur de société dans le header (pour users multi-tenants).
-- Page `/parametres/permissions` : matrice interactive rôle × module × action, presets (ISO 17025, Labo privé, Labo public).
-- Page `/parametres/utilisateurs` : invitation par email, assignation rôle, désactivation, journal sessions.
-- Middleware côté client : masque les entrées sidebar + boutons selon `has_permission()`.
-- Middleware serverFn : vérifie `has_permission()` avant chaque écriture sensible.
-
-Livrable : plusieurs sociétés cohabitent sans se voir, chacune configure ses rôles.
-
----
+## Étape 4 — Exécution par lots
+Après validation du fichier repère, correction par lots priorisés, chaque lot terminé étant coché dans `docs/AUDIT-UX.md` :
+1. Transverse : navigation, thème, tableaux, modales
+2. Chaîne commerciale : Devis → BC → Facturation → Règlements
+3. Chaîne laboratoire : Prélèvements → Réception → Échantillons → Analyses → Validation → Rapports
+4. Qualité / CQ / Équipements / Réactifs
+5. Impression et paramétrage
+6. Tests de bout en bout rejoués
 
 ## Détails techniques
+- Audit conduit avec Playwright en local (captures par module, relevé des erreurs console et des requêtes en échec).
+- Aucune modification de schéma dans cette phase d'audit ; les besoins de données manquantes sont listés comme actions.
+- Les corrections transverses passent par les composants partagés (`DataTable`, `PageHeader`, `dialog`, `StatusBadge`, `AppSidebar`) et les tokens de `src/styles.css`, pour éviter 38 corrections isolées.
+- Correction au passage d'un bruit d'exécution actuel : conflit de verrou sur le jeton d'authentification (plusieurs clients concurrents) visible dans les erreurs de prévisualisation.
 
-### Ordre d'implémentation
-```
-Phase A  → 3 itérations (DB, UI paramètres, refactor PDF/emails)
-Phase B  → 4 itérations (DB workflow, éditeur UI, widget transitions, migration statuts)
-Phase C  → 4 itérations (schema tenant_id + RLS, permissions, UI, onboarding SaaS)
-```
-Total ~11 itérations. Build vert après chaque itération.
-
-### Compatibilité & non-régression
-- Toutes les migrations sont additives ; un tenant par défaut "BALIMS Origine" absorbe l'existant.
-- Le moteur de workflow est préréglé avec les statuts actuels — aucun écran ne casse.
-- Les policies RLS sont réécrites en un seul passage transactionnel avec `GRANT` restauré.
-- Le linter Supabase est passé après chaque migration.
-
-### Sécurité
-- `tenant_id` non modifiable côté client (trigger `BEFORE UPDATE`).
-- Signature électronique : hash SHA-256 du snapshot entité + timestamp + user + IP, stocké en `workflow_signatures`.
-- Permissions vérifiées **côté serveur** via server functions ; UI masque = confort, pas sécurité.
-- Onboarding tenant : email confirmé obligatoire avant activation.
-
-### Ce que je NE fais PAS (hors scope demandé)
-- Facturation Stripe du SaaS lui-même (abonnements par tenant).
-- Auto-scaling / sharding DB.
-- Mobile natif.
-
----
-
-## Démarrage
-
-Dès approbation, j'attaque **Phase A itération 1** (migration `tenants` + `tenant_settings` + `notification_rules` + branding assets). Je poursuis la séquence sans attendre validation intermédiaire, sauf si un choix produit apparaît (ex. modèle de signature, format Elfatoora spécifique).
+Livrable de la première étape : `docs/AUDIT-UX.md` complet et chiffré, prêt à être exécuté ligne par ligne.
