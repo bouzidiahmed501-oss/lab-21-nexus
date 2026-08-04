@@ -88,7 +88,7 @@ Le problème n'est pas la couverture fonctionnelle, c'est **la lisibilité du pa
 
 ### 3.1 Navigation
 - [ ] `TRV-01` **P0** — Fil d'Ariane affiche l'URL brute : `BALIMS > devis`, `BALIMS > echantillons`. 20 routes n'ont pas de libellé.
-- [ ] `TRV-02` **P0** — 40 entrées de menu à plat, sans repli des groupes ni mémorisation.
+- [x] `TRV-02` **P0** — 40 entrées de menu à plat, sans repli des groupes ni mémorisation.
 - [ ] `TRV-03` **P1** — Pas de favoris / « épingler un module ».
 - [ ] `TRV-04` **P1** — Pas de fil workflow visible (Devis → BC → … → Facture) ni de bouton « étape suivante » sur les fiches.
 - [ ] `TRV-05` **P1** — Pas de « récemment consultés ».
@@ -97,10 +97,10 @@ Le problème n'est pas la couverture fonctionnelle, c'est **la lisibilité du pa
 
 ### 3.2 Écrans et tableaux
 - [ ] `TRV-10` **P0** — Pendant le chargement, le pied de tableau annonce « 0 ligne » sous des lignes squelettes : information contradictoire.
-- [ ] `TRV-11` **P0** — Les écrans vides n'expliquent rien : ni cause, ni action. Besoin d'un état vide utile (« Aucun devis — créez le premier / importez »).
-- [ ] `TRV-12` **P1** — Contenu bloqué en haut de page : sur un écran 1800 px, 80 % de vide sous le tableau. Pas de hauteur pleine ni d'en-tête de tableau collant.
-- [ ] `TRV-13` **P1** — Pas de sélection multiple ni d'actions groupées (imprimer étiquettes, changer statut, exporter la sélection).
-- [ ] `TRV-14` **P1** — Filtres non mémorisés : on perd son filtre en revenant sur l'écran.
+- [~] `TRV-11` **P0** — Les écrans vides n'expliquent rien : ni cause, ni action. Besoin d'un état vide utile (« Aucun devis — créez le premier / importez »).
+- [x] `TRV-12` **P1** — Contenu bloqué en haut de page : sur un écran 1800 px, 80 % de vide sous le tableau. Pas de hauteur pleine ni d'en-tête de tableau collant.
+- [x] `TRV-13` **P1** — Pas de sélection multiple ni d'actions groupées (imprimer étiquettes, changer statut, exporter la sélection).
+- [x] `TRV-14` **P1** — Filtres non mémorisés : on perd son filtre en revenant sur l'écran.
 - [ ] `TRV-15` **P1** — Pas de choix ni de réordonnancement des colonnes, pas de densité réglable.
 - [ ] `TRV-16` **P2** — Pas de tri secondaire, pas de tri par défaut métier (le plus récent en premier).
 - [ ] `TRV-17` **P2** — L'export CSV exporte la vue et non la sélection ; pas d'export Excel.
@@ -119,10 +119,10 @@ Le problème n'est pas la couverture fonctionnelle, c'est **la lisibilité du pa
 - [ ] `TRV-32` **P1** — Aucune corbeille / annulation : suppression définitive immédiate.
 
 ### 3.5 Thème et identité
-- [ ] `TRV-40` **P0** — États non normalisés : chaque module invente ses couleurs de statut. Besoin d'un jeu unique : *brouillon, en attente, en cours, conforme, non conforme, hors limites, expiré, clôturé*.
+- [x] `TRV-40` **P0** — États non normalisés : chaque module invente ses couleurs de statut. Besoin d'un jeu unique : *brouillon, en attente, en cours, conforme, non conforme, hors limites, expiré, clôturé*.
 - [ ] `TRV-41` **P1** — Les KPI du tableau de bord se chevauchent et coupent les libellés sur deux lignes en 1280 px.
 - [ ] `TRV-42` **P1** — Valeurs numériques sans hiérarchie ni unité lisible (`0,000 DT` aussi gros que le reste).
-- [ ] `TRV-43` **P1** — Mode sombre défini dans les tokens mais aucun sélecteur : inutilisable en salle d'analyse.
+- [x] `TRV-43` **P1** — Mode sombre défini dans les tokens mais aucun sélecteur : inutilisable en salle d'analyse.
 - [ ] `TRV-44` **P2** — Aucun accent laboratoire visuel : séparateurs, en-têtes de section, badges d'accréditation, marquage « donnée non validée ».
 - [ ] `TRV-45` **P2** — Accessibilité : contraste des textes gris sur gris, focus clavier peu visible, cibles tactiles < 32 px.
 
@@ -347,3 +347,7 @@ Rôle : point d'entrée quotidien.
 |---|---|---|
 | 2026-08-03 | Audit initial des 38 écrans | création du fichier |
 | 2026-08-03 | `TRV-01`, `TRV-10` | libellés du fil d'Ariane complétés ; pied de tableau silencieux pendant le chargement |
+
+
+### Journal — Lot 1 (transverse)
+- 4 août 2026 : TRV-02 (menu repliable + filtre, état mémorisé), TRV-12 (en-tête de tableau collant, zone scrollable), TRV-13 (sélection multiple + actions groupées), TRV-14 (recherche mémorisée par écran), TRV-40 (vocabulaire d'états normalisé + `statutLabel`), TRV-43 (bascule thème clair/sombre dans l'en-tête). TRV-11 : socle prêt (`emptyState` dans `DataTable`), à câbler module par module.
