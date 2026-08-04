@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { CommandPalette } from "./CommandPalette";
+import { ThemeToggle } from "./ThemeToggle";
 
 
 interface AppLayoutProps {
@@ -144,6 +145,7 @@ export function AppLayout({ user }: AppLayoutProps) {
             )}
             <div className="ml-auto flex items-center gap-2">
               <CommandPalette />
+              <ThemeToggle />
               <NotificationsBell userId={user.id} />
             </div>
 
