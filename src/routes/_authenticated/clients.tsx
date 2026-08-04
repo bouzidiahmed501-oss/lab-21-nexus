@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/lab/PageHeader";
 import { DataTable, type Column } from "@/components/lab/DataTable";
+import { ClientDetailSheet } from "@/components/lab/ClientDetailSheet";
 import { StatusBadge } from "@/components/lab/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,6 +62,8 @@ function ClientsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<ClientRow | null>(null);
   const [form, setForm] = useState<ClientForm>(EMPTY_FORM);
+  const [detail, setDetail] = useState<ClientRow | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ["clients"],
@@ -145,9 +148,17 @@ function ClientsPage() {
           searchPlaceholder="Rechercher (nom, code, email, ville, MF…)"
           exportFilename="clients"
           emptyMessage="Aucun client. Cliquez sur « Nouveau client » pour démarrer."
-          onRowClick={openEdit}
+          onRowClick={(c) => { setDetail(c); setDetailOpen(true); }}
+
         />
       </div>
+
+      <ClientDetailSheet
+        client={detail}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        onEdit={(c) => { setDetailOpen(false); openEdit(c as ClientRow); }}
+      />
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

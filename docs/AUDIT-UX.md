@@ -87,7 +87,7 @@ Le problème n'est pas la couverture fonctionnelle, c'est **la lisibilité du pa
 ## 3. Défauts transverses
 
 ### 3.1 Navigation
-- [ ] `TRV-01` **P0** — Fil d'Ariane affiche l'URL brute : `BALIMS > devis`, `BALIMS > echantillons`. 20 routes n'ont pas de libellé.
+- [x] `TRV-01` **P0** — Fil d'Ariane affiche l'URL brute : `BALIMS > devis`, `BALIMS > echantillons`. 20 routes n'ont pas de libellé.
 - [x] `TRV-02` **P0** — 40 entrées de menu à plat, sans repli des groupes ni mémorisation.
 - [ ] `TRV-03` **P1** — Pas de favoris / « épingler un module ».
 - [ ] `TRV-04` **P1** — Pas de fil workflow visible (Devis → BC → … → Facture) ni de bouton « étape suivante » sur les fiches.
@@ -96,7 +96,7 @@ Le problème n'est pas la couverture fonctionnelle, c'est **la lisibilité du pa
 - [ ] `TRV-07` **P1** — Aucun bouton retour sur les écrans profonds (seuls login et portail en ont un).
 
 ### 3.2 Écrans et tableaux
-- [ ] `TRV-10` **P0** — Pendant le chargement, le pied de tableau annonce « 0 ligne » sous des lignes squelettes : information contradictoire.
+- [x] `TRV-10` **P0** — Pendant le chargement, le pied de tableau annonce « 0 ligne » sous des lignes squelettes : information contradictoire.
 - [~] `TRV-11` **P0** — Les écrans vides n'expliquent rien : ni cause, ni action. Besoin d'un état vide utile (« Aucun devis — créez le premier / importez »).
 - [x] `TRV-12` **P1** — Contenu bloqué en haut de page : sur un écran 1800 px, 80 % de vide sous le tableau. Pas de hauteur pleine ni d'en-tête de tableau collant.
 - [x] `TRV-13` **P1** — Pas de sélection multiple ni d'actions groupées (imprimer étiquettes, changer statut, exporter la sélection).
@@ -135,7 +135,7 @@ Le problème n'est pas la couverture fonctionnelle, c'est **la lisibilité du pa
 - [ ] `TRV-55` **P2** — Pas d'envoi par e-mail du rapport ou de la facture depuis l'écran.
 
 ### 3.7 Paramétrage
-- [ ] `TRV-60` **P0** — Doublon d'écran société : la page `Paramètres` contient déjà un onglet « Société », et une seconde route `/parametres/societe` existe sans lien ni rendu propre (la page parente n'affiche pas de sous-route). Garder un seul écran.
+- [x] `TRV-60` **P0** — Doublon d'écran société : la page `Paramètres` contient déjà un onglet « Société », et une seconde route `/parametres/societe` existe sans lien ni rendu propre (la page parente n'affiche pas de sous-route). Garder un seul écran.
 - [ ] `TRV-61` **P1** — Pas d'assistant de première configuration (société → logo → numérotation → utilisateurs → catalogue).
 - [ ] `TRV-62` **P1** — Pas d'aperçu en direct du branding sur un document.
 - [ ] `TRV-63` **P1** — Numérotation paramétrable mais sans exemple de rendu.
@@ -182,7 +182,7 @@ Rôle : point d'entrée quotidien.
 - [ ] `SCA-03` **P2** — Pas de retour sonore/visuel fort en cas de code inconnu.
 
 ### 4.7 Échantillons — `ECH`
-- [ ] `ECH-01` **P0** — Pas de fiche échantillon à onglets (identité, résultats, historique, stockage, documents).
+- [x] `ECH-01` **P0** — Pas de fiche échantillon à onglets (identité, résultats, historique, stockage, documents).
 - [ ] `ECH-02` **P0** — Pas d'aliquots / sous-échantillons (parent-enfant) : indispensable en multi-analyses.
 - [ ] `ECH-03` **P1** — Pas de lien direct vers l'emplacement de stockage.
 - [ ] `ECH-04` **P1** — Pas de règle de conservation / destruction programmée avec rappel.
@@ -229,7 +229,7 @@ Rôle : point d'entrée quotidien.
 - [ ] `RME-02` **P2** — Pas de graphiques : uniquement des tableaux et du CSV.
 
 ### 4.17 Clients — `CLI`
-- [ ] `CLI-01` **P0** — Pas de vue 360° client (devis, BC, échantillons, factures, encours, contacts, contrat) : aujourd'hui il faut ouvrir 6 modules.
+- [x] `CLI-01` **P0** — Pas de vue 360° client (devis, BC, échantillons, factures, encours, contacts, contrat) : aujourd'hui il faut ouvrir 6 modules.
 - [ ] `CLI-02` **P1** — Contacts multiples et adresses de facturation/livraison distinctes absents.
 - [ ] `CLI-03` **P1** — Pas de tarif négocié par client.
 - [ ] `CLI-04` **P2** — Pas d'accès portail géré depuis la fiche client.
@@ -351,3 +351,10 @@ Rôle : point d'entrée quotidien.
 
 ### Journal — Lot 1 (transverse)
 - 4 août 2026 : TRV-02 (menu repliable + filtre, état mémorisé), TRV-12 (en-tête de tableau collant, zone scrollable), TRV-13 (sélection multiple + actions groupées), TRV-14 (recherche mémorisée par écran), TRV-40 (vocabulaire d'états normalisé + `statutLabel`), TRV-43 (bascule thème clair/sombre dans l'en-tête). TRV-11 : socle prêt (`emptyState` dans `DataTable`), à câbler module par module.
+
+### Journal — Lot 2/3 (fiches objet et paramétrage)
+- `TRV-01` libellés du fil d'Ariane complétés pour toutes les routes.
+- `TRV-10` plus de « 0 ligne » pendant le chargement.
+- `TRV-60` route doublon `/parametres/societe` supprimée : un seul écran Société dans Paramètres.
+- `CLI-01` vue 360° client (KPI facturé / encaissé / encours / retards + onglets devis, commandes, factures, règlements, identité et actions rapides).
+- `ECH-01` fiche échantillon à onglets (identité, stockage, analyses liées, traçabilité chronologique).
