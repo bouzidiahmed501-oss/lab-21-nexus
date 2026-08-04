@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Search, ChevronsUpDown, ChevronUp, ChevronDown, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,14 @@ interface DataTableProps<T> {
   enableExport?: boolean;
   exportFilename?: string;
   dense?: boolean;
+  /** Rich empty state shown instead of a plain message when there is no data at all. */
+  emptyState?: ReactNode;
+  /** When set, the search text is remembered between visits (TRV-14). */
+  storageKey?: string;
+  /** Enable multi-selection with a bulk actions bar (TRV-13). */
+  selectable?: boolean;
+  /** Rendered in the bulk bar; receives the currently selected rows. */
+  bulkActions?: (rows: T[]) => ReactNode;
 }
 
 export function DataTable<T extends Record<string, any>>({
@@ -47,8 +55,23 @@ export function DataTable<T extends Record<string, any>>({
   enableExport = true,
   exportFilename = "export",
   dense = true,
+  emptyState,
+  storageKey,
+  selectable = false,
+  bulkActions,
 }: DataTableProps<T>) {
   const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!storageKey) return;
+    const saved = sessionStorage.getItem(`dt:${storageKey}:q`);
+    if (saved) setQuery(saved);
+  }, [storageKey]);
+
+  useEffect(() => {
+    if (storageKey) sessionStorage.setItem(`dt:${storageKey}:q`, query);
+  }, [storageKey, query]);
   const [sort, setSort] = useState<{ key: string; dir: "asc" | "desc" } | null>(null);
   const [page, setPage] = useState(0);
 
@@ -150,11 +173,40 @@ export function DataTable<T extends Record<string, any>>({
         </div>
       </div>
 
+      {selectable && selected.size > 0 && (
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
+          <span className="font-medium text-foreground">
+            {selected.size} sélectionné{selected.size > 1 ? "s" : ""}
+          </span>
+          <div className="ml-auto flex items-center gap-2">
+            {bulkActions?.(sorted.filter((r) => selected.has(rowKey(r))))}
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => setSelected(new Set())}>
+              Annuler
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="overflow-hidden rounded-md border border-border bg-card">
-        <div className="overflow-x-auto">
+        <div className="max-h-[calc(100vh-16rem)] overflow-auto">
           <table className="w-full border-collapse text-sm">
-            <thead className="border-b border-border bg-muted/50">
+            <thead className="sticky top-0 z-10 border-b border-border bg-muted/95 backdrop-blur">
               <tr>
+                {selectable && (
+                  <th className="w-9 px-3 py-2">
+                    <input
+                      type="checkbox"
+                      aria-label="Tout sélectionner"
+                      className="h-3.5 w-3.5 accent-[var(--primary)]"
+                      checked={paginated.length > 0 && paginated.every((r) => selected.has(rowKey(r)))}
+                      onChange={(e) => {
+                        const next = new Set(selected);
+                        paginated.forEach((r) => (e.target.checked ? next.add(rowKey(r)) : next.delete(rowKey(r))));
+                        setSelected(next);
+                      }}
+                    />
+                  </th>
+                )}
                 {columns.map((c) => (
                   <th
                     key={c.key}
@@ -181,6 +233,7 @@ export function DataTable<T extends Record<string, any>>({
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="border-b border-border/50">
+                    {selectable && <td className="px-3" />}
                     {columns.map((c) => (
                       <td key={c.key} className={cn("px-3", dense ? "py-2" : "py-3")}>
                         <div className="h-3 w-full animate-pulse rounded bg-muted" />
@@ -190,8 +243,14 @@ export function DataTable<T extends Record<string, any>>({
                 ))
               ) : paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length} className="px-3 py-12 text-center text-sm text-muted-foreground">
-                    {emptyMessage}
+                  <td colSpan={columns.length + (selectable ? 1 : 0)} className="p-0">
+                    {emptyState && !query ? (
+                      <div className="p-4">{emptyState}</div>
+                    ) : (
+                      <div className="px-3 py-12 text-center text-sm text-muted-foreground">
+                        {query ? `Aucun résultat pour « ${query} »` : emptyMessage}
+                      </div>
+                    )}
                   </td>
                 </tr>
               ) : (
@@ -204,6 +263,21 @@ export function DataTable<T extends Record<string, any>>({
                       onRowClick && "cursor-pointer hover:bg-muted/40",
                     )}
                   >
+                    {selectable && (
+                      <td className="px-3" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          aria-label="Sélectionner la ligne"
+                          className="h-3.5 w-3.5 accent-[var(--primary)]"
+                          checked={selected.has(rowKey(row))}
+                          onChange={(e) => {
+                            const next = new Set(selected);
+                            e.target.checked ? next.add(rowKey(row)) : next.delete(rowKey(row));
+                            setSelected(next);
+                          }}
+                        />
+                      </td>
+                    )}
                     {columns.map((c) => (
                       <td
                         key={c.key}
