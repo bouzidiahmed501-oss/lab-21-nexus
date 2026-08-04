@@ -48,13 +48,27 @@ export function StatusBadge({ label, tone = "neutral", dot = true, className }: 
   );
 }
 
-/** Mappings standards des statuts BALIMS */
+/** Vocabulaire d'états normalisé BALIMS (TRV-40) */
+const SUCCESS = ["valide","validee","valides","validees","termine","terminee","cloture","cloturee","conforme","approuve","approuvee","paye","payee","paid","actif","active","efficace","signe","signee","recu","recue","livre","livree","disponible","ok"];
+const INFO = ["brouillon","nouveau","nouvelle","en_attente","attente","planifie","planifiee","demande","demandee","a_faire","preventive","enregistre","enregistree","prevu","prevue","soumis","soumise"];
+const PROGRESS = ["en_cours","en_analyse","en_traitement","en_preparation","en_validation","partiel","partielle","en_stock_faible"];
+const WARNING = ["mineure","observation","a_verifier","alerte","hors_limites","avertissement","bientot_expire","retard_leger","suspendu","suspendue","en_pause"];
+const DANGER = ["en_retard","retard","anomalie","majeure","non_conforme","refuse","refusee","annule","annulee","rejete","rejetee","impaye","impayee","critique","expire","expiree","perime","perimee","rupture","hors_service","echec"];
+
 export function statutTone(statut: string | null | undefined): StatusTone {
   if (!statut) return "neutral";
-  const s = statut.toLowerCase();
-  if (["valide", "validee", "valide", "termine", "terminee", "cloturee", "conforme", "approuve", "paye", "paid", "actif", "active", "efficace"].includes(s)) return "success";
-  if (["en_cours", "en_attente", "planifie", "planifiee", "demande", "a_faire", "brouillon", "preventive"].includes(s)) return "info";
-  if (["en_retard", "anomalie", "majeure", "non_conforme", "refuse", "annulee", "rejete", "impaye", "critique"].includes(s)) return "destructive";
-  if (["partiel", "partielle", "mineure", "observation", "a_verifier", "alerte"].includes(s)) return "warning";
+  const s = statut.toLowerCase().trim().replace(/[\s-]+/g, "_");
+  if (SUCCESS.includes(s)) return "success";
+  if (DANGER.includes(s)) return "destructive";
+  if (WARNING.includes(s)) return "warning";
+  if (PROGRESS.includes(s)) return "primary";
+  if (INFO.includes(s)) return "info";
   return "neutral";
+}
+
+/** Libellé lisible pour un code d'état (ex. "non_conforme" → "Non conforme"). */
+export function statutLabel(statut: string | null | undefined): string {
+  if (!statut) return "—";
+  const s = statut.replace(/_/g, " ").trim();
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
