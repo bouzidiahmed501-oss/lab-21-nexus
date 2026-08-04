@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/lab/PageHeader";
 import { EmptyState } from "@/components/lab/EmptyState";
+import { EchantillonDetailSheet } from "@/components/lab/EchantillonDetailSheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,6 +42,7 @@ function EchantillonsPage() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [histOpen, setHistOpen] = useState<string | null>(null);
+  const [detail, setDetail] = useState<any | null>(null);
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["echantillons"],
@@ -149,7 +151,7 @@ function EchantillonsPage() {
           {isLoading ? (
             <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin" /></div>
           ) : filtered.length === 0 ? (
-            <EmptyState icon={TestTubes} title="Aucun échantillon" description="Créez votre premier échantillon." />
+            <EmptyState icon={TestTubes} title="Aucun échantillon" description="Enregistrez un échantillon à la réception ou scannez son code-barres depuis l\u2019écran Scan réception." />
           ) : (
             <Table>
               <TableHeader>
@@ -166,11 +168,11 @@ function EchantillonsPage() {
               </TableHeader>
               <TableBody>
                 {filtered.map((e: any) => (
-                  <TableRow key={e.id}>
+                  <TableRow key={e.id} className="cursor-pointer" onClick={() => setDetail(e)}>
                     <TableCell className="font-mono text-xs">{e.code_barre}</TableCell>
                     <TableCell className="font-medium">{e.designation}</TableCell>
                     <TableCell>{e.type_echantillon ?? "—"}</TableCell>
-                    <TableCell>
+                    <TableCell onClick={(ev) => ev.stopPropagation()}>
                       <Select value={e.statut} onValueChange={(v) => updateStatut.mutate({ id: e.id, statut: v, ancien: e.statut })}>
                         <SelectTrigger className="h-7 w-32 text-xs"><SelectValue /></SelectTrigger>
                         <SelectContent>{STATUTS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
@@ -180,7 +182,7 @@ function EchantillonsPage() {
                     <TableCell className="text-xs">{formatDate(e.date_reception)}</TableCell>
                     <TableCell className="text-xs">{e.date_conservation_fin ? formatDate(e.date_conservation_fin) : "—"}</TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="sm" onClick={() => setHistOpen(e.id)}>
+                      <Button variant="ghost" size="sm" onClick={(ev) => { ev.stopPropagation(); setHistOpen(e.id); }}>
                         <History className="h-3.5 w-3.5" />
                       </Button>
                     </TableCell>
@@ -191,6 +193,12 @@ function EchantillonsPage() {
           )}
         </CardContent>
       </Card>
+
+      <EchantillonDetailSheet
+        echantillon={detail}
+        open={!!detail}
+        onOpenChange={(o) => !o && setDetail(null)}
+      />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl">
