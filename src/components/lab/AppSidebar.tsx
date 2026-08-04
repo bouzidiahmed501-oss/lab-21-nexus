@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   LayoutDashboard,
@@ -33,6 +34,8 @@ import {
   Workflow,
   Boxes,
   GraduationCap,
+  ChevronDown,
+  Search,
 } from "lucide-react";
 import {
   Sidebar,
@@ -48,6 +51,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import type { AppRole } from "@/hooks/useUserRoles";
 import { cn } from "@/lib/utils";
@@ -141,6 +145,27 @@ export function AppSidebar({ roles, userEmail, primaryRole }: AppSidebarProps) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = location.pathname;
+  const [filter, setFilter] = useState("");
+  const [closed, setClosed] = useState<string[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("balims-nav-closed");
+    if (saved) {
+      try {
+        setClosed(JSON.parse(saved) as string[]);
+      } catch {
+        /* ignore */
+      }
+    }
+  }, []);
+
+  const toggleGroup = (label: string) => {
+    setClosed((prev) => {
+      const next = prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label];
+      localStorage.setItem("balims-nav-closed", JSON.stringify(next));
+      return next;
+    });
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -173,17 +198,44 @@ export function AppSidebar({ roles, userEmail, primaryRole }: AppSidebarProps) {
       </SidebarHeader>
 
       <SidebarContent className="px-1 py-2">
+        {!collapsed && (
+          <div className="relative px-2 pb-2">
+            <Search className="absolute left-4 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-sidebar-foreground/50" />
+            <Input
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              placeholder="Filtrer le menu…"
+              className="h-7 border-sidebar-border bg-sidebar-accent/40 pl-7 text-xs text-sidebar-foreground placeholder:text-sidebar-foreground/50"
+            />
+          </div>
+        )}
         {NAV_GROUPS.map((group) => {
-          const visibleItems = group.items.filter(canSee);
+          const q = filter.trim().toLowerCase();
+          const visibleItems = group.items
+            .filter(canSee)
+            .filter((i) => !q || i.label.toLowerCase().includes(q));
           if (visibleItems.length === 0) return null;
+          const hasActive = visibleItems.some((i) => isActive(i.to));
+          const open = !!q || hasActive || !closed.includes(group.label);
           return (
             <SidebarGroup key={group.label}>
               {!collapsed && (
-                <SidebarGroupLabel className="px-2 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
-                  {group.label}
+                <SidebarGroupLabel
+                  asChild
+                  className="px-2 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50"
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.label)}
+                    className="flex w-full items-center justify-between hover:text-sidebar-foreground"
+                    aria-expanded={open}
+                  >
+                    <span>{group.label}</span>
+                    <ChevronDown className={cn("h-3 w-3 transition-transform", !open && "-rotate-90")} />
+                  </button>
                 </SidebarGroupLabel>
               )}
-              <SidebarGroupContent>
+              <SidebarGroupContent className={cn(!collapsed && !open && "hidden")}>
                 <SidebarMenu>
                   {visibleItems.map((item) => {
                     const Icon = item.icon;
