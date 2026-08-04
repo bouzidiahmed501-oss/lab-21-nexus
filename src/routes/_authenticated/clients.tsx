@@ -145,7 +145,8 @@ function ClientsPage() {
           searchPlaceholder="Rechercher (nom, code, email, ville, MF…)"
           exportFilename="clients"
           emptyMessage="Aucun client. Cliquez sur « Nouveau client » pour démarrer."
-          onRowClick={openEdit}
+          onRowClick={(c) => { setDetail(c); setDetailOpen(true); }}
+
         />
       </div>
 
