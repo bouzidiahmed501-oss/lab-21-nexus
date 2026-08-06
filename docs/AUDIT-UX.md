@@ -161,7 +161,7 @@ Rôle : point d'entrée quotidien.
 - [ ] `DEV-05` **P2** — Pas d'envoi au client ni de trace « envoyé le ».
 
 ### 4.3 Bons de commande — `BCO`
-- [ ] `BCO-01` **P0** — Aucun bouton « planifier une mission » ou « créer les échantillons » depuis un BC : rupture du fil métier.
+- [x] `BCO-01` **P0** — Aucun bouton « planifier une mission » ou « créer les échantillons » depuis un BC : rupture du fil métier.
 - [ ] `BCO-02` **P1** — Pas d'avancement visible (X analyses sur Y terminées).
 - [ ] `BCO-03` **P1** — Pas de date d'échéance client ni d'alerte de retard.
 - [ ] `BCO-04` **P2** — Pas de pièce jointe (bon client scanné, cahier des charges).
@@ -220,7 +220,7 @@ Rôle : point d'entrée quotidien.
 - [ ] `RAP-03` **P2** — Pas de modèle de rapport par type de client ou par norme.
 
 ### 4.15 Validations / Signature — `VAL`
-- [ ] `VAL-01` **P1** — Pas de file d'attente « à valider par moi » ni de validation en lot.
+- [x] `VAL-01` **P1** — Pas de file d'attente « à valider par moi » ni de validation en lot.
 - [ ] `VAL-02` **P1** — Pas de motif obligatoire au refus, ni de renvoi au technicien.
 - [ ] `VAL-03` **P2** — Pas de re-saisie du mot de passe au moment de signer (attendu en 17025 / 21 CFR 11).
 
