@@ -577,6 +577,31 @@ function ViewBcDialog({ id, onClose }: { id: string; onClose: () => void }) {
             <WorkflowTimeline statut={bc.statut as BCStatut} />
           </div>
 
+          {/* Suite du fil métier */}
+          <div className="flex flex-wrap items-center justify-center gap-2 rounded-md border border-dashed border-border/60 bg-muted/30 p-3">
+            <span className="text-xs font-medium text-muted-foreground">Étape suivante :</span>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => planifierMission.mutate()}
+              disabled={planifierMission.isPending}
+            >
+              {planifierMission.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Truck className="h-3.5 w-3.5" />}
+              Planifier une mission
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => creerPrelevements.mutate()}
+              disabled={creerPrelevements.isPending || lignes.length === 0}
+            >
+              {creerPrelevements.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FlaskConical className="h-3.5 w-3.5" />}
+              Créer les prélèvements ({lignes.length})
+            </Button>
+          </div>
+
+
+
           {/* Info Grid */}
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2 rounded-md border border-border/60 p-3">
