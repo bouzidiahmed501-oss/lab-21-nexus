@@ -32,6 +32,7 @@ import { Route as AuthenticatedMilieuxRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedMissionsRouteImport } from './routes/_authenticated/missions'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedPackAnalysesRouteImport } from './routes/_authenticated/pack-analyses'
+import { Route as AuthenticatedPaillasseRouteImport } from './routes/_authenticated/paillasse'
 import { Route as AuthenticatedParametresRouteImport } from './routes/_authenticated/parametres'
 import { Route as AuthenticatedPrelevementsRouteImport } from './routes/_authenticated/prelevements'
 import { Route as AuthenticatedProduitsRouteImport } from './routes/_authenticated/produits'
@@ -176,6 +177,11 @@ const AuthenticatedPackAnalysesRoute =
     path: '/pack-analyses',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedPaillasseRoute = AuthenticatedPaillasseRouteImport.update({
+  id: '/paillasse',
+  path: '/paillasse',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedParametresRoute = AuthenticatedParametresRouteImport.update({
   id: '/parametres',
   path: '/parametres',
@@ -303,6 +309,7 @@ export interface FileRoutesByFullPath {
   '/missions': typeof AuthenticatedMissionsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/pack-analyses': typeof AuthenticatedPackAnalysesRoute
+  '/paillasse': typeof AuthenticatedPaillasseRoute
   '/parametres': typeof AuthenticatedParametresRoute
   '/prelevements': typeof AuthenticatedPrelevementsRoute
   '/produits': typeof AuthenticatedProduitsRoute
@@ -345,6 +352,7 @@ export interface FileRoutesByTo {
   '/missions': typeof AuthenticatedMissionsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/pack-analyses': typeof AuthenticatedPackAnalysesRoute
+  '/paillasse': typeof AuthenticatedPaillasseRoute
   '/parametres': typeof AuthenticatedParametresRoute
   '/prelevements': typeof AuthenticatedPrelevementsRoute
   '/produits': typeof AuthenticatedProduitsRoute
@@ -390,6 +398,7 @@ export interface FileRoutesById {
   '/_authenticated/missions': typeof AuthenticatedMissionsRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/pack-analyses': typeof AuthenticatedPackAnalysesRoute
+  '/_authenticated/paillasse': typeof AuthenticatedPaillasseRoute
   '/_authenticated/parametres': typeof AuthenticatedParametresRoute
   '/_authenticated/prelevements': typeof AuthenticatedPrelevementsRoute
   '/_authenticated/produits': typeof AuthenticatedProduitsRoute
@@ -436,6 +445,7 @@ export interface FileRouteTypes {
     | '/missions'
     | '/notifications'
     | '/pack-analyses'
+    | '/paillasse'
     | '/parametres'
     | '/prelevements'
     | '/produits'
@@ -478,6 +488,7 @@ export interface FileRouteTypes {
     | '/missions'
     | '/notifications'
     | '/pack-analyses'
+    | '/paillasse'
     | '/parametres'
     | '/prelevements'
     | '/produits'
@@ -522,6 +533,7 @@ export interface FileRouteTypes {
     | '/_authenticated/missions'
     | '/_authenticated/notifications'
     | '/_authenticated/pack-analyses'
+    | '/_authenticated/paillasse'
     | '/_authenticated/parametres'
     | '/_authenticated/prelevements'
     | '/_authenticated/produits'
@@ -715,6 +727,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPackAnalysesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/paillasse': {
+      id: '/_authenticated/paillasse'
+      path: '/paillasse'
+      fullPath: '/paillasse'
+      preLoaderRoute: typeof AuthenticatedPaillasseRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/parametres': {
       id: '/_authenticated/parametres'
       path: '/parametres'
@@ -870,6 +889,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedMissionsRoute: typeof AuthenticatedMissionsRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPackAnalysesRoute: typeof AuthenticatedPackAnalysesRoute
+  AuthenticatedPaillasseRoute: typeof AuthenticatedPaillasseRoute
   AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
   AuthenticatedPrelevementsRoute: typeof AuthenticatedPrelevementsRoute
   AuthenticatedProduitsRoute: typeof AuthenticatedProduitsRoute
@@ -910,6 +930,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedMissionsRoute: AuthenticatedMissionsRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPackAnalysesRoute: AuthenticatedPackAnalysesRoute,
+  AuthenticatedPaillasseRoute: AuthenticatedPaillasseRoute,
   AuthenticatedParametresRoute: AuthenticatedParametresRoute,
   AuthenticatedPrelevementsRoute: AuthenticatedPrelevementsRoute,
   AuthenticatedProduitsRoute: AuthenticatedProduitsRoute,
@@ -946,3 +967,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

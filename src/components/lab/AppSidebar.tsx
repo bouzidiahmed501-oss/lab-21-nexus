@@ -7,6 +7,7 @@ import {
   Beaker,
   Package,
   FlaskConical,
+  Grid3x3,
   ClipboardList,
   FileText,
   Receipt,
