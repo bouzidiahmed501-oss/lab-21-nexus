@@ -505,6 +505,57 @@ function ViewBcDialog({ id, onClose }: { id: string; onClose: () => void }) {
     },
   });
 
+  const qcv = useQueryClient();
+
+  const planifierMission = useMutation({
+    mutationFn: async () => {
+      if (!bc) return;
+      const numero = await nextNumero("MIS");
+      const { error } = await supabase.from("missions").insert({
+        numero,
+        client_id: bc.client_id,
+        bc_id: bc.id,
+        date_mission: new Date().toISOString().slice(0, 10),
+        objet: bc.objet ?? `Mission liée au ${bc.numero}`,
+        statut: "planifiee",
+      });
+      if (error) throw error;
+      return numero;
+    },
+    onSuccess: (numero) => {
+      toast.success(`Mission ${numero} planifiée`);
+      qcv.invalidateQueries({ queryKey: ["bc_missions", id] });
+      qcv.invalidateQueries({ queryKey: ["missions"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const creerPrelevements = useMutation({
+    mutationFn: async () => {
+      if (!bc || lignes.length === 0) throw new Error("Aucune ligne sur ce bon de commande");
+      let count = 0;
+      for (const l of lignes) {
+        const numero = await nextNumero("PRL");
+        const { error } = await supabase.from("prelevements").insert({
+          numero,
+          client_id: bc.client_id,
+          denomination: l.designation,
+          date_prelevement: new Date().toISOString().slice(0, 10),
+          statut: "planifie",
+        });
+        if (error) throw error;
+        count += 1;
+      }
+      return count;
+    },
+    onSuccess: (count) => {
+      toast.success(`${count} prélèvement(s) créé(s) depuis le bon de commande`);
+      qcv.invalidateQueries({ queryKey: ["bc_prelevements", id] });
+      qcv.invalidateQueries({ queryKey: ["prelevements"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   if (!bc) return null;
 
   const client = bc.clients as { raison_sociale: string; matricule_fiscal: string | null; adresse: string | null; telephone: string | null; email: string | null } | null;
