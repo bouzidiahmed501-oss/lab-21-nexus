@@ -7,6 +7,7 @@ import {
   Beaker,
   Package,
   FlaskConical,
+  Grid3x3,
   ClipboardList,
   FileText,
   Receipt,
@@ -83,6 +84,8 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { label: "Plan de stockage", to: "/stockage", icon: Boxes },
       { label: "Feuilles de route", to: "/feuilles-route", icon: CalendarRange },
       { label: "Analyses", to: "/analyses", icon: FlaskConical },
+      { label: "Saisie paillasse", to: "/paillasse", icon: Grid3x3 },
+
       { label: "Packs d'analyses", to: "/pack-analyses", icon: Package2 },
       { label: "Chaînes d'analyse", to: "/chaines-analyse", icon: Workflow },
       { label: "Types prélèvement", to: "/type-prelevements", icon: Layers },

@@ -110,7 +110,7 @@ Le problème n'est pas la couverture fonctionnelle, c'est **la lisibilité du pa
 - [ ] `TRV-20` **P1** — Formulaires longs sans sections ni étapes (BC, facture, équipement, RH).
 - [ ] `TRV-21` **P1** — Validation seulement à l'envoi ; pas de message sous le champ fautif.
 - [ ] `TRV-22` **P1** — Fermeture d'une modale sans avertissement en cas de modifications non enregistrées.
-- [ ] `TRV-23` **P2** — Pas de raccourci d'enregistrement (Ctrl+S), pas de « enregistrer et créer le suivant ».
+- [x] `TRV-23` **P2** — Pas de raccourci d'enregistrement (Ctrl+S), pas de « enregistrer et créer le suivant ».
 - [ ] `TRV-24` **P2** — Retours d'action inégaux : certains toasts, d'autres rien.
 
 ### 3.4 Données et démonstration
@@ -197,8 +197,8 @@ Rôle : point d'entrée quotidien.
 - [ ] `FDR-02` **P2** — Pas d'ordre de tournée ni d'estimation de trajet.
 
 ### 4.10 Analyses — `ANA`
-- [ ] `ANA-01` **P0** — Pas de saisie en grille multi-échantillons : c'est l'écran le plus utilisé d'un LIMS, il doit se piloter au clavier.
-- [ ] `ANA-02` **P0** — Pas de contrôle des limites à la saisie (verdict conforme / hors spécification immédiat).
+- [x] `ANA-01` **P0** — Pas de saisie en grille multi-échantillons : c'est l'écran le plus utilisé d'un LIMS, il doit se piloter au clavier.
+- [x] `ANA-02` **P0** — Pas de contrôle des limites à la saisie (verdict conforme / hors spécification immédiat).
 - [ ] `ANA-03` **P1** — Pas de saisie de l'incertitude ni de la méthode utilisée par résultat.
 - [ ] `ANA-04` **P1** — Pas de rattachement automatique équipement + réactif + lot au résultat (traçabilité ISO).
 - [ ] `ANA-05` **P1** — Pas de reprise/répétition d'analyse tracée.
@@ -299,7 +299,7 @@ Rôle : point d'entrée quotidien.
 - [ ] `CQU-02` **P2** — Pas de rattachement d'une dérive CQ à une NC automatique.
 
 ### 4.33 Paramètres — `PAR`
-- [ ] `PAR-01` **P0** — Écran société en double (voir `TRV-60`).
+- [x] `PAR-01` **P0** — Écran société en double (voir `TRV-60`).
 - [ ] `PAR-02` **P1** — Pas d'éditeur de workflow par société (états, transitions, obligations) alors que c'est une promesse produit.
 - [ ] `PAR-03` **P1** — Droits par rôle non paramétrables dans l'écran.
 - [ ] `PAR-04` **P2** — Journal d'audit non filtrable par utilisateur/objet/période.

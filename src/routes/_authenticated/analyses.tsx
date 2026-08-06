@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Loader2, FlaskConical, Eye, CheckCircle2, XCircle, Trash2, Download, ChevronDown } from "lucide-react";
+import { Plus, Search, Loader2, FlaskConical, Eye, CheckCircle2, XCircle, Trash2, Download, ChevronDown, Grid3x3 } from "lucide-react";
+
 import { z } from "zod";
 import { toast } from "sonner";
 
@@ -98,7 +99,15 @@ function AnalysesPage() {
       <PageHeader
         title="Analyses & Résultats"
         description="Saisie des résultats, conformité temps réel et validation multi-niveaux (Tech → Chef → Qualité)."
-        actions={<Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" /> Nouvelle analyse</Button>}
+        actions={
+          <>
+            <Button variant="outline" asChild>
+              <Link to="/paillasse"><Grid3x3 className="h-4 w-4" /> Saisie paillasse</Link>
+            </Button>
+            <Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" /> Nouvelle analyse</Button>
+          </>
+        }
+
       />
 
       <div className="space-y-4 p-4">
