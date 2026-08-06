@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Loader2, FileText, Trash2, Download, Eye, Clock, CheckCircle2, XCircle, Thermometer, MapPin } from "lucide-react";
+import { Plus, Loader2, FileText, Trash2, Download, Eye, Clock, CheckCircle2, XCircle, Thermometer, MapPin, Truck, FlaskConical } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 
