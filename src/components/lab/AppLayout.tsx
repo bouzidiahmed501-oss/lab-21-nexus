@@ -28,6 +28,8 @@ const ROUTE_LABELS: Record<string, string> = {
   "stockage": "Plan de stockage",
   "feuilles-route": "Feuilles de route",
   "analyses": "Analyses",
+  "paillasse": "Saisie paillasse",
+
   "pack-analyses": "Packs d'analyses",
   "chaines-analyse": "Chaînes d'analyse",
   "type-prelevements": "Types de prélèvement",
