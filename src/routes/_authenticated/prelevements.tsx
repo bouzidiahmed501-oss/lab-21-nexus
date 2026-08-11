@@ -276,6 +276,16 @@ function NewDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
               <Label>Observations</Label>
               <Textarea value={observations} onChange={(e) => setObservations(e.target.value)} rows={2} maxLength={1000} />
             </div>
+            <div className="flex items-start gap-3 rounded-md border border-border bg-muted/40 p-3 md:col-span-2">
+              <Switch checked={creerEch} onCheckedChange={setCreerEch} />
+              <div className="space-y-0.5">
+                <Label>Créer l'échantillon et imprimer l'étiquette</Label>
+                <p className="text-xs text-muted-foreground">
+                  L'échantillon est créé au labo avec le code-barres du prélèvement, prêt pour le scan de réception.
+                </p>
+              </div>
+            </div>
+
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>Annuler</Button>
