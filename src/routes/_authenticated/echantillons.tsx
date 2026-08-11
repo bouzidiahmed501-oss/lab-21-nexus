@@ -58,7 +58,14 @@ function EchantillonsPage() {
     },
   });
 
+  const aliquotCount = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const e of items as any[]) if (e.parent_id) m[e.parent_id] = (m[e.parent_id] ?? 0) + 1;
+    return m;
+  }, [items]);
+
   const filtered = useMemo(
+
     () => items.filter((e: any) =>
       !search || e.code_barre?.toLowerCase().includes(search.toLowerCase()) ||
       e.designation?.toLowerCase().includes(search.toLowerCase())
