@@ -217,7 +217,13 @@ function EchantillonsPage() {
                 {filtered.map((e: any) => (
                   <TableRow key={e.id} className="cursor-pointer" onClick={() => setDetail(e)}>
                     <TableCell className="font-mono text-xs">{e.code_barre}</TableCell>
-                    <TableCell className="font-medium">{e.designation}</TableCell>
+                    <TableCell className="font-medium">
+                      <span className={e.parent_id ? "pl-3 text-muted-foreground" : ""}>{e.designation}</span>
+                      {e.parent_id && <Badge variant="outline" className="ml-2 text-[10px]">aliquot</Badge>}
+                      {!e.parent_id && aliquotCount[e.id] > 0 && (
+                        <Badge variant="outline" className="ml-2 text-[10px]">{aliquotCount[e.id]} aliquots</Badge>
+                      )}
+                    </TableCell>
                     <TableCell>{e.type_echantillon ?? "—"}</TableCell>
                     <TableCell onClick={(ev) => ev.stopPropagation()}>
                       <Select value={e.statut} onValueChange={(v) => updateStatut.mutate({ id: e.id, statut: v, ancien: e.statut })}>
@@ -228,11 +234,19 @@ function EchantillonsPage() {
                     <TableCell className="text-xs">{e.emplacement ?? "—"}{e.temperature_stockage != null ? ` (${e.temperature_stockage}°C)` : ""}</TableCell>
                     <TableCell className="text-xs">{formatDate(e.date_reception)}</TableCell>
                     <TableCell className="text-xs">{e.date_conservation_fin ? formatDate(e.date_conservation_fin) : "—"}</TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm" onClick={(ev) => { ev.stopPropagation(); setHistOpen(e.id); }}>
-                        <History className="h-3.5 w-3.5" />
-                      </Button>
+                    <TableCell onClick={(ev) => ev.stopPropagation()}>
+                      <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="sm" title="Historique" onClick={() => setHistOpen(e.id)}>
+                          <History className="h-3.5 w-3.5" />
+                        </Button>
+                        {!e.parent_id && (
+                          <Button variant="ghost" size="sm" title="Créer des aliquots" onClick={() => { setAliquotNb("2"); setAliquotVol(""); setAliquotFor(e); }}>
+                            <Split className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
+
                   </TableRow>
                 ))}
               </TableBody>
