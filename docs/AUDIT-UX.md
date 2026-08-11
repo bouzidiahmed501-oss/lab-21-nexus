@@ -177,9 +177,9 @@ Rôle : point d'entrée quotidien.
 - [ ] `PRE-03` **P2** — Pas de photo ni de signature du client sur site.
 
 ### 4.6 Scan réception — `SCA`
-- [ ] `SCA-01` **P1** — Pas de mode réception en lot (scanner 20 codes à la suite avec récapitulatif).
-- [ ] `SCA-02` **P1** — Pas de contrôle de conformité à réception (température, état du contenant, quantité) : c'est le point de refus normatif.
-- [ ] `SCA-03` **P2** — Pas de retour sonore/visuel fort en cas de code inconnu.
+- [x] `SCA-01` **P1** — Pas de mode réception en lot (scanner 20 codes à la suite avec récapitulatif).
+- [x] `SCA-02` **P1** — Pas de contrôle de conformité à réception (température, état du contenant, quantité) : c'est le point de refus normatif.
+- [x] `SCA-03` **P2** — Pas de retour sonore/visuel fort en cas de code inconnu.
 
 ### 4.7 Échantillons — `ECH`
 - [x] `ECH-01` **P0** — Pas de fiche échantillon à onglets (identité, résultats, historique, stockage, documents).
