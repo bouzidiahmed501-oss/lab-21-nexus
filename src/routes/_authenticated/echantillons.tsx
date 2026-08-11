@@ -129,6 +129,49 @@ function EchantillonsPage() {
     enabled: !!histOpen,
   });
 
+  const createAliquots = useMutation({
+    mutationFn: async ({ parent, nb, volume }: { parent: any; nb: number; volume: string }) => {
+      if (nb < 1 || nb > 20) throw new Error("Nombre d'aliquots invalide (1 à 20)");
+      const { data: userData } = await supabase.auth.getUser();
+      const { data: existing } = await (supabase.from("echantillons" as never) as any)
+        .select("aliquot_index").eq("parent_id", parent.id);
+      const start = (existing ?? []).reduce((m: number, r: any) => Math.max(m, r.aliquot_index ?? 0), 0);
+      const rows = Array.from({ length: nb }, (_, i) => {
+        const idx = start + i + 1;
+        return {
+          code_barre: `${parent.code_barre}-A${idx}`,
+          designation: `${parent.designation} — aliquot ${idx}`,
+          type_echantillon: parent.type_echantillon,
+          prelevement_id: parent.prelevement_id,
+          parent_id: parent.id,
+          aliquot_index: idx,
+          statut: "recu",
+          emplacement: parent.emplacement,
+          emplacement_id: parent.emplacement_id,
+          temperature_stockage: parent.temperature_stockage,
+          date_conservation_fin: parent.date_conservation_fin,
+          volume_quantite: volume || null,
+          created_by: userData.user?.id,
+        };
+      });
+      const { data, error } = await (supabase.from("echantillons" as never) as any).insert(rows).select("id, code_barre");
+      if (error) throw error;
+      await (supabase.from("echantillon_historique" as never) as any).insert(
+        (data ?? []).map((d: any) => ({
+          echantillon_id: d.id, action: "creation_aliquot", nouveau_statut: "recu", user_id: userData.user?.id,
+        })),
+      );
+      return data ?? [];
+    },
+    onSuccess: (created: any[]) => {
+      toast.success(`${created.length} aliquot(s) créé(s)`);
+      setAliquotFor(null);
+      qc.invalidateQueries({ queryKey: ["echantillons"] });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+
   return (
     <div className="p-6 space-y-4">
       <PageHeader
