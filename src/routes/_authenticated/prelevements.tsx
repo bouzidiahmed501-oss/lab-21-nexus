@@ -164,7 +164,9 @@ function NewDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [preleveur, setPreleveur] = useState("");
   const [temp, setTemp] = useState<string>("");
   const [conformite, setConformite] = useState(true);
+  const [creerEch, setCreerEch] = useState(true);
   const [observations, setObservations] = useState("");
+
 
   const { data: clients = [] } = useQuery({
     queryKey: ["clients_active"],
