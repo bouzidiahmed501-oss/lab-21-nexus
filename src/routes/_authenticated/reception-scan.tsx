@@ -143,7 +143,15 @@ function ScanUnitaire() {
       remarque: string;
     }) => {
       const { data: userRes } = await supabase.auth.getUser();
-      const patch: Record<string, unknown> = {
+      const patch: {
+        statut: "recu_labo" | "rejete";
+        date_reception: string;
+        verifie_at: string;
+        verifie_by: string | null;
+        conformite: boolean;
+        remarque_non_conformite: string | null;
+        temperature?: number;
+      } = {
         statut: v.conforme ? "recu_labo" : "rejete",
         date_reception: new Date().toISOString(),
         verifie_at: new Date().toISOString(),
@@ -390,7 +398,16 @@ function ScanLot() {
       const now = new Date().toISOString();
       const t = temp === "" ? null : parseFloat(temp);
       for (const item of known) {
-        const patch: Record<string, unknown> = {
+        const patch: {
+          statut: "recu_labo" | "rejete";
+          date_reception: string;
+          scanne_at: string;
+          verifie_at: string;
+          verifie_by: string | null;
+          conformite: boolean;
+          remarque_non_conformite: string | null;
+          temperature?: number;
+        } = {
           statut: item.conforme ? "recu_labo" : "rejete",
           date_reception: now,
           scanne_at: now,
