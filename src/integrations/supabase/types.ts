@@ -1655,6 +1655,7 @@ export type Database = {
       }
       echantillons: {
         Row: {
+          aliquot_index: number | null
           code_barre: string
           created_at: string | null
           created_by: string | null
@@ -1666,6 +1667,7 @@ export type Database = {
           emplacement_id: string | null
           id: string
           notes: string | null
+          parent_id: string | null
           prelevement_id: string | null
           statut: string
           temperature_stockage: number | null
@@ -1675,6 +1677,7 @@ export type Database = {
           volume_quantite: string | null
         }
         Insert: {
+          aliquot_index?: number | null
           code_barre: string
           created_at?: string | null
           created_by?: string | null
@@ -1686,6 +1689,7 @@ export type Database = {
           emplacement_id?: string | null
           id?: string
           notes?: string | null
+          parent_id?: string | null
           prelevement_id?: string | null
           statut?: string
           temperature_stockage?: number | null
@@ -1695,6 +1699,7 @@ export type Database = {
           volume_quantite?: string | null
         }
         Update: {
+          aliquot_index?: number | null
           code_barre?: string
           created_at?: string | null
           created_by?: string | null
@@ -1706,6 +1711,7 @@ export type Database = {
           emplacement_id?: string | null
           id?: string
           notes?: string | null
+          parent_id?: string | null
           prelevement_id?: string | null
           statut?: string
           temperature_stockage?: number | null
@@ -1720,6 +1726,13 @@ export type Database = {
             columns: ["emplacement_id"]
             isOneToOne: false
             referencedRelation: "emplacements_stockage"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "echantillons_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "echantillons"
             referencedColumns: ["id"]
           },
           {
