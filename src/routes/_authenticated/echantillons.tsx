@@ -297,6 +297,38 @@ function EchantillonsPage() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={!!aliquotFor} onOpenChange={(o) => !o && setAliquotFor(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Créer des aliquots</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Échantillon parent : <span className="font-mono">{aliquotFor?.code_barre}</span> — {aliquotFor?.designation}
+            </p>
+            <div>
+              <Label>Nombre d'aliquots</Label>
+              <Input type="number" min={1} max={20} value={aliquotNb} onChange={(e) => setAliquotNb(e.target.value)} />
+            </div>
+            <div>
+              <Label>Volume / quantité par aliquot</Label>
+              <Input value={aliquotVol} onChange={(e) => setAliquotVol(e.target.value)} placeholder="ex. 50 mL" />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Codes générés : {aliquotFor?.code_barre}-A1 … -A{Number(aliquotNb) || 1}. Emplacement et conservation hérités du parent.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAliquotFor(null)}>Annuler</Button>
+            <Button
+              disabled={createAliquots.isPending}
+              onClick={() => createAliquots.mutate({ parent: aliquotFor, nb: Number(aliquotNb), volume: aliquotVol })}
+            >
+              {createAliquots.isPending && <Loader2 className="mr-2 h-3 w-3 animate-spin" />} Créer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
       <Dialog open={!!histOpen} onOpenChange={(o) => !o && setHistOpen(null)}>
         <DialogContent className="max-w-xl">
           <DialogHeader><DialogTitle>Historique (chain of custody)</DialogTitle></DialogHeader>
