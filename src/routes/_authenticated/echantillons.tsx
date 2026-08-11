@@ -42,7 +42,11 @@ function EchantillonsPage() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [histOpen, setHistOpen] = useState<string | null>(null);
+  const [aliquotFor, setAliquotFor] = useState<any | null>(null);
+  const [aliquotNb, setAliquotNb] = useState("2");
+  const [aliquotVol, setAliquotVol] = useState("");
   const [detail, setDetail] = useState<any | null>(null);
+
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["echantillons"],
