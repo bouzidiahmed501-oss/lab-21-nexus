@@ -193,7 +193,7 @@ function NewDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
       z.string().max(100).parse(preleveur);
       z.string().max(1000).parse(observations);
       const numero = await nextNumero("PRL");
-      const { error } = await supabase.from("prelevements").insert({
+      const { data, error } = await supabase.from("prelevements").insert({
         numero, client_id: clientId,
         mission_id: missionId === "none" ? null : missionId,
         date_prelevement: new Date(datePrelev).toISOString(),
@@ -201,17 +201,33 @@ function NewDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
         temperature: temp ? Number(temp) : null,
         conformite, observations: observations || null,
         statut: "effectue",
-      });
+      }).select("id, numero, code_barre, date_prelevement").single();
       if (error) throw error;
+
+      if (creerEch) {
+        const code = data.code_barre ?? data.numero;
+        const clientNom = clients.find((c) => c.id === clientId)?.raison_sociale;
+        const { error: e2 } = await (supabase.from("echantillons" as never) as any).insert({
+          code_barre: code,
+          designation: `Échantillon ${data.numero}${lieu ? ` — ${lieu}` : ""}`,
+          prelevement_id: data.id,
+          statut: "recu",
+          temperature_stockage: temp ? Number(temp) : null,
+        });
+        if (e2) throw e2;
+        printLabels([{ code_barre: code, numero: data.numero, client: clientNom, date: data.date_prelevement }]);
+      }
     },
     onSuccess: () => {
-      toast.success("Prélèvement enregistré");
+      toast.success(creerEch ? "Prélèvement + échantillon créés, étiquette envoyée" : "Prélèvement enregistré");
       qc.invalidateQueries({ queryKey: ["prelevements"] });
+      qc.invalidateQueries({ queryKey: ["echantillons"] });
       setClientId(""); setMissionId("none"); setLieu(""); setPreleveur(""); setTemp(""); setObservations("");
       onClose();
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
