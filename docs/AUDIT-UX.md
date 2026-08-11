@@ -172,7 +172,7 @@ Rôle : point d'entrée quotidien.
 - [ ] `MIS-03` **P2** — Pas de suivi terrain (heure de départ/retour, kilométrage réel, glacière/température).
 
 ### 4.5 Prélèvements — `PRE`
-- [ ] `PRE-01` **P0** — Pas de création automatique de l'échantillon et de son étiquette au prélèvement.
+- [x] `PRE-01` **P0** — Pas de création automatique de l'échantillon et de son étiquette au prélèvement.
 - [ ] `PRE-02` **P1** — Pas de conditions de transport (température, délai) pourtant exigées en ISO 17025.
 - [ ] `PRE-03` **P2** — Pas de photo ni de signature du client sur site.
 
@@ -183,7 +183,7 @@ Rôle : point d'entrée quotidien.
 
 ### 4.7 Échantillons — `ECH`
 - [x] `ECH-01` **P0** — Pas de fiche échantillon à onglets (identité, résultats, historique, stockage, documents).
-- [ ] `ECH-02` **P0** — Pas d'aliquots / sous-échantillons (parent-enfant) : indispensable en multi-analyses.
+- [x] `ECH-02` **P0** — Pas d'aliquots / sous-échantillons (parent-enfant) : indispensable en multi-analyses.
 - [ ] `ECH-03` **P1** — Pas de lien direct vers l'emplacement de stockage.
 - [ ] `ECH-04` **P1** — Pas de règle de conservation / destruction programmée avec rappel.
 

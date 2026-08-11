@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Plus, Search, TestTubes, Loader2, History } from "lucide-react";
+import { Plus, Search, TestTubes, Loader2, History, Split } from "lucide-react";
 import { formatDate } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/echantillons")({
@@ -42,7 +42,11 @@ function EchantillonsPage() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [histOpen, setHistOpen] = useState<string | null>(null);
+  const [aliquotFor, setAliquotFor] = useState<any | null>(null);
+  const [aliquotNb, setAliquotNb] = useState("2");
+  const [aliquotVol, setAliquotVol] = useState("");
   const [detail, setDetail] = useState<any | null>(null);
+
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["echantillons"],
@@ -54,7 +58,14 @@ function EchantillonsPage() {
     },
   });
 
+  const aliquotCount = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const e of items as any[]) if (e.parent_id) m[e.parent_id] = (m[e.parent_id] ?? 0) + 1;
+    return m;
+  }, [items]);
+
   const filtered = useMemo(
+
     () => items.filter((e: any) =>
       !search || e.code_barre?.toLowerCase().includes(search.toLowerCase()) ||
       e.designation?.toLowerCase().includes(search.toLowerCase())
@@ -129,6 +140,49 @@ function EchantillonsPage() {
     enabled: !!histOpen,
   });
 
+  const createAliquots = useMutation({
+    mutationFn: async ({ parent, nb, volume }: { parent: any; nb: number; volume: string }) => {
+      if (nb < 1 || nb > 20) throw new Error("Nombre d'aliquots invalide (1 à 20)");
+      const { data: userData } = await supabase.auth.getUser();
+      const { data: existing } = await (supabase.from("echantillons" as never) as any)
+        .select("aliquot_index").eq("parent_id", parent.id);
+      const start = (existing ?? []).reduce((m: number, r: any) => Math.max(m, r.aliquot_index ?? 0), 0);
+      const rows = Array.from({ length: nb }, (_, i) => {
+        const idx = start + i + 1;
+        return {
+          code_barre: `${parent.code_barre}-A${idx}`,
+          designation: `${parent.designation} — aliquot ${idx}`,
+          type_echantillon: parent.type_echantillon,
+          prelevement_id: parent.prelevement_id,
+          parent_id: parent.id,
+          aliquot_index: idx,
+          statut: "recu",
+          emplacement: parent.emplacement,
+          emplacement_id: parent.emplacement_id,
+          temperature_stockage: parent.temperature_stockage,
+          date_conservation_fin: parent.date_conservation_fin,
+          volume_quantite: volume || null,
+          created_by: userData.user?.id,
+        };
+      });
+      const { data, error } = await (supabase.from("echantillons" as never) as any).insert(rows).select("id, code_barre");
+      if (error) throw error;
+      await (supabase.from("echantillon_historique" as never) as any).insert(
+        (data ?? []).map((d: any) => ({
+          echantillon_id: d.id, action: "creation_aliquot", nouveau_statut: "recu", user_id: userData.user?.id,
+        })),
+      );
+      return data ?? [];
+    },
+    onSuccess: (created: any[]) => {
+      toast.success(`${created.length} aliquot(s) créé(s)`);
+      setAliquotFor(null);
+      qc.invalidateQueries({ queryKey: ["echantillons"] });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+
   return (
     <div className="p-6 space-y-4">
       <PageHeader
@@ -170,7 +224,13 @@ function EchantillonsPage() {
                 {filtered.map((e: any) => (
                   <TableRow key={e.id} className="cursor-pointer" onClick={() => setDetail(e)}>
                     <TableCell className="font-mono text-xs">{e.code_barre}</TableCell>
-                    <TableCell className="font-medium">{e.designation}</TableCell>
+                    <TableCell className="font-medium">
+                      <span className={e.parent_id ? "pl-3 text-muted-foreground" : ""}>{e.designation}</span>
+                      {e.parent_id && <Badge variant="outline" className="ml-2 text-[10px]">aliquot</Badge>}
+                      {!e.parent_id && aliquotCount[e.id] > 0 && (
+                        <Badge variant="outline" className="ml-2 text-[10px]">{aliquotCount[e.id]} aliquots</Badge>
+                      )}
+                    </TableCell>
                     <TableCell>{e.type_echantillon ?? "—"}</TableCell>
                     <TableCell onClick={(ev) => ev.stopPropagation()}>
                       <Select value={e.statut} onValueChange={(v) => updateStatut.mutate({ id: e.id, statut: v, ancien: e.statut })}>
@@ -181,11 +241,19 @@ function EchantillonsPage() {
                     <TableCell className="text-xs">{e.emplacement ?? "—"}{e.temperature_stockage != null ? ` (${e.temperature_stockage}°C)` : ""}</TableCell>
                     <TableCell className="text-xs">{formatDate(e.date_reception)}</TableCell>
                     <TableCell className="text-xs">{e.date_conservation_fin ? formatDate(e.date_conservation_fin) : "—"}</TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm" onClick={(ev) => { ev.stopPropagation(); setHistOpen(e.id); }}>
-                        <History className="h-3.5 w-3.5" />
-                      </Button>
+                    <TableCell onClick={(ev) => ev.stopPropagation()}>
+                      <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="sm" title="Historique" onClick={() => setHistOpen(e.id)}>
+                          <History className="h-3.5 w-3.5" />
+                        </Button>
+                        {!e.parent_id && (
+                          <Button variant="ghost" size="sm" title="Créer des aliquots" onClick={() => { setAliquotNb("2"); setAliquotVol(""); setAliquotFor(e); }}>
+                            <Split className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
+
                   </TableRow>
                 ))}
               </TableBody>
@@ -228,6 +296,38 @@ function EchantillonsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!aliquotFor} onOpenChange={(o) => !o && setAliquotFor(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Créer des aliquots</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Échantillon parent : <span className="font-mono">{aliquotFor?.code_barre}</span> — {aliquotFor?.designation}
+            </p>
+            <div>
+              <Label>Nombre d'aliquots</Label>
+              <Input type="number" min={1} max={20} value={aliquotNb} onChange={(e) => setAliquotNb(e.target.value)} />
+            </div>
+            <div>
+              <Label>Volume / quantité par aliquot</Label>
+              <Input value={aliquotVol} onChange={(e) => setAliquotVol(e.target.value)} placeholder="ex. 50 mL" />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Codes générés : {aliquotFor?.code_barre}-A1 … -A{Number(aliquotNb) || 1}. Emplacement et conservation hérités du parent.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAliquotFor(null)}>Annuler</Button>
+            <Button
+              disabled={createAliquots.isPending}
+              onClick={() => createAliquots.mutate({ parent: aliquotFor, nb: Number(aliquotNb), volume: aliquotVol })}
+            >
+              {createAliquots.isPending && <Loader2 className="mr-2 h-3 w-3 animate-spin" />} Créer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
 
       <Dialog open={!!histOpen} onOpenChange={(o) => !o && setHistOpen(null)}>
         <DialogContent className="max-w-xl">
