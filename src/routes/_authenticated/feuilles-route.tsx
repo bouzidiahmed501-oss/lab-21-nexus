@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Loader2, CalendarRange, Eye, UserPlus, CheckCircle2 } from "lucide-react";
+import { Plus, Search, Loader2, CalendarRange, Eye, UserPlus, CheckCircle2, Printer } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { nextNumero } from "@/lib/numbering";
 import { formatDate } from "@/lib/format";
+import { printFeuilleRoute } from "@/lib/print/feuilleRoute";
 
 export const Route = createFileRoute("/_authenticated/feuilles-route")({
   head: () => ({ meta: [{ title: "Feuilles de route — BALIMS" }] }),
@@ -85,6 +86,26 @@ function FRPage() {
     onSuccess: () => { toast.success("Statut mis à jour"); qc.invalidateQueries({ queryKey: ["feuilles_route"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const printFr = async (fr: any) => {
+    const { data, error } = await supabase.from("fr_taches")
+      .select("*, prelevements(numero), parametres_analyse(libelle)")
+      .eq("fr_id", fr.id).order("ordre");
+    if (error) { toast.error(error.message); return; }
+    printFeuilleRoute({
+      numero: fr.numero,
+      date_fr: fr.date_fr,
+      laboratoire: fr.laboratoire,
+      notes: fr.notes,
+      taches: (data ?? []).map((t: any) => ({
+        designation: t.designation,
+        prelevement: t.prelevements?.numero ?? null,
+        parametre: t.parametres_analyse?.libelle ?? null,
+        technicien: t.technicien,
+        priorite: t.priorite,
+      })),
+    });
+  };
 
   return (
     <div>
@@ -147,6 +168,7 @@ function FRPage() {
                       </Select>
                     </TableCell>
                     <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" title="Imprimer la feuille terrain" onClick={() => printFr(r)}><Printer className="h-4 w-4" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => setViewing(r.id)}><Eye className="h-4 w-4" /></Button>
                     </TableCell>
                   </TableRow>

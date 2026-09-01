@@ -23,6 +23,7 @@ import {
 import { nextNumero } from "@/lib/numbering";
 import { formatDateTime } from "@/lib/format";
 import { printLabels } from "@/components/lab/PrintLabels";
+import { PrintLabelsDialog } from "@/components/lab/PrintLabelsDialog";
 
 export const Route = createFileRoute("/_authenticated/prelevements")({
   head: () => ({ meta: [{ title: "Prélèvements — BALIMS" }] }),
@@ -125,7 +126,20 @@ function PrelevementsPage() {
         title="Prélèvements & Réception"
         description="Traçabilité des échantillons : prélèvement, transport, réception au labo."
         badge={<StatusBadge label={`${rows.length}`} tone="info" dot={false} />}
-        actions={<Button size="sm" onClick={() => setOpen(true)}><Plus className="h-3.5 w-3.5" /> Nouveau prélèvement</Button>}
+        actions={
+          <div className="flex items-center gap-2">
+            <PrintLabelsDialog
+              triggerLabel={`Étiquettes (${filtered.length})`}
+              labels={filtered.map((r) => ({
+                code_barre: r.code_barre ?? "",
+                numero: r.numero,
+                client: r.clients?.raison_sociale,
+                date: r.date_prelevement,
+              }))}
+            />
+            <Button size="sm" onClick={() => setOpen(true)}><Plus className="h-3.5 w-3.5" /> Nouveau prélèvement</Button>
+          </div>
+        }
       />
 
       <div className="p-4">
