@@ -168,6 +168,7 @@ function FRPage() {
                       </Select>
                     </TableCell>
                     <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" title="Imprimer la feuille terrain" onClick={() => printFr(r)}><Printer className="h-4 w-4" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => setViewing(r.id)}><Eye className="h-4 w-4" /></Button>
                     </TableCell>
                   </TableRow>
