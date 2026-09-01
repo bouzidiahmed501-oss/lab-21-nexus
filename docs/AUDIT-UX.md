@@ -128,7 +128,7 @@ Le problème n'est pas la couverture fonctionnelle, c'est **la lisibilité du pa
 
 ### 3.6 Impression et documents
 - [ ] `TRV-50` **P1** — Aucun aperçu avant impression : le PDF s'ouvre directement, sans possibilité de vérifier.
-- [ ] `TRV-51` **P1** — Étiquettes A6 : bordure pointillée visible à l'écran, un seul format ; besoin de 2 formats (A6 flacon, 50×25 mm rouleau) et de l'impression en lot.
+- [x] `TRV-51` **P1** — Étiquettes A6 : bordure pointillée visible à l'écran, un seul format ; besoin de 2 formats (A6 flacon, 50×25 mm rouleau) et de l'impression en lot.
 - [ ] `TRV-52` **P1** — Rapport ISO 17025 : vérifier pagination « page X sur Y », mention d'accréditation, portée, mention « les résultats ne concernent que les échantillons soumis », note d'incertitude.
 - [ ] `TRV-53` **P1** — Facture : contrôler timbre fiscal, TVA 19 %, montant en toutes lettres, mentions légales, RIB.
 - [ ] `TRV-54` **P2** — Pas de modèle de document paramétrable (en-tête/pied, mentions) par société.
@@ -193,7 +193,7 @@ Rôle : point d'entrée quotidien.
 - [ ] `STO-03` **P2** — Températures affichées sans lien avec les sondes IoT existantes.
 
 ### 4.9 Feuilles de route — `FDR`
-- [ ] `FDR-01` **P1** — Pas d'impression optimisée terrain (une page, cases à cocher, encart signature).
+- [x] `FDR-01` **P1** — Pas d'impression optimisée terrain (une page, cases à cocher, encart signature).
 - [ ] `FDR-02` **P2** — Pas d'ordre de tournée ni d'estimation de trajet.
 
 ### 4.10 Analyses — `ANA`
