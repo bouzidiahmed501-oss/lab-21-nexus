@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { nextNumero } from "@/lib/numbering";
 import { formatDate } from "@/lib/format";
+import { printFeuilleRoute } from "@/lib/print/feuilleRoute";
 
 export const Route = createFileRoute("/_authenticated/feuilles-route")({
   head: () => ({ meta: [{ title: "Feuilles de route — BALIMS" }] }),
