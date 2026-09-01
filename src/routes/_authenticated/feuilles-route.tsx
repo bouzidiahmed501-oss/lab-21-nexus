@@ -87,6 +87,26 @@ function FRPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const printFr = async (fr: any) => {
+    const { data, error } = await supabase.from("fr_taches")
+      .select("*, prelevements(numero), parametres_analyse(libelle)")
+      .eq("fr_id", fr.id).order("ordre");
+    if (error) { toast.error(error.message); return; }
+    printFeuilleRoute({
+      numero: fr.numero,
+      date_fr: fr.date_fr,
+      laboratoire: fr.laboratoire,
+      notes: fr.notes,
+      taches: (data ?? []).map((t: any) => ({
+        designation: t.designation,
+        prelevement: t.prelevements?.numero ?? null,
+        parametre: t.parametres_analyse?.libelle ?? null,
+        technicien: t.technicien,
+        priorite: t.priorite,
+      })),
+    });
+  };
+
   return (
     <div>
       <PageHeader
