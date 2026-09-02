@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { CommandPalette } from "./CommandPalette";
 import { ThemeToggle } from "./ThemeToggle";
+import { WorkflowTrail } from "./WorkflowTrail";
+
 
 
 interface AppLayoutProps {
