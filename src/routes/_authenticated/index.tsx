@@ -10,6 +10,9 @@ import { StatusBadge, statutTone } from "@/components/lab/StatusBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { formatTND, formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserRoles, type AppRole } from "@/hooks/useUserRoles";
+
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
@@ -59,6 +62,142 @@ function KpiTile({ k }: { k: Kpi }) {
 }
 
 const PIE_COLORS = ["hsl(var(--primary))", "hsl(var(--warning))", "hsl(var(--success))", "hsl(var(--destructive))", "#8884d8", "#82ca9d", "#ffc658"];
+
+interface WorkItem { id: string; label: string; sub: string; }
+
+interface WorkPanel { key: string; title: string; icon: React.ComponentType<{ className?: string }>; to: string; items: WorkItem[]; }
+
+/** DSH-01 — Workbench personnalisé selon les rôles de l'utilisateur. */
+function RoleWorkbench() {
+  const { user } = useAuth();
+  const { roles, loading: rolesLoading } = useUserRoles(user?.id);
+  const [panels, setPanels] = useState<WorkPanel[]>([]);
+  const [busy, setBusy] = useState(true);
+
+  const has = (...r: AppRole[]) => r.some((x) => roles.includes(x));
+
+  useEffect(() => {
+    if (rolesLoading) return;
+    let cancelled = false;
+    const load = async () => {
+      const out: WorkPanel[] = [];
+      const all = roles.length === 0 || has("admin", "direction");
+
+      if (all || has("technicien", "chef_labo")) {
+        const { data } = await supabase
+          .from("analyses")
+          .select("id,numero,statut,date_debut,clients(raison_sociale)")
+          .in("statut", ["a_faire", "en_cours"] as any)
+          .order("date_debut", { ascending: true })
+          .limit(6);
+        out.push({
+          key: "tech", title: "Mes analyses en cours", icon: FlaskConical, to: "/paillasse",
+          items: (data ?? []).map((a: any) => ({
+            id: a.id,
+            label: a.numero,
+            sub: `${a.clients?.raison_sociale ?? "—"} · ${a.statut === "a_faire" ? "À faire" : "En cours"}`,
+          })),
+        });
+      }
+
+      if (all || has("chef_labo", "qualite", "direction")) {
+        const { data } = await supabase
+          .from("analyses")
+          .select("id,numero,statut,clients(raison_sociale)")
+          .in("statut", ["termine", "valide_tech"] as any)
+          .order("created_at", { ascending: false })
+          .limit(6);
+        out.push({
+          key: "valid", title: "À valider / signer", icon: ShieldAlert, to: "/validations",
+          items: (data ?? []).map((a: any) => ({
+            id: a.id, label: a.numero,
+            sub: `${a.clients?.raison_sociale ?? "—"} · ${a.statut === "termine" ? "Validation technique" : "Validation chef labo"}`,
+          })),
+        });
+      }
+
+      if (all || has("commercial")) {
+        const { data } = await supabase
+          .from("devis")
+          .select("id,numero,statut,date_devis,total_ttc,clients(raison_sociale)")
+          .in("statut", ["brouillon", "envoye"] as any)
+          .order("date_devis", { ascending: false })
+          .limit(6);
+        out.push({
+          key: "com", title: "Devis en attente", icon: ClipboardList, to: "/devis",
+          items: (data ?? []).map((d: any) => ({
+            id: d.id, label: d.numero,
+            sub: `${d.clients?.raison_sociale ?? "—"} · ${formatTND(Number(d.total_ttc ?? 0))}`,
+          })),
+        });
+      }
+
+      if (all || has("comptable")) {
+        const { data } = await supabase
+          .from("factures")
+          .select("id,numero,net_a_payer,date_echeance,clients(raison_sociale)")
+          .in("statut", ["emise", "partielle", "impayee"] as any)
+          .order("date_echeance", { ascending: true })
+          .limit(6);
+        out.push({
+          key: "compta", title: "Factures à recouvrer", icon: Receipt, to: "/recouvrement",
+          items: (data ?? []).map((f: any) => ({
+            id: f.id, label: f.numero,
+            sub: `${f.clients?.raison_sociale ?? "—"} · ${formatTND(Number(f.net_a_payer ?? 0))}${f.date_echeance ? ` · éch. ${formatDate(f.date_echeance)}` : ""}`,
+          })),
+        });
+      }
+
+      if (!cancelled) { setPanels(out); setBusy(false); }
+    };
+    load().catch(() => { if (!cancelled) setBusy(false); });
+    return () => { cancelled = true; };
+  }, [rolesLoading, roles.join(",")]);
+
+  if (busy || panels.length === 0) return null;
+
+  return (
+    <section className="space-y-2">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        Mon poste de travail
+      </p>
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        {panels.map((p) => {
+          const Icon = p.icon;
+          return (
+            <Card key={p.key} className="shadow-none">
+              <CardHeader className="border-b border-border py-2">
+                <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <Icon className="h-3.5 w-3.5" /> {p.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                {p.items.length === 0 ? (
+                  <p className="px-3 py-6 text-center text-xs text-muted-foreground">Rien en attente ✓</p>
+                ) : (
+                  <ul className="divide-y divide-border/50">
+                    {p.items.map((it) => (
+                      <li key={it.id} className="px-3 py-1.5">
+                        <p className="font-mono text-xs font-medium text-foreground">{it.label}</p>
+                        <p className="truncate text-[11px] text-muted-foreground">{it.sub}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <div className="border-t border-border px-3 py-1.5">
+                  <Link to={p.to} className="flex items-center gap-1 text-[11px] font-medium text-primary hover:underline">
+                    Ouvrir le module <ArrowUpRight className="h-3 w-3" />
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 
 function DashboardPage() {
   const [stats, setStats] = useState({
@@ -191,6 +330,10 @@ function DashboardPage() {
       <section className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
         {kpis.map((k) => <KpiTile key={k.label} k={k} />)}
       </section>
+
+      <RoleWorkbench />
+
+
 
       {/* Charts */}
       <section className="grid gap-3 lg:grid-cols-3">
