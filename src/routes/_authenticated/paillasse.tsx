@@ -258,7 +258,7 @@ function PaillassePage() {
 
         if (cell.resultatId) updates.push({ id: cell.resultatId, payload });
         else if (cell.valeur.trim()) {
-          inserts.push({ analyse_id: analyseId, parametre_id: paramId, ...payload });
+          inserts.push({ analyse_id: analyseId, parametre_id: paramId, operateur_id: operateurId, ...payload });
         }
       }
 
