@@ -158,9 +158,13 @@ export function AppLayout({ user }: AppLayoutProps) {
                 Chargement…
               </div>
             ) : (
-              <Outlet />
+              <>
+                <WorkflowTrailBar />
+                <Outlet />
+              </>
             )}
           </main>
+
         </div>
       </div>
     </SidebarProvider>
