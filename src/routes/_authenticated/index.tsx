@@ -192,6 +192,10 @@ function DashboardPage() {
         {kpis.map((k) => <KpiTile key={k.label} k={k} />)}
       </section>
 
+      <RoleWorkbench />
+
+
+
       {/* Charts */}
       <section className="grid gap-3 lg:grid-cols-3">
         <Card className="lg:col-span-2 shadow-none">
