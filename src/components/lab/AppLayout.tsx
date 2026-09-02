@@ -127,6 +127,37 @@ function NotificationsBell({ userId }: { userId: string }) {
   );
 }
 
+/** Mappe une route sur une étape du workflow LIMS. */
+const WORKFLOW_ROUTE_KEYS: Record<string, string> = {
+  devis: "devis",
+  "bons-commande": "bon_commande",
+  missions: "mission",
+  prelevements: "prelevement",
+  "feuilles-route": "prelevement",
+  "reception-scan": "reception",
+  echantillons: "reception",
+  analyses: "analyse",
+  paillasse: "analyse",
+  validations: "validation",
+  rapports: "rapport",
+  facturation: "facture",
+  reglements: "facture",
+};
+
+function WorkflowTrailBar() {
+  const location = useLocation();
+  const seg = location.pathname.split("/").filter(Boolean)[0] ?? "";
+  const current = WORKFLOW_ROUTE_KEYS[seg];
+  if (!current) return null;
+  return (
+    <div className="border-b border-border bg-card/60 px-4 py-1.5">
+      <WorkflowTrail current={current} />
+    </div>
+  );
+}
+
+
+
 export function AppLayout({ user }: AppLayoutProps) {
   const { roles, primaryRole, loading } = useUserRoles(user.id);
   const { tenant } = useTenant();
