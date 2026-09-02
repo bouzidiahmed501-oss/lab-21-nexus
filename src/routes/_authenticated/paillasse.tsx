@@ -105,6 +105,44 @@ function PaillassePage() {
     },
   });
 
+  // ANA-03 / ANA-04 : contexte de session rattaché à chaque résultat enregistré.
+  const [sessMethode, setSessMethode] = useState("");
+  const [sessEquipement, setSessEquipement] = useState("");
+  const [sessReactif, setSessReactif] = useState("");
+  const [sessLot, setSessLot] = useState("");
+  const [sessIncertitude, setSessIncertitude] = useState("");
+
+  const { data: methodes = [] } = useQuery({
+    queryKey: ["paillasse_methodes"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("methodes_analyse").select("id,code,libelle").eq("is_active", true).order("libelle");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const { data: equipements = [] } = useQuery({
+    queryKey: ["paillasse_equipements"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("equipements").select("id,code,designation,statut").eq("statut", "actif").order("designation");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const { data: reactifs = [] } = useQuery({
+    queryKey: ["paillasse_reactifs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("reactifs").select("id,code,nom,numero_lot").order("nom").limit(300);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+
   const visibleAnalyses = useMemo(() => {
     const q = search.toLowerCase().trim();
     return analyses.filter((a) => {
