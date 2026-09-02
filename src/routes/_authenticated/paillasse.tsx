@@ -229,6 +229,9 @@ function PaillassePage() {
     mutationFn: async () => {
       const inserts: Record<string, unknown>[] = [];
       const updates: { id: string; payload: Record<string, unknown> }[] = [];
+      const { data: auth } = await supabase.auth.getUser();
+      const operateurId = auth.user?.id ?? null;
+
 
       for (const [k, cell] of Object.entries(cells)) {
         if (!cell.dirty) continue;
