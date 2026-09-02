@@ -387,6 +387,68 @@ function PaillassePage() {
           </Select>
         </div>
 
+        {/* ANA-03 / ANA-04 : traçabilité ISO 17025 appliquée aux résultats enregistrés */}
+        <Card className="shadow-none">
+          <CardContent className="grid gap-3 p-3 md:grid-cols-5">
+            <div className="space-y-1">
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Méthode</label>
+              <Select value={sessMethode} onValueChange={setSessMethode}>
+                <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
+                <SelectContent>
+                  {methodes.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>{m.code ? `${m.code} — ` : ""}{m.libelle}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Équipement</label>
+              <Select value={sessEquipement} onValueChange={setSessEquipement}>
+                <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
+                <SelectContent>
+                  {equipements.map((e) => (
+                    <SelectItem key={e.id} value={e.id}>{e.code ? `${e.code} — ` : ""}{e.designation}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Réactif</label>
+              <Select
+                value={sessReactif}
+                onValueChange={(v) => {
+                  setSessReactif(v);
+                  const r = reactifs.find((x) => x.id === v);
+                  if (r?.numero_lot) setSessLot(r.numero_lot);
+                }}
+              >
+                <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
+                <SelectContent>
+                  {reactifs.map((r) => (
+                    <SelectItem key={r.id} value={r.id}>{r.code ? `${r.code} — ` : ""}{r.nom}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Lot réactif</label>
+              <Input className="h-9" value={sessLot} onChange={(e) => setSessLot(e.target.value)} placeholder="N° de lot" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Incertitude (%)</label>
+              <Input
+                className="h-9 tabular-nums"
+                inputMode="decimal"
+                value={sessIncertitude}
+                onChange={(e) => setSessIncertitude(e.target.value)}
+                placeholder="ex. 2,5"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+
+
         {columns.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {columns.map((p) => (
