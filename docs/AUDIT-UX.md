@@ -90,7 +90,7 @@ Le problème n'est pas la couverture fonctionnelle, c'est **la lisibilité du pa
 - [x] `TRV-01` **P0** — Fil d'Ariane affiche l'URL brute : `BALIMS > devis`, `BALIMS > echantillons`. 20 routes n'ont pas de libellé.
 - [x] `TRV-02` **P0** — 40 entrées de menu à plat, sans repli des groupes ni mémorisation.
 - [ ] `TRV-03` **P1** — Pas de favoris / « épingler un module ».
-- [ ] `TRV-04` **P1** — Pas de fil workflow visible (Devis → BC → … → Facture) ni de bouton « étape suivante » sur les fiches.
+- [x] `TRV-04` **P1** — Pas de fil workflow visible (Devis → BC → … → Facture) ni de bouton « étape suivante » sur les fiches.
 - [ ] `TRV-05` **P1** — Pas de « récemment consultés ».
 - [ ] `TRV-06` **P2** — Ctrl+K ne cherche que clients / échantillons / factures : étendre aux devis, BC, analyses, rapports, équipements, et aux commandes (« créer un devis »).
 - [ ] `TRV-07` **P1** — Aucun bouton retour sur les écrans profonds (seuls login et portail en ont un).
@@ -147,7 +147,7 @@ Le problème n'est pas la couverture fonctionnelle, c'est **la lisibilité du pa
 
 ### 4.1 Tableau de bord — `DSH`
 Rôle : point d'entrée quotidien.
-- [ ] `DSH-01` **P0** — Même écran pour tous les rôles : créer un workbench par rôle (technicien : mes analyses ; chef labo : à valider ; commercial : devis en attente ; comptable : impayés).
+- [x] `DSH-01` **P0** — Même écran pour tous les rôles : créer un workbench par rôle (technicien : mes analyses ; chef labo : à valider ; commercial : devis en attente ; comptable : impayés).
 - [ ] `DSH-02` **P1** — 8 KPI de même poids : hiérarchiser (3 majeurs + le reste en bandeau).
 - [ ] `DSH-03` **P1** — Aucun indicateur de délai : ajouter « échantillons en retard », « TAT moyen », « analyses hors délai ».
 - [ ] `DSH-04` **P1** — Les KPI à 0 ne renvoient pas vers une action de création.
