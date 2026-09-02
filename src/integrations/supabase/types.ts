@@ -163,11 +163,17 @@ export type Database = {
           analyse_id: string
           conformite: boolean | null
           created_at: string
+          equipement_id: string | null
           id: string
           incertitude: number | null
+          lot_reactif: string | null
           methode_id: string | null
+          motif_reprise: string | null
           observations: string | null
+          operateur_id: string | null
           parametre_id: string
+          reactif_id: string | null
+          repetition: number
           unite_id: string | null
           updated_at: string
           valeur: string | null
@@ -177,11 +183,17 @@ export type Database = {
           analyse_id: string
           conformite?: boolean | null
           created_at?: string
+          equipement_id?: string | null
           id?: string
           incertitude?: number | null
+          lot_reactif?: string | null
           methode_id?: string | null
+          motif_reprise?: string | null
           observations?: string | null
+          operateur_id?: string | null
           parametre_id: string
+          reactif_id?: string | null
+          repetition?: number
           unite_id?: string | null
           updated_at?: string
           valeur?: string | null
@@ -191,11 +203,17 @@ export type Database = {
           analyse_id?: string
           conformite?: boolean | null
           created_at?: string
+          equipement_id?: string | null
           id?: string
           incertitude?: number | null
+          lot_reactif?: string | null
           methode_id?: string | null
+          motif_reprise?: string | null
           observations?: string | null
+          operateur_id?: string | null
           parametre_id?: string
+          reactif_id?: string | null
+          repetition?: number
           unite_id?: string | null
           updated_at?: string
           valeur?: string | null
@@ -210,6 +228,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "analyse_resultats_equipement_id_fkey"
+            columns: ["equipement_id"]
+            isOneToOne: false
+            referencedRelation: "equipements"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "analyse_resultats_methode_id_fkey"
             columns: ["methode_id"]
             isOneToOne: false
@@ -221,6 +246,13 @@ export type Database = {
             columns: ["parametre_id"]
             isOneToOne: false
             referencedRelation: "parametres_analyse"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analyse_resultats_reactif_id_fkey"
+            columns: ["reactif_id"]
+            isOneToOne: false
+            referencedRelation: "reactifs"
             referencedColumns: ["id"]
           },
           {
