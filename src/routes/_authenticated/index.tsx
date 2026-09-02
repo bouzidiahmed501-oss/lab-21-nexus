@@ -10,6 +10,9 @@ import { StatusBadge, statutTone } from "@/components/lab/StatusBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { formatTND, formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserRoles, type AppRole } from "@/hooks/useUserRoles";
+
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
