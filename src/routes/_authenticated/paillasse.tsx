@@ -238,11 +238,21 @@ function PaillassePage() {
         const n = Number(cell.valeur.replace(",", "."));
         const numeric = cell.valeur.trim() && Number.isFinite(n) ? n : null;
         const verdict = verdictOf(p, cell.valeur);
+        const incNum = Number(sessIncertitude.replace(",", "."));
         const payload = {
           valeur: cell.valeur.trim() || null,
           valeur_numerique: numeric,
           conformite: verdict === "neutre" ? null : verdict === "conforme",
+          methode_id: sessMethode || null,
+          equipement_id: sessEquipement || null,
+          reactif_id: sessReactif || null,
+          lot_reactif: sessLot.trim() || null,
+          incertitude:
+            numeric != null && sessIncertitude.trim() && Number.isFinite(incNum)
+              ? Number(((numeric * incNum) / 100).toFixed(6))
+              : null,
         };
+
         if (cell.resultatId) updates.push({ id: cell.resultatId, payload });
         else if (cell.valeur.trim()) {
           inserts.push({ analyse_id: analyseId, parametre_id: paramId, ...payload });
