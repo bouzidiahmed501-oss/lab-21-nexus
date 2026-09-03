@@ -471,7 +471,9 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
   const save = useMutation({
     mutationFn: async () => {
       const valid = resultats.filter((r) => r.parametre_id && r.valeur.trim());
-      await supabase.from("analyse_resultats").delete().eq("analyse_id", id);
+      const { data: { user } } = await supabase.auth.getUser();
+      await supabase.from("analyse_resultats").delete()
+        .eq("analyse_id", id).eq("repetition", repetition);
       if (valid.length > 0) {
         const { error } = await supabase.from("analyse_resultats").insert(
           valid.map((r) => ({
@@ -484,6 +486,12 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
             conformite: r.conformite ?? null,
             incertitude: r.incertitude ?? null,
             observations: r.observations || null,
+            equipement_id: trEquipement === "none" ? null : trEquipement,
+            reactif_id: trReactif === "none" ? null : trReactif,
+            lot_reactif: trLot || null,
+            operateur_id: user?.id ?? null,
+            repetition,
+            motif_reprise: motifReprise,
           })),
         );
         if (error) throw error;
@@ -502,6 +510,19 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  // ANA-05 — reprise / répétition tracée
+  const startReprise = () => {
+    if (!reMotif.trim()) { toast.error("Motif de reprise obligatoire"); return; }
+    setMotifReprise(reMotif.trim());
+    setRepetition(maxRepetition + 1);
+    setResultats((prev) => prev.map((r) => ({
+      ...r, id: undefined, valeur: "", valeur_numerique: null, conformite: null, observations: "",
+    })));
+    setReOpen(false);
+    setReMotif("");
+    toast.success(`Répétition n°${maxRepetition + 1} ouverte — saisissez les nouvelles valeurs`);
+  };
 
   const validate = useMutation({
     mutationFn: async (niveau: "technicien" | "chef_labo" | "qualite") => {
