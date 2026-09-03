@@ -327,7 +327,7 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
     queryKey: ["analyse_resultats", id],
     queryFn: async () => {
       const { data, error } = await supabase.from("analyse_resultats")
-        .select("*, parametres_analyse(libelle, seuil_min, seuil_max, unites:unite_id(symbole)), equipements(nom), reactifs(nom)")
+        .select("*, parametres_analyse(libelle, seuil_min, seuil_max, unites:unite_id(symbole)), equipements(designation), reactifs(nom)")
         .eq("analyse_id", id);
       if (error) throw error;
       return data as any[];
@@ -338,7 +338,7 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
     queryKey: ["equipements_actifs"],
     queryFn: async () => {
       const { data, error } = await supabase.from("equipements")
-        .select("id,nom").eq("statut", "actif").order("nom");
+        .select("id,designation").eq("statut", "actif").order("designation");
       if (error) throw error;
       return data;
     },
@@ -348,7 +348,7 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
     queryKey: ["reactifs_dispo"],
     queryFn: async () => {
       const { data, error } = await supabase.from("reactifs")
-        .select("id,nom,numero_lot").order("nom");
+        .select("id,nom,numero_lot").eq("is_actif", true).order("nom");
       if (error) throw error;
       return data as any[];
     },
@@ -585,7 +585,7 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
                   <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">— Aucun —</SelectItem>
-                    {equipements.map((e) => <SelectItem key={e.id} value={e.id}>{e.nom}</SelectItem>)}
+                    {equipements.map((e) => <SelectItem key={e.id} value={e.id}>{e.designation}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
