@@ -327,10 +327,30 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
     queryKey: ["analyse_resultats", id],
     queryFn: async () => {
       const { data, error } = await supabase.from("analyse_resultats")
-        .select("*, parametres_analyse(libelle, seuil_min, seuil_max, unites:unite_id(symbole))")
+        .select("*, parametres_analyse(libelle, seuil_min, seuil_max, unites:unite_id(symbole)), equipements(nom), reactifs(nom)")
         .eq("analyse_id", id);
       if (error) throw error;
+      return data as any[];
+    },
+  });
+
+  const { data: equipements = [] } = useQuery({
+    queryKey: ["equipements_actifs"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("equipements")
+        .select("id,nom").eq("statut", "actif").order("nom");
+      if (error) throw error;
       return data;
+    },
+  });
+
+  const { data: reactifs = [] } = useQuery({
+    queryKey: ["reactifs_dispo"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("reactifs")
+        .select("id,nom,numero_lot").order("nom");
+      if (error) throw error;
+      return data as any[];
     },
   });
 
@@ -358,10 +378,34 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
   });
 
   const [resultats, setResultats] = useState<ResRow[]>([]);
+  const [repetition, setRepetition] = useState(1);
+  const [motifReprise, setMotifReprise] = useState<string | null>(null);
+  const [trEquipement, setTrEquipement] = useState<string>("none");
+  const [trReactif, setTrReactif] = useState<string>("none");
+  const [trLot, setTrLot] = useState("");
+  const [reOpen, setReOpen] = useState(false);
+  const [reMotif, setReMotif] = useState("");
+
+  const maxRepetition = useMemo(
+    () => existing.reduce((m: number, e: any) => Math.max(m, e.repetition ?? 1), 1),
+    [existing],
+  );
+  const historique = useMemo(
+    () => existing.filter((e: any) => (e.repetition ?? 1) < repetition),
+    [existing, repetition],
+  );
+
+  useEffect(() => { setRepetition(maxRepetition); }, [maxRepetition]);
 
   useEffect(() => {
-    if (existing.length > 0) {
-      setResultats(existing.map((e: any) => ({
+    const current = existing.filter((e: any) => (e.repetition ?? 1) === repetition);
+    if (current.length > 0) {
+      const first: any = current[0];
+      setTrEquipement(first.equipement_id ?? "none");
+      setTrReactif(first.reactif_id ?? "none");
+      setTrLot(first.lot_reactif ?? "");
+      setMotifReprise(first.motif_reprise ?? null);
+      setResultats(current.map((e: any) => ({
         id: e.id, parametre_id: e.parametre_id, valeur: e.valeur ?? "",
         valeur_numerique: e.valeur_numerique, unite_id: e.unite_id, methode_id: e.methode_id,
         conformite: e.conformite, incertitude: e.incertitude, observations: e.observations ?? "",
@@ -371,7 +415,7 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
         seuil_max: e.parametres_analyse?.seuil_max,
       })));
     }
-  }, [existing]);
+  }, [existing, repetition]);
 
   const addRow = () => setResultats((a) => [...a, { parametre_id: "", valeur: "", observations: "" }]);
   const removeRow = (i: number) => setResultats((a) => a.filter((_, idx) => idx !== i));
