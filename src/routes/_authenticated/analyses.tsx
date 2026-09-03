@@ -737,7 +737,75 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
               </div>
             )}
           </TabsContent>
+
+          <TabsContent value="historique" className="flex-1 overflow-y-auto space-y-3 mt-2">
+            {historique.length === 0 ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                Aucune répétition antérieure. Utilisez « Refaire l'analyse » pour tracer une reprise.
+              </p>
+            ) : (
+              <div className="rounded-lg border border-border/60 overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="text-[11px]">
+                      <TableHead className="w-20">Rép.</TableHead>
+                      <TableHead>Paramètre</TableHead>
+                      <TableHead className="w-28">Valeur</TableHead>
+                      <TableHead className="w-20 text-center">Conf.</TableHead>
+                      <TableHead>Équipement</TableHead>
+                      <TableHead>Réactif / lot</TableHead>
+                      <TableHead>Motif de reprise</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {historique.map((h: any) => (
+                      <TableRow key={h.id} className="text-xs">
+                        <TableCell><Badge variant="outline" className="text-[10px]">n°{h.repetition ?? 1}</Badge></TableCell>
+                        <TableCell>{h.parametres_analyse?.libelle ?? "—"}</TableCell>
+                        <TableCell className="tabular-nums">
+                          {h.valeur ?? "—"}{h.incertitude != null ? ` ± ${h.incertitude}` : ""}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {h.conformite == null ? "—" : h.conformite
+                            ? <Badge className="bg-success/20 text-success border-success/40 text-[10px]">OK</Badge>
+                            : <Badge variant="destructive" className="text-[10px]">NC</Badge>}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{h.equipements?.designation ?? "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {h.reactifs?.nom ?? "—"}{h.lot_reactif ? ` · ${h.lot_reactif}` : ""}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{h.motif_reprise ?? "—"}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </TabsContent>
         </Tabs>
+
+        <Dialog open={reOpen} onOpenChange={setReOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="h-4 w-4" /> Reprise d'analyse (répétition n°{maxRepetition + 1})
+              </DialogTitle>
+              <DialogDescription className="text-xs">
+                Les résultats actuels sont conservés dans l'historique. Le motif est obligatoire (ISO 17025 §7.7).
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Label>Motif de la reprise *</Label>
+              <Textarea rows={3} value={reMotif} onChange={(e) => setReMotif(e.target.value)}
+                placeholder="Ex. : dérive instrument, contamination, contrôle qualité hors limites…" />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setReOpen(false)}>Annuler</Button>
+              <Button onClick={startReprise}><RotateCcw className="h-4 w-4" /> Ouvrir la répétition</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
 
         <DialogFooter className="border-t pt-3 gap-2">
           <div className="flex-1 flex gap-1">
