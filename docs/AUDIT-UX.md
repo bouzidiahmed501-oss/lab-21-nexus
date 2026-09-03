@@ -199,9 +199,9 @@ Rôle : point d'entrée quotidien.
 ### 4.10 Analyses — `ANA`
 - [x] `ANA-01` **P0** — Pas de saisie en grille multi-échantillons : c'est l'écran le plus utilisé d'un LIMS, il doit se piloter au clavier.
 - [x] `ANA-02` **P0** — Pas de contrôle des limites à la saisie (verdict conforme / hors spécification immédiat).
-- [ ] `ANA-03` **P1** — Pas de saisie de l'incertitude ni de la méthode utilisée par résultat.
-- [ ] `ANA-04` **P1** — Pas de rattachement automatique équipement + réactif + lot au résultat (traçabilité ISO).
-- [ ] `ANA-05` **P1** — Pas de reprise/répétition d'analyse tracée.
+- [x] `ANA-03` **P1** — Pas de saisie de l'incertitude ni de la méthode utilisée par résultat.
+- [x] `ANA-04` **P1** — Pas de rattachement automatique équipement + réactif + lot au résultat (traçabilité ISO).
+- [x] `ANA-05` **P1** — Pas de reprise/répétition d'analyse tracée.
 
 ### 4.11 Packs d'analyses — `PCK`
 - [ ] `PCK-01` **P1** — Pas d'application d'un pack en un clic sur un BC ou un échantillon.

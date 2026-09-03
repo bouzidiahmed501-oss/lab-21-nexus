@@ -93,21 +93,31 @@ function RapportsPage() {
         type Anly = { id: string; numero: string; date_debut: string | null; prelevements: { numero: string } | null };
         const a = l.analyses as unknown as Anly;
         const { data: res, error: e2 } = await supabase.from("analyse_resultats")
-          .select("valeur, conformite, parametres_analyse(libelle,seuil_min,seuil_max), unites:unite_id(symbole), methodes_analyse:methode_id(libelle)")
+          .select("valeur, conformite, incertitude, lot_reactif, parametres_analyse(libelle,seuil_min,seuil_max), unites:unite_id(symbole), methodes_analyse:methode_id(libelle), equipements(designation), reactifs(nom)")
           .eq("analyse_id", a.id);
         if (e2) throw e2;
         type ResR = {
           valeur: string | null;
           conformite: boolean | null;
+          incertitude: number | null;
+          lot_reactif: string | null;
+          equipements: { designation: string } | null;
+          reactifs: { nom: string } | null;
           parametres_analyse: { libelle: string; seuil_min: number | null; seuil_max: number | null } | null;
           unites: { symbole: string } | null;
           methodes_analyse: { libelle: string } | null;
         };
+        const rows = ((res ?? []) as unknown as ResR[]);
+        const trParts = Array.from(new Set(rows.flatMap((r) => [
+          r.equipements?.designation ? `Équip. ${r.equipements.designation}` : null,
+          r.reactifs?.nom ? `Réactif ${r.reactifs.nom}${r.lot_reactif ? ` (lot ${r.lot_reactif})` : ""}` : null,
+        ].filter(Boolean) as string[])));
         return {
           numero: a.numero,
           prelevement: a.prelevements?.numero ?? null,
           date_debut: a.date_debut,
-          resultats: ((res ?? []) as unknown as ResR[]).map((r) => ({
+          tracabilite: trParts.length > 0 ? trParts.join(" · ") : null,
+          resultats: rows.map((r) => ({
             parametre: r.parametres_analyse?.libelle ?? "—",
             valeur: r.valeur ?? "—",
             unite: r.unites?.symbole ?? null,
@@ -115,6 +125,7 @@ function RapportsPage() {
             seuil_min: r.parametres_analyse?.seuil_min ?? null,
             seuil_max: r.parametres_analyse?.seuil_max ?? null,
             conformite: r.conformite,
+            incertitude: r.incertitude,
           })),
         };
       }));

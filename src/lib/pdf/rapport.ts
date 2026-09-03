@@ -18,6 +18,7 @@ export interface PdfRapportAnalyse {
   numero: string;
   prelevement: string | null;
   date_debut: string | null;
+  tracabilite?: string | null;
   resultats: PdfRapportResultat[];
 }
 
@@ -140,6 +141,11 @@ export async function generateRapportPdf(rap: PdfRapportData): Promise<Blob> {
       doc.text(`Date début : ${new Date(a.date_debut).toLocaleDateString("fr-FR")}`, w - 14, y, { align: "right" });
     }
     y += 5;
+    if (a.tracabilite) {
+      doc.setFontSize(7).setFont("helvetica", "italic").setTextColor(120);
+      doc.text(`Traçabilité : ${a.tracabilite}`, 14, y);
+      y += 4;
+    }
 
     autoTable(doc, {
       startY: y,

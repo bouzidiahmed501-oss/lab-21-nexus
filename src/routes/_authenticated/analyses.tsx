@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Loader2, FlaskConical, Eye, CheckCircle2, XCircle, Trash2, Download, ChevronDown, Grid3x3 } from "lucide-react";
+import { Plus, Search, Loader2, FlaskConical, Eye, CheckCircle2, XCircle, Trash2, Download, ChevronDown, Grid3x3, RotateCcw, History } from "lucide-react";
 
 import { z } from "zod";
 import { toast } from "sonner";
@@ -327,10 +327,30 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
     queryKey: ["analyse_resultats", id],
     queryFn: async () => {
       const { data, error } = await supabase.from("analyse_resultats")
-        .select("*, parametres_analyse(libelle, seuil_min, seuil_max, unites:unite_id(symbole))")
+        .select("*, parametres_analyse(libelle, seuil_min, seuil_max, unites:unite_id(symbole)), equipements(designation), reactifs(nom)")
         .eq("analyse_id", id);
       if (error) throw error;
+      return data as any[];
+    },
+  });
+
+  const { data: equipements = [] } = useQuery({
+    queryKey: ["equipements_actifs"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("equipements")
+        .select("id,designation").eq("statut", "actif").order("designation");
+      if (error) throw error;
       return data;
+    },
+  });
+
+  const { data: reactifs = [] } = useQuery({
+    queryKey: ["reactifs_dispo"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("reactifs")
+        .select("id,nom,numero_lot").eq("is_actif", true).order("nom");
+      if (error) throw error;
+      return data as any[];
     },
   });
 
@@ -358,10 +378,34 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
   });
 
   const [resultats, setResultats] = useState<ResRow[]>([]);
+  const [repetition, setRepetition] = useState(1);
+  const [motifReprise, setMotifReprise] = useState<string | null>(null);
+  const [trEquipement, setTrEquipement] = useState<string>("none");
+  const [trReactif, setTrReactif] = useState<string>("none");
+  const [trLot, setTrLot] = useState("");
+  const [reOpen, setReOpen] = useState(false);
+  const [reMotif, setReMotif] = useState("");
+
+  const maxRepetition = useMemo(
+    () => existing.reduce((m: number, e: any) => Math.max(m, e.repetition ?? 1), 1),
+    [existing],
+  );
+  const historique = useMemo(
+    () => existing.filter((e: any) => (e.repetition ?? 1) < repetition),
+    [existing, repetition],
+  );
+
+  useEffect(() => { setRepetition(maxRepetition); }, [maxRepetition]);
 
   useEffect(() => {
-    if (existing.length > 0) {
-      setResultats(existing.map((e: any) => ({
+    const current = existing.filter((e: any) => (e.repetition ?? 1) === repetition);
+    if (current.length > 0) {
+      const first: any = current[0];
+      setTrEquipement(first.equipement_id ?? "none");
+      setTrReactif(first.reactif_id ?? "none");
+      setTrLot(first.lot_reactif ?? "");
+      setMotifReprise(first.motif_reprise ?? null);
+      setResultats(current.map((e: any) => ({
         id: e.id, parametre_id: e.parametre_id, valeur: e.valeur ?? "",
         valeur_numerique: e.valeur_numerique, unite_id: e.unite_id, methode_id: e.methode_id,
         conformite: e.conformite, incertitude: e.incertitude, observations: e.observations ?? "",
@@ -371,7 +415,7 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
         seuil_max: e.parametres_analyse?.seuil_max,
       })));
     }
-  }, [existing]);
+  }, [existing, repetition]);
 
   const addRow = () => setResultats((a) => [...a, { parametre_id: "", valeur: "", observations: "" }]);
   const removeRow = (i: number) => setResultats((a) => a.filter((_, idx) => idx !== i));
@@ -427,7 +471,9 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
   const save = useMutation({
     mutationFn: async () => {
       const valid = resultats.filter((r) => r.parametre_id && r.valeur.trim());
-      await supabase.from("analyse_resultats").delete().eq("analyse_id", id);
+      const { data: { user } } = await supabase.auth.getUser();
+      await supabase.from("analyse_resultats").delete()
+        .eq("analyse_id", id).eq("repetition", repetition);
       if (valid.length > 0) {
         const { error } = await supabase.from("analyse_resultats").insert(
           valid.map((r) => ({
@@ -440,6 +486,12 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
             conformite: r.conformite ?? null,
             incertitude: r.incertitude ?? null,
             observations: r.observations || null,
+            equipement_id: trEquipement === "none" ? null : trEquipement,
+            reactif_id: trReactif === "none" ? null : trReactif,
+            lot_reactif: trLot || null,
+            operateur_id: user?.id ?? null,
+            repetition,
+            motif_reprise: motifReprise,
           })),
         );
         if (error) throw error;
@@ -458,6 +510,19 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  // ANA-05 — reprise / répétition tracée
+  const startReprise = () => {
+    if (!reMotif.trim()) { toast.error("Motif de reprise obligatoire"); return; }
+    setMotifReprise(reMotif.trim());
+    setRepetition(maxRepetition + 1);
+    setResultats((prev) => prev.map((r) => ({
+      ...r, id: undefined, valeur: "", valeur_numerique: null, conformite: null, observations: "",
+    })));
+    setReOpen(false);
+    setReMotif("");
+    toast.success(`Répétition n°${maxRepetition + 1} ouverte — saisissez les nouvelles valeurs`);
+  };
 
   const validate = useMutation({
     mutationFn: async (niveau: "technicien" | "chef_labo" | "qualite") => {
@@ -508,9 +573,51 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
           <TabsList className="mx-0">
             <TabsTrigger value="resultats">Résultats ({resultats.length})</TabsTrigger>
             <TabsTrigger value="validations">Validations ({validations.length})</TabsTrigger>
+            <TabsTrigger value="historique">Historique ({historique.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="resultats" className="flex-1 overflow-y-auto space-y-3 mt-2">
+            {/* ANA-04 — traçabilité ISO de la série */}
+            <div className="grid gap-2 rounded-lg border border-border/60 bg-muted/30 p-3 md:grid-cols-4">
+              <div className="space-y-1">
+                <Label className="text-[11px] text-muted-foreground">Équipement utilisé</Label>
+                <Select value={trEquipement} onValueChange={setTrEquipement}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— Aucun —</SelectItem>
+                    {equipements.map((e) => <SelectItem key={e.id} value={e.id}>{e.designation}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[11px] text-muted-foreground">Réactif</Label>
+                <Select value={trReactif} onValueChange={(v) => {
+                  setTrReactif(v);
+                  const r = reactifs.find((x: any) => x.id === v);
+                  if (r?.numero_lot) setTrLot(r.numero_lot);
+                }}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— Aucun —</SelectItem>
+                    {reactifs.map((r: any) => <SelectItem key={r.id} value={r.id}>{r.nom}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[11px] text-muted-foreground">Lot réactif</Label>
+                <Input className="h-8 text-xs" value={trLot} onChange={(e) => setTrLot(e.target.value)} placeholder="N° de lot" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[11px] text-muted-foreground">Série</Label>
+                <div className="flex h-8 items-center gap-2">
+                  <Badge variant={repetition > 1 ? "destructive" : "outline"} className="text-[10px]">
+                    Répétition n°{repetition}
+                  </Badge>
+                  {motifReprise && <span className="truncate text-[11px] text-muted-foreground" title={motifReprise}>{motifReprise}</span>}
+                </div>
+              </div>
+            </div>
+
             {/* Toolbar */}
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -519,6 +626,10 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
                 <span className="text-xs text-muted-foreground">{resultats.filter(r => r.parametre_id).length} paramètre(s)</span>
               </div>
               <div className="flex gap-1">
+                <Button variant="outline" size="sm" onClick={() => setReOpen(true)} className="text-xs h-7"
+                  disabled={existing.length === 0}>
+                  <RotateCcw className="h-3 w-3 mr-1" /> Refaire l'analyse
+                </Button>
                 <Button variant="outline" size="sm" onClick={setAllConforme} className="text-xs h-7">
                   <CheckCircle2 className="h-3 w-3 mr-1" /> Tout conforme
                 </Button>
@@ -527,6 +638,7 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
                 </Button>
               </div>
             </div>
+
 
             {/* Results table */}
             <div className="rounded-lg border border-border/60 overflow-x-auto">
@@ -625,7 +737,75 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
               </div>
             )}
           </TabsContent>
+
+          <TabsContent value="historique" className="flex-1 overflow-y-auto space-y-3 mt-2">
+            {historique.length === 0 ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                Aucune répétition antérieure. Utilisez « Refaire l'analyse » pour tracer une reprise.
+              </p>
+            ) : (
+              <div className="rounded-lg border border-border/60 overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="text-[11px]">
+                      <TableHead className="w-20">Rép.</TableHead>
+                      <TableHead>Paramètre</TableHead>
+                      <TableHead className="w-28">Valeur</TableHead>
+                      <TableHead className="w-20 text-center">Conf.</TableHead>
+                      <TableHead>Équipement</TableHead>
+                      <TableHead>Réactif / lot</TableHead>
+                      <TableHead>Motif de reprise</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {historique.map((h: any) => (
+                      <TableRow key={h.id} className="text-xs">
+                        <TableCell><Badge variant="outline" className="text-[10px]">n°{h.repetition ?? 1}</Badge></TableCell>
+                        <TableCell>{h.parametres_analyse?.libelle ?? "—"}</TableCell>
+                        <TableCell className="tabular-nums">
+                          {h.valeur ?? "—"}{h.incertitude != null ? ` ± ${h.incertitude}` : ""}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {h.conformite == null ? "—" : h.conformite
+                            ? <Badge className="bg-success/20 text-success border-success/40 text-[10px]">OK</Badge>
+                            : <Badge variant="destructive" className="text-[10px]">NC</Badge>}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{h.equipements?.designation ?? "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {h.reactifs?.nom ?? "—"}{h.lot_reactif ? ` · ${h.lot_reactif}` : ""}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{h.motif_reprise ?? "—"}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </TabsContent>
         </Tabs>
+
+        <Dialog open={reOpen} onOpenChange={setReOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="h-4 w-4" /> Reprise d'analyse (répétition n°{maxRepetition + 1})
+              </DialogTitle>
+              <DialogDescription className="text-xs">
+                Les résultats actuels sont conservés dans l'historique. Le motif est obligatoire (ISO 17025 §7.7).
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Label>Motif de la reprise *</Label>
+              <Textarea rows={3} value={reMotif} onChange={(e) => setReMotif(e.target.value)}
+                placeholder="Ex. : dérive instrument, contamination, contrôle qualité hors limites…" />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setReOpen(false)}>Annuler</Button>
+              <Button onClick={startReprise}><RotateCcw className="h-4 w-4" /> Ouvrir la répétition</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
 
         <DialogFooter className="border-t pt-3 gap-2">
           <div className="flex-1 flex gap-1">
