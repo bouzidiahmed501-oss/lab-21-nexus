@@ -573,9 +573,51 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
           <TabsList className="mx-0">
             <TabsTrigger value="resultats">Résultats ({resultats.length})</TabsTrigger>
             <TabsTrigger value="validations">Validations ({validations.length})</TabsTrigger>
+            <TabsTrigger value="historique">Historique ({historique.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="resultats" className="flex-1 overflow-y-auto space-y-3 mt-2">
+            {/* ANA-04 — traçabilité ISO de la série */}
+            <div className="grid gap-2 rounded-lg border border-border/60 bg-muted/30 p-3 md:grid-cols-4">
+              <div className="space-y-1">
+                <Label className="text-[11px] text-muted-foreground">Équipement utilisé</Label>
+                <Select value={trEquipement} onValueChange={setTrEquipement}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— Aucun —</SelectItem>
+                    {equipements.map((e) => <SelectItem key={e.id} value={e.id}>{e.nom}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[11px] text-muted-foreground">Réactif</Label>
+                <Select value={trReactif} onValueChange={(v) => {
+                  setTrReactif(v);
+                  const r = reactifs.find((x: any) => x.id === v);
+                  if (r?.numero_lot) setTrLot(r.numero_lot);
+                }}>
+                  <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— Aucun —</SelectItem>
+                    {reactifs.map((r: any) => <SelectItem key={r.id} value={r.id}>{r.nom}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[11px] text-muted-foreground">Lot réactif</Label>
+                <Input className="h-8 text-xs" value={trLot} onChange={(e) => setTrLot(e.target.value)} placeholder="N° de lot" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[11px] text-muted-foreground">Série</Label>
+                <div className="flex h-8 items-center gap-2">
+                  <Badge variant={repetition > 1 ? "destructive" : "outline"} className="text-[10px]">
+                    Répétition n°{repetition}
+                  </Badge>
+                  {motifReprise && <span className="truncate text-[11px] text-muted-foreground" title={motifReprise}>{motifReprise}</span>}
+                </div>
+              </div>
+            </div>
+
             {/* Toolbar */}
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -584,6 +626,10 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
                 <span className="text-xs text-muted-foreground">{resultats.filter(r => r.parametre_id).length} paramètre(s)</span>
               </div>
               <div className="flex gap-1">
+                <Button variant="outline" size="sm" onClick={() => setReOpen(true)} className="text-xs h-7"
+                  disabled={existing.length === 0}>
+                  <RotateCcw className="h-3 w-3 mr-1" /> Refaire l'analyse
+                </Button>
                 <Button variant="outline" size="sm" onClick={setAllConforme} className="text-xs h-7">
                   <CheckCircle2 className="h-3 w-3 mr-1" /> Tout conforme
                 </Button>
@@ -592,6 +638,7 @@ function ResultsDialog({ id, onClose }: { id: string; onClose: () => void }) {
                 </Button>
               </div>
             </div>
+
 
             {/* Results table */}
             <div className="rounded-lg border border-border/60 overflow-x-auto">
