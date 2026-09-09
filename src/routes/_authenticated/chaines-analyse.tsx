@@ -196,6 +196,12 @@ function ChainesPage() {
           </Table>
         )}
       </CardContent></Card>
+      </TabsContent>
+
+      <TabsContent value="executions">
+        <ChaineExecutions chaines={chaines as any[]} />
+      </TabsContent>
+      </Tabs>
 
       <ChaineDialog
         open={open} onOpenChange={(v) => { if (!v) { setEditing(null); setEtapes([]); } setOpen(v); }}
