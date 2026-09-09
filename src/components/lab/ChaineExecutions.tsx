@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { EmptyState } from "@/components/lab/EmptyState";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -334,7 +333,6 @@ export function ChaineExecutions({ chaines }: { chaines: any[] }) {
                 </SelectContent>
               </Select>
             </div>
-            <Textarea placeholder="Commentaire (optionnel)" rows={2} disabled />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setLaunchOpen(false)}>
