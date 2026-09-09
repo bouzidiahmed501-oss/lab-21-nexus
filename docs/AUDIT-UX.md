@@ -208,8 +208,8 @@ Rôle : point d'entrée quotidien.
 - [ ] `PCK-02` **P2** — Pas de tarif de pack distinct de la somme des analyses.
 
 ### 4.12 Chaînes d'analyse — `CHA`
-- [ ] `CHA-01` **P0** — Les chaînes se définissent mais ne s'exécutent pas : aucun suivi d'avancement étape par étape sur un échantillon réel.
-- [ ] `CHA-02` **P1** — Pas de délai par étape ni d'alerte de dépassement.
+- [x] `CHA-01` **P0** — Les chaînes se définissent mais ne s'exécutent pas : aucun suivi d'avancement étape par étape sur un échantillon réel.
+- [x] `CHA-02` **P1** — Pas de délai par étape ni d'alerte de dépassement.
 
 ### 4.13 Types de prélèvement — `TYP`
 - [ ] `TYP-01` **P1** — Pas de liaison type ↔ analyses obligatoires ↔ contenant ↔ volume minimal.

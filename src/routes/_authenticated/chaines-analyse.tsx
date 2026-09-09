@@ -17,6 +17,8 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Plus, Search, Workflow, Loader2, Trash2, Edit, ArrowUp, ArrowDown } from "lucide-react";
 import { logAudit } from "@/lib/audit";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChaineExecutions } from "@/components/lab/ChaineExecutions";
 
 export const Route = createFileRoute("/_authenticated/chaines-analyse")({
   head: () => ({ meta: [{ title: "Chaînes d'analyse — BALIMS" }] }),
@@ -146,6 +148,13 @@ function ChainesPage() {
         actions={<Button onClick={openNew}><Plus className="mr-2 h-4 w-4" />Nouvelle chaîne</Button>}
       />
 
+      <Tabs defaultValue="modeles" className="space-y-4">
+      <TabsList>
+        <TabsTrigger value="modeles">Modèles</TabsTrigger>
+        <TabsTrigger value="executions">Exécutions en cours</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="modeles" className="space-y-4">
       <Card><CardContent className="p-4">
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -187,6 +196,12 @@ function ChainesPage() {
           </Table>
         )}
       </CardContent></Card>
+      </TabsContent>
+
+      <TabsContent value="executions">
+        <ChaineExecutions chaines={chaines as any[]} />
+      </TabsContent>
+      </Tabs>
 
       <ChaineDialog
         open={open} onOpenChange={(v) => { if (!v) { setEditing(null); setEtapes([]); } setOpen(v); }}

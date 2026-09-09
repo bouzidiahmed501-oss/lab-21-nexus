@@ -998,6 +998,146 @@ export type Database = {
           },
         ]
       }
+      chaine_execution_etapes: {
+        Row: {
+          commentaire: string | null
+          created_at: string
+          duree_prevue_minutes: number | null
+          ended_at: string | null
+          equipement_id: string | null
+          etape_id: string | null
+          execution_id: string
+          id: string
+          instructions: string | null
+          libelle: string
+          operateur_id: string | null
+          ordre: number
+          started_at: string | null
+          statut: string
+          updated_at: string
+        }
+        Insert: {
+          commentaire?: string | null
+          created_at?: string
+          duree_prevue_minutes?: number | null
+          ended_at?: string | null
+          equipement_id?: string | null
+          etape_id?: string | null
+          execution_id: string
+          id?: string
+          instructions?: string | null
+          libelle: string
+          operateur_id?: string | null
+          ordre: number
+          started_at?: string | null
+          statut?: string
+          updated_at?: string
+        }
+        Update: {
+          commentaire?: string | null
+          created_at?: string
+          duree_prevue_minutes?: number | null
+          ended_at?: string | null
+          equipement_id?: string | null
+          etape_id?: string | null
+          execution_id?: string
+          id?: string
+          instructions?: string | null
+          libelle?: string
+          operateur_id?: string | null
+          ordre?: number
+          started_at?: string | null
+          statut?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chaine_execution_etapes_equipement_id_fkey"
+            columns: ["equipement_id"]
+            isOneToOne: false
+            referencedRelation: "equipements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chaine_execution_etapes_etape_id_fkey"
+            columns: ["etape_id"]
+            isOneToOne: false
+            referencedRelation: "chaine_etapes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chaine_execution_etapes_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: false
+            referencedRelation: "chaine_executions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chaine_executions: {
+        Row: {
+          analyse_id: string | null
+          chaine_id: string
+          commentaire: string | null
+          created_at: string
+          created_by: string | null
+          echantillon_id: string | null
+          ended_at: string | null
+          id: string
+          started_at: string
+          statut: string
+          updated_at: string
+        }
+        Insert: {
+          analyse_id?: string | null
+          chaine_id: string
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          echantillon_id?: string | null
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          statut?: string
+          updated_at?: string
+        }
+        Update: {
+          analyse_id?: string | null
+          chaine_id?: string
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          echantillon_id?: string | null
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          statut?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chaine_executions_analyse_id_fkey"
+            columns: ["analyse_id"]
+            isOneToOne: false
+            referencedRelation: "analyses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chaine_executions_chaine_id_fkey"
+            columns: ["chaine_id"]
+            isOneToOne: false
+            referencedRelation: "chaines_analyse"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chaine_executions_echantillon_id_fkey"
+            columns: ["echantillon_id"]
+            isOneToOne: false
+            referencedRelation: "echantillons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chaines_analyse: {
         Row: {
           catalogue_analyse_id: string | null
