@@ -17,6 +17,8 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Plus, Search, Workflow, Loader2, Trash2, Edit, ArrowUp, ArrowDown } from "lucide-react";
 import { logAudit } from "@/lib/audit";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChaineExecutions } from "@/components/lab/ChaineExecutions";
 
 export const Route = createFileRoute("/_authenticated/chaines-analyse")({
   head: () => ({ meta: [{ title: "Chaînes d'analyse — BALIMS" }] }),
