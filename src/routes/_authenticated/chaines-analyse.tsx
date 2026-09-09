@@ -148,6 +148,13 @@ function ChainesPage() {
         actions={<Button onClick={openNew}><Plus className="mr-2 h-4 w-4" />Nouvelle chaîne</Button>}
       />
 
+      <Tabs defaultValue="modeles" className="space-y-4">
+      <TabsList>
+        <TabsTrigger value="modeles">Modèles</TabsTrigger>
+        <TabsTrigger value="executions">Exécutions en cours</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="modeles" className="space-y-4">
       <Card><CardContent className="p-4">
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
