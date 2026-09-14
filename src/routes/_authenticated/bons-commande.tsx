@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Loader2, FileText, Trash2, Download, Eye, Clock, CheckCircle2, XCircle, Thermometer, MapPin, Truck, FlaskConical } from "lucide-react";
+import { Plus, Loader2, FileText, Trash2, Download, Eye, Clock, CheckCircle2, XCircle, Thermometer, MapPin, Truck, FlaskConical, AlertTriangle } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 
@@ -27,7 +27,14 @@ import { formatCurrency, formatDate } from "@/lib/format";
 import { generateBcPdf } from "@/lib/pdf/bonCommande";
 
 export const Route = createFileRoute("/_authenticated/bons-commande")({
-  head: () => ({ meta: [{ title: "Bons de commande — BALIMS" }] }),
+  head: () => ({ meta: [
+    { title: "Bons de commande — BALIMS" },
+    { name: "description", content: "Suivi des commandes clients, échéances et avancement des analyses." },
+    { property: "og:title", content: "Bons de commande — BALIMS" },
+    { property: "og:description", content: "Suivi des commandes clients, échéances et avancement des analyses." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: BCPage,
 });
 
@@ -56,6 +63,8 @@ interface BCRow {
   total_ht: number;
   total_tva: number;
   total_ttc: number;
+  date_souhaitee: string | null;
+  analyses: { id: string; statut: string }[] | null;
   clients: { raison_sociale: string; matricule_fiscal: string | null; adresse: string | null } | null;
 }
 
@@ -70,7 +79,7 @@ function BCPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("bons_commande")
-        .select("*, clients(raison_sociale, matricule_fiscal, adresse)")
+        .select("*, clients(raison_sociale, matricule_fiscal, adresse), analyses(id,statut)")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as unknown as BCRow[];
@@ -128,6 +137,15 @@ function BCPage() {
     { key: "client", header: "Client", accessor: (r) => r.clients?.raison_sociale ?? "", cell: (r) => r.clients?.raison_sociale ?? "—" },
     { key: "reference_client", header: "Réf. client", cell: (r) => <span className="text-muted-foreground">{r.reference_client || "—"}</span> },
     { key: "objet", header: "Objet", cell: (r) => <span className="truncate text-muted-foreground">{r.objet || "—"}</span> },
+    { key: "progress", header: "Avancement", cell: (r) => {
+      const all = r.analyses ?? [];
+      const done = all.filter((a) => ["termine", "valide_tech", "valide_chef", "valide_qualite"].includes(a.statut)).length;
+      return <div className="min-w-24"><div className="mb-1 flex justify-between text-[11px]"><span>{done}/{all.length}</span><span>{all.length ? Math.round(done / all.length * 100) : 0}%</span></div><div className="h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary" style={{ width: `${all.length ? done / all.length * 100 : 0}%` }} /></div></div>;
+    }, sortable: false, width: "120px" },
+    { key: "date_souhaitee", header: "Échéance", accessor: (r) => r.date_souhaitee ?? "", cell: (r) => {
+      const late = !!r.date_souhaitee && new Date(`${r.date_souhaitee}T23:59:59`).getTime() < Date.now() && !["cloture", "annule"].includes(r.statut);
+      return <span className={late ? "flex items-center gap-1 text-xs font-medium text-destructive" : "text-xs"}>{late && <AlertTriangle className="h-3.5 w-3.5" />}{formatDate(r.date_souhaitee)}</span>;
+    }, width: "120px" },
     { key: "total_ttc", header: "Total TTC", align: "right", cell: (r) => <span className="font-medium">{formatCurrency(r.total_ttc)}</span>, accessor: (r) => Number(r.total_ttc), width: "130px" },
     {
       key: "statut", header: "Statut", align: "center", width: "150px",
@@ -204,6 +222,7 @@ function NewBcDialog({ open, onClose }: { open: boolean; onClose: () => void }) 
   const [objet, setObjet] = useState("");
   const [conditions, setConditions] = useState("");
   const [dateBc, setDateBc] = useState(() => new Date().toISOString().split("T")[0]);
+  const [dateSouhaitee, setDateSouhaitee] = useState("");
   const [temperatureReception, setTemperatureReception] = useState("");
   const [codeExterne, setCodeExterne] = useState("");
   const [lignes, setLignes] = useState<Ligne[]>([
@@ -261,7 +280,7 @@ function NewBcDialog({ open, onClose }: { open: boolean; onClose: () => void }) 
       const { data: bc, error: e1 } = await supabase
         .from("bons_commande")
         .insert({
-          numero, client_id: clientId, date_bc: dateBc, statut: "brouillon",
+          numero, client_id: clientId, date_bc: dateBc, date_souhaitee: dateSouhaitee || null, statut: "brouillon",
           reference_client: refClient || null, objet: objet || null, conditions: conditions || null,
           temperature_reception: temperatureReception || null, code_externe: codeExterne || null,
           total_ht: totals.ht, total_tva: totals.tva, total_ttc: totals.ttc,
@@ -284,7 +303,7 @@ function NewBcDialog({ open, onClose }: { open: boolean; onClose: () => void }) 
     onSuccess: () => {
       toast.success("Bon de commande créé");
       qc.invalidateQueries({ queryKey: ["bons_commande"] });
-      setClientId(""); setRefClient(""); setObjet(""); setConditions(""); setTemperatureReception(""); setCodeExterne("");
+      setClientId(""); setRefClient(""); setObjet(""); setConditions(""); setTemperatureReception(""); setCodeExterne(""); setDateSouhaitee("");
       setLignes([{ designation: "", quantite: 1, prix_unitaire: 0, remise_pct: 0, tva_pct: 19, total_ht: 0 }]);
       onClose();
     },
@@ -313,6 +332,10 @@ function NewBcDialog({ open, onClose }: { open: boolean; onClose: () => void }) 
             <div className="space-y-2">
               <Label>Référence client</Label>
               <Input value={refClient} onChange={(e) => setRefClient(e.target.value)} maxLength={200} />
+            </div>
+            <div className="space-y-2">
+              <Label>Échéance client</Label>
+              <Input type="date" value={dateSouhaitee} min={dateBc} onChange={(e) => setDateSouhaitee(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label>Objet</Label>
