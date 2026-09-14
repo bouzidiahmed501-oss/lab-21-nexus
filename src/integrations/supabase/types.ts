@@ -1690,7 +1690,15 @@ export type Database = {
           updated_at?: string
           validite_jours?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "devis_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       devis_lignes: {
         Row: {
