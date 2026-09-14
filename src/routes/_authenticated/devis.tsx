@@ -251,7 +251,7 @@ function DevisPage() {
       <PageHeader
         title="Devis"
         description="Création et suivi des devis commerciaux. Conversion en bon de commande en un clic."
-        badge={<div className="flex items-center gap-2"><StatusBadge label={`${rows.length}`} tone="info" dot={false} />{rows.some(isDevisExpired) && <StatusBadge label={`${rows.filter(isDevisExpired).length} expiré(s)`} tone="danger" />}</div>}
+        badge={<div className="flex items-center gap-2"><StatusBadge label={`${rows.length}`} tone="info" dot={false} />{rows.some(isDevisExpired) && <StatusBadge label={`${rows.filter(isDevisExpired).length} expiré(s)`} tone="destructive" />}</div>}
         actions={<Button size="sm" onClick={() => setOpen(true)}><Plus className="h-3.5 w-3.5" /> Nouveau devis</Button>}
       />
 
