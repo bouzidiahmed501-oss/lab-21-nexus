@@ -22,6 +22,7 @@ import {
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
 import { nextNumero } from "@/lib/numbering";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { generateBcPdf } from "@/lib/pdf/bonCommande";
@@ -140,7 +141,8 @@ function BCPage() {
     { key: "progress", header: "Avancement", cell: (r) => {
       const all = r.analyses ?? [];
       const done = all.filter((a) => ["termine", "valide_tech", "valide_chef", "valide_qualite"].includes(a.statut)).length;
-      return <div className="min-w-24"><div className="mb-1 flex justify-between text-[11px]"><span>{done}/{all.length}</span><span>{all.length ? Math.round(done / all.length * 100) : 0}%</span></div><div className="h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary" style={{ width: `${all.length ? done / all.length * 100 : 0}%` }} /></div></div>;
+      const percent = all.length ? Math.round(done / all.length * 100) : 0;
+      return <div className="min-w-24"><div className="mb-1 flex justify-between text-[11px]"><span>{done}/{all.length}</span><span>{percent}%</span></div><Progress value={percent} className="h-1.5" /></div>;
     }, sortable: false, width: "120px" },
     { key: "date_souhaitee", header: "Échéance", accessor: (r) => r.date_souhaitee ?? "", cell: (r) => {
       const late = !!r.date_souhaitee && new Date(`${r.date_souhaitee}T23:59:59`).getTime() < Date.now() && !["cloture", "annule"].includes(r.statut);
