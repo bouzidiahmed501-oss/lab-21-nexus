@@ -154,16 +154,16 @@ Rôle : point d'entrée quotidien.
 - [ ] `DSH-05` **P2** — Graphique CA vide sur 12 mois : afficher un message plutôt qu'une grille vide.
 
 ### 4.2 Devis — `DEV`
-- [ ] `DEV-01` **P1** — Pas de fiche devis : historique des révisions, relances, motif de refus.
-- [ ] `DEV-02` **P1** — Pas de duplication d'un devis.
-- [ ] `DEV-03` **P1** — Pas d'alerte sur devis expirés (date de validité dépassée).
-- [ ] `DEV-04` **P2** — Pas de modèle de devis pré-rempli à partir d'un pack d'analyses.
-- [ ] `DEV-05` **P2** — Pas d'envoi au client ni de trace « envoyé le ».
+- [x] `DEV-01` **P1** — Pas de fiche devis : historique des révisions, relances, motif de refus.
+- [x] `DEV-02` **P1** — Pas de duplication d'un devis.
+- [x] `DEV-03` **P1** — Pas d'alerte sur devis expirés (date de validité dépassée).
+- [x] `DEV-04` **P2** — Pas de modèle de devis pré-rempli à partir d'un pack d'analyses.
+- [x] `DEV-05` **P2** — Pas d'envoi au client ni de trace « envoyé le ».
 
 ### 4.3 Bons de commande — `BCO`
 - [x] `BCO-01` **P0** — Aucun bouton « planifier une mission » ou « créer les échantillons » depuis un BC : rupture du fil métier.
-- [ ] `BCO-02` **P1** — Pas d'avancement visible (X analyses sur Y terminées).
-- [ ] `BCO-03` **P1** — Pas de date d'échéance client ni d'alerte de retard.
+- [x] `BCO-02` **P1** — Pas d'avancement visible (X analyses sur Y terminées).
+- [x] `BCO-03` **P1** — Pas de date d'échéance client ni d'alerte de retard.
 - [ ] `BCO-04` **P2** — Pas de pièce jointe (bon client scanné, cahier des charges).
 
 ### 4.4 Missions — `MIS`

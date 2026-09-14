@@ -1631,6 +1631,7 @@ export type Database = {
           date_devis: string
           envoye_at: string | null
           id: string
+          motif_refus: string | null
           notes: string | null
           numero: string
           objet: string | null
@@ -1653,6 +1654,7 @@ export type Database = {
           date_devis?: string
           envoye_at?: string | null
           id?: string
+          motif_refus?: string | null
           notes?: string | null
           numero: string
           objet?: string | null
@@ -1675,6 +1677,7 @@ export type Database = {
           date_devis?: string
           envoye_at?: string | null
           id?: string
+          motif_refus?: string | null
           notes?: string | null
           numero?: string
           objet?: string | null
@@ -1687,7 +1690,15 @@ export type Database = {
           updated_at?: string
           validite_jours?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "devis_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       devis_lignes: {
         Row: {
@@ -1735,6 +1746,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "devis_lignes_devis_id_fkey"
+            columns: ["devis_id"]
+            isOneToOne: false
+            referencedRelation: "devis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devis_suivi: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          devis_id: string
+          id: string
+          note: string | null
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          devis_id: string
+          id?: string
+          note?: string | null
+          type: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          devis_id?: string
+          id?: string
+          note?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devis_suivi_devis_id_fkey"
             columns: ["devis_id"]
             isOneToOne: false
             referencedRelation: "devis"

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, Download, Eye, ArrowRightLeft, Copy } from "lucide-react";
+import { Plus, Trash2, Download, Eye, ArrowRightLeft, Copy, AlertTriangle, Send, BellRing, History } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 
@@ -22,7 +22,14 @@ import { generateDevisPdf } from "@/lib/pdf/devis";
 import { logAudit } from "@/lib/audit";
 
 export const Route = createFileRoute("/_authenticated/devis")({
-  head: () => ({ meta: [{ title: "Devis — BALIMS" }] }),
+  head: () => ({ meta: [
+    { title: "Devis commerciaux — BALIMS" },
+    { name: "description", content: "Création, envoi et suivi des devis du laboratoire." },
+    { property: "og:title", content: "Devis commerciaux — BALIMS" },
+    { property: "og:description", content: "Création, envoi et suivi des devis du laboratoire." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: DevisPage,
 });
 
@@ -53,11 +60,23 @@ interface DevisRow {
   total_tva: number;
   total_ttc: number;
   bc_id: string | null;
+  envoye_at: string | null;
+  motif_refus: string | null;
   clients: { raison_sociale: string; matricule_fiscal: string | null; adresse: string | null } | null;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const sb = supabase as any;
+
+function devisEcheance(row: Pick<DevisRow, "date_devis" | "validite_jours">) {
+  const date = new Date(`${row.date_devis}T12:00:00`);
+  date.setDate(date.getDate() + row.validite_jours);
+  return date;
+}
+
+function isDevisExpired(row: DevisRow) {
+  return !["accepte", "converti", "refuse"].includes(row.statut) && devisEcheance(row).getTime() < Date.now();
+}
 
 function DevisPage() {
   const qc = useQueryClient();
@@ -83,8 +102,12 @@ function DevisPage() {
 
   const updateStatut = useMutation({
     mutationFn: async ({ id, statut }: { id: string; statut: DevisStatut }) => {
-      const { error } = await sb.from("devis").update({ statut }).eq("id", id);
+      const patch: Record<string, unknown> = { statut };
+      if (statut === "envoye") patch.envoye_at = new Date().toISOString();
+      const { error } = await sb.from("devis").update(patch).eq("id", id);
       if (error) throw error;
+      const { data: auth } = await supabase.auth.getUser();
+      if (auth.user) await sb.from("devis_suivi").insert({ devis_id: id, type: statut === "envoye" ? "envoi" : "statut", note: `Statut : ${statut}`, created_by: auth.user.id });
       await logAudit({ action: "status_change", entity_type: "devis", entity_id: id, details: { statut } });
     },
     onSuccess: () => { toast.success("Statut mis à jour"); qc.invalidateQueries({ queryKey: ["devis"] }); },
@@ -176,7 +199,10 @@ function DevisPage() {
   const columns: Column<DevisRow>[] = [
     { key: "numero", header: "N°", cell: (r) => <span className="text-numeric font-medium">{r.numero}</span>, width: "140px" },
     { key: "date_devis", header: "Date", cell: (r) => <span className="text-numeric">{formatDate(r.date_devis)}</span>, accessor: (r) => r.date_devis, width: "110px" },
-    { key: "validite", header: "Validité", accessor: (r) => r.validite_jours, cell: (r) => <span className="text-xs">{r.validite_jours}j</span>, width: "80px" },
+    { key: "validite", header: "Échéance", accessor: (r) => devisEcheance(r).toISOString(), cell: (r) => {
+      const expired = isDevisExpired(r);
+      return <span className={expired ? "flex items-center gap-1 text-xs font-medium text-destructive" : "text-xs"}>{expired && <AlertTriangle className="h-3.5 w-3.5" />}{formatDate(devisEcheance(r))}</span>;
+    }, width: "125px" },
     { key: "client", header: "Client", accessor: (r) => r.clients?.raison_sociale ?? "", cell: (r) => r.clients?.raison_sociale ?? "—" },
     { key: "objet", header: "Objet", cell: (r) => <span className="truncate text-muted-foreground">{r.objet || "—"}</span> },
     { key: "total_ttc", header: "Total TTC", align: "right", cell: (r) => <span className="font-medium">{formatCurrency(r.total_ttc)}</span>, accessor: (r) => Number(r.total_ttc), width: "130px" },
@@ -225,7 +251,7 @@ function DevisPage() {
       <PageHeader
         title="Devis"
         description="Création et suivi des devis commerciaux. Conversion en bon de commande en un clic."
-        badge={<StatusBadge label={`${rows.length}`} tone="info" dot={false} />}
+        badge={<div className="flex items-center gap-2"><StatusBadge label={`${rows.length}`} tone="info" dot={false} />{rows.some(isDevisExpired) && <StatusBadge label={`${rows.filter(isDevisExpired).length} expiré(s)`} tone="destructive" />}</div>}
         actions={<Button size="sm" onClick={() => setOpen(true)}><Plus className="h-3.5 w-3.5" /> Nouveau devis</Button>}
       />
 
@@ -265,6 +291,7 @@ function NewDevisDialog({ open, onClose }: { open: boolean; onClose: () => void 
   const [conditions, setConditions] = useState("");
   const [dateDevis, setDateDevis] = useState(() => new Date().toISOString().split("T")[0]);
   const [validite, setValidite] = useState(30);
+  const [packId, setPackId] = useState("none");
   const [lignes, setLignes] = useState<Ligne[]>([
     { designation: "", quantite: 1, prix_unitaire: 0, remise_pct: 0, tva_pct: 19, total_ht: 0 },
   ]);
@@ -283,6 +310,16 @@ function NewDevisDialog({ open, onClose }: { open: boolean; onClose: () => void 
       const { data, error } = await supabase.from("parametres_analyse").select("id,libelle,prix_unitaire").eq("is_active", true).order("libelle");
       if (error) throw error;
       return data;
+    },
+  });
+  const { data: packs = [] } = useQuery({
+    queryKey: ["packs_for_devis"],
+    queryFn: async () => {
+      const { data, error } = await sb.from("pack_analyses")
+        .select("id,code,libelle,lignes:lignes_pack_analyse(ordre,catalogue:catalogue_analyses(libelle,prix))")
+        .eq("is_active", true).order("code");
+      if (error) throw error;
+      return data ?? [];
     },
   });
 
@@ -305,6 +342,25 @@ function NewDevisDialog({ open, onClose }: { open: boolean; onClose: () => void 
     const p = parametres.find((x) => x.id === paramId);
     if (!p) return;
     updateLigne(i, { parametre_id: paramId, designation: p.libelle, prix_unitaire: Number(p.prix_unitaire) });
+  };
+  const applyPack = (id: string) => {
+    setPackId(id);
+    if (id === "none") return;
+    const pack = packs.find((p: any) => p.id === id);
+    if (!pack) return;
+    const next = (pack.lignes ?? [])
+      .sort((a: any, b: any) => a.ordre - b.ordre)
+      .map((line: any) => ({
+        designation: line.catalogue?.libelle ?? "Analyse",
+        quantite: 1,
+        prix_unitaire: Number(line.catalogue?.prix ?? 0),
+        remise_pct: 0,
+        tva_pct: 19,
+        total_ht: Number(line.catalogue?.prix ?? 0),
+      }));
+    if (next.length) setLignes(next);
+    if (!objet) setObjet(pack.libelle ?? pack.code);
+    toast.success(`${next.length} analyse(s) ajoutée(s) depuis le pack`);
   };
 
   const create = useMutation({
@@ -334,7 +390,7 @@ function NewDevisDialog({ open, onClose }: { open: boolean; onClose: () => void 
     onSuccess: () => {
       toast.success("Devis créé");
       qc.invalidateQueries({ queryKey: ["devis"] });
-      setClientId(""); setRefClient(""); setObjet(""); setConditions("");
+      setClientId(""); setRefClient(""); setObjet(""); setConditions(""); setPackId("none");
       setLignes([{ designation: "", quantite: 1, prix_unitaire: 0, remise_pct: 0, tva_pct: 19, total_ht: 0 }]);
       onClose();
     },
@@ -347,6 +403,13 @@ function NewDevisDialog({ open, onClose }: { open: boolean; onClose: () => void 
         <DialogHeader><DialogTitle>Nouveau devis</DialogTitle></DialogHeader>
         <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); create.mutate(); }}>
           <div className="grid gap-4 md:grid-cols-3">
+            <div className="space-y-2 md:col-span-3">
+              <Label>Pré-remplir depuis un pack d'analyses</Label>
+              <Select value={packId} onValueChange={applyPack}>
+                <SelectTrigger><SelectValue placeholder="Choisir un pack…" /></SelectTrigger>
+                <SelectContent><SelectItem value="none">Aucun pack</SelectItem>{packs.map((p: any) => <SelectItem key={p.id} value={p.id}>{p.code} — {p.libelle}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
             <div className="space-y-2">
               <Label>Client *</Label>
               <Select value={clientId} onValueChange={setClientId}>
@@ -444,6 +507,9 @@ function NewDevisDialog({ open, onClose }: { open: boolean; onClose: () => void 
 }
 
 function ViewDevisDialog({ id, onClose }: { id: string; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [note, setNote] = useState("");
+  const [motifRefus, setMotifRefus] = useState("");
   const { data, isLoading } = useQuery({
     queryKey: ["devis", id],
     queryFn: async () => {
@@ -453,8 +519,34 @@ function ViewDevisDialog({ id, onClose }: { id: string; onClose: () => void }) {
       if (error) throw error;
       const { data: lignes } = await sb.from("devis_lignes")
         .select("*").eq("devis_id", id).order("ordre");
-      return { devis: d as DevisRow, lignes: (lignes ?? []) as Ligne[] };
+      const { data: suivi } = await sb.from("devis_suivi").select("*").eq("devis_id", id).order("created_at", { ascending: false });
+      return { devis: d as DevisRow, lignes: (lignes ?? []) as Ligne[], suivi: suivi ?? [] };
     },
+  });
+
+  const addSuivi = useMutation({
+    mutationFn: async ({ type, text }: { type: "relance" | "envoi" | "refus" | "revision"; text?: string }) => {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user) throw new Error("Session utilisateur introuvable");
+      if (type === "refus" && !text?.trim()) throw new Error("Le motif de refus est obligatoire");
+      const now = new Date().toISOString();
+      const patch: Record<string, unknown> = {};
+      if (type === "envoi") Object.assign(patch, { statut: "envoye", envoye_at: now });
+      if (type === "refus") Object.assign(patch, { statut: "refuse", motif_refus: text?.trim() });
+      if (Object.keys(patch).length) {
+        const { error } = await sb.from("devis").update(patch).eq("id", id);
+        if (error) throw error;
+      }
+      const { error } = await sb.from("devis_suivi").insert({ devis_id: id, type, note: text?.trim() || null, created_by: auth.user.id });
+      if (error) throw error;
+    },
+    onSuccess: (_, vars) => {
+      toast.success(vars.type === "relance" ? "Relance enregistrée" : vars.type === "envoi" ? "Envoi au client tracé" : vars.type === "refus" ? "Refus enregistré" : "Révision enregistrée");
+      setNote(""); setMotifRefus("");
+      qc.invalidateQueries({ queryKey: ["devis", id] });
+      qc.invalidateQueries({ queryKey: ["devis"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   return (
@@ -471,6 +563,9 @@ function ViewDevisDialog({ id, onClose }: { id: string; onClose: () => void }) {
               <div><span className="text-muted-foreground">Validité : </span>{data.devis.validite_jours} jours</div>
               <div><span className="text-muted-foreground">Statut : </span><StatusBadge label={data.devis.statut} tone={statutTone(data.devis.statut)} /></div>
               {data.devis.objet && <div className="col-span-2"><span className="text-muted-foreground">Objet : </span>{data.devis.objet}</div>}
+              <div><span className="text-muted-foreground">Échéance : </span><span className={isDevisExpired(data.devis) ? "font-medium text-destructive" : ""}>{formatDate(devisEcheance(data.devis))}</span></div>
+              <div><span className="text-muted-foreground">Envoyé le : </span>{formatDate(data.devis.envoye_at)}</div>
+              {data.devis.motif_refus && <div className="col-span-2 rounded-md border border-destructive/30 bg-destructive/5 p-2 text-destructive"><strong>Motif de refus :</strong> {data.devis.motif_refus}</div>}
             </div>
             <Table>
               <TableHeader>
@@ -496,6 +591,27 @@ function ViewDevisDialog({ id, onClose }: { id: string; onClose: () => void }) {
               <span>HT : <strong>{Number(data.devis.total_ht).toFixed(3)}</strong></span>
               <span>TVA : <strong>{Number(data.devis.total_tva).toFixed(3)}</strong></span>
               <span className="text-base">TTC : <strong>{formatCurrency(data.devis.total_ttc)}</strong></span>
+            </div>
+            <div className="space-y-3 border-t pt-4">
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" onClick={() => addSuivi.mutate({ type: "envoi", text: note })} disabled={addSuivi.isPending}><Send className="h-3.5 w-3.5" /> Envoyer au client</Button>
+                <Button size="sm" variant="outline" onClick={() => addSuivi.mutate({ type: "relance", text: note })} disabled={addSuivi.isPending}><BellRing className="h-3.5 w-3.5" /> Enregistrer une relance</Button>
+                <Button size="sm" variant="outline" onClick={() => addSuivi.mutate({ type: "revision", text: note })} disabled={addSuivi.isPending}><History className="h-3.5 w-3.5" /> Noter une révision</Button>
+              </div>
+              <Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note de suivi, destinataire ou détails de la révision…" rows={2} />
+              <div className="flex gap-2">
+                <Input value={motifRefus} onChange={(e) => setMotifRefus(e.target.value)} placeholder="Motif de refus obligatoire…" />
+                <Button variant="destructive" onClick={() => addSuivi.mutate({ type: "refus", text: motifRefus })} disabled={addSuivi.isPending}>Refuser</Button>
+              </div>
+            </div>
+            <div className="space-y-2 border-t pt-4">
+              <h4 className="text-sm font-semibold">Historique commercial</h4>
+              {data.suivi.length === 0 ? <p className="text-xs text-muted-foreground">Aucun événement enregistré.</p> : data.suivi.map((event: any) => (
+                <div key={event.id} className="flex items-start justify-between gap-3 border-b border-border/50 py-2 text-xs">
+                  <div><span className="font-medium capitalize">{event.type}</span>{event.note && <p className="mt-0.5 text-muted-foreground">{event.note}</p>}</div>
+                  <span className="shrink-0 text-muted-foreground">{formatDate(event.created_at)}</span>
+                </div>
+              ))}
             </div>
           </div>
         )}
