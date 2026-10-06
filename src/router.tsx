@@ -9,7 +9,7 @@ function DefaultErrorComponent({ error, reset }: ErrorComponentProps) {
       <div className="max-w-md text-center">
         <h1 className="text-2xl font-bold text-foreground">Une erreur est survenue</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          {error.message || "Erreur inattendue. Veuillez réessayer."}
+          {(error instanceof Error && error.message) || "Erreur inattendue. Veuillez réessayer."}
         </p>
         <div className="mt-6 flex justify-center gap-3">
           <button
