@@ -1,15 +1,15 @@
 import { QueryClient } from "@tanstack/react-query";
-import { createRouter, useRouter } from "@tanstack/react-router";
+import { createRouter, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 
-function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function DefaultErrorComponent({ error, reset }: ErrorComponentProps) {
   const router = useRouter();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-2xl font-bold text-foreground">Une erreur est survenue</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          {error.message || "Erreur inattendue. Veuillez réessayer."}
+          {(error instanceof Error && error.message) || "Erreur inattendue. Veuillez réessayer."}
         </p>
         <div className="mt-6 flex justify-center gap-3">
           <button
