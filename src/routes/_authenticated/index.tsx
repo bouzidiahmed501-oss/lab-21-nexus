@@ -367,9 +367,12 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* KPIs */}
-      <section className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
-        {kpis.map((k) => <KpiTile key={k.label} k={k} />)}
+      {/* KPIs — DSH-02 : 3 majeurs + bandeau secondaire */}
+      <section className="grid gap-3 md:grid-cols-3">
+        {majorKpis.map((k) => <KpiTile key={k.label} k={k} />)}
+      </section>
+      <section className="grid grid-cols-2 gap-1 rounded-md border border-border bg-card sm:grid-cols-4 xl:grid-cols-8">
+        {minorKpis.map((k) => <KpiChip key={k.label} k={k} />)}
       </section>
 
       <RoleWorkbench />
@@ -387,12 +390,19 @@ function DashboardPage() {
           <CardContent className="p-3">
             {loading ? (
               <div className="h-48 flex items-center justify-center text-xs text-muted-foreground">Chargement…</div>
+            ) : bcByMonth.every((m) => m.count === 0) ? (
+              <div className="flex h-48 flex-col items-center justify-center gap-2 text-center">
+                <p className="text-sm text-muted-foreground">Aucun bon de commande cette année.</p>
+                <Button size="sm" variant="outline" asChild className="h-8 text-xs">
+                  <Link to="/devis">Créer un devis</Link>
+                </Button>
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={bcByMonth} margin={{ top: 5, right: 5, bottom: 0, left: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-border/40" />
                   <XAxis dataKey="mois" tick={{ fontSize: 10 }} className="fill-muted-foreground" />
-                  <YAxis tick={{ fontSize: 10 }} className="fill-muted-foreground" />
+                  <YAxis tick={{ fontSize: 10 }} allowDecimals={false} className="fill-muted-foreground" />
                   <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8 }} />
                   <Bar dataKey="count" name="BC" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
                 </BarChart>
