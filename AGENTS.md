@@ -1,0 +1,1 @@
+- Chart (recharts) colors come from theme tokens via `useThemeColors` in `src/lib/chartColors.ts` — SVG fill/stroke attributes cannot resolve CSS variables.
