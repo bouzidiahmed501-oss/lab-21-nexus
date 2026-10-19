@@ -342,15 +342,48 @@ function DashboardPage() {
     load().catch((e) => { console.error(e); setLoading(false); });
   }, []);
 
-  const kpis: Kpi[] = [
-    { label: "BC en cours", value: String(stats.bcEnCours), delta: `${stats.bcTotal} total`, icon: ClipboardList, to: "/bons-commande" },
-    { label: "Analyses en attente", value: String(stats.analysesAttente), icon: FlaskConical, to: "/analyses", tone: "warning" },
-    { label: "Missions planifiées", value: String(stats.missionsPlanifiees), icon: Activity, to: "/missions" },
-    { label: "CA facturé", value: formatTND(stats.caFacture), icon: TrendingUp, tone: "success" },
-    { label: "Clients actifs", value: String(stats.clients), icon: Users, to: "/clients" },
+  // DSH-03 — indicateurs de délai
+  const [delais, setDelais] = useState<{ echRetard: number; anaHorsDelai: number; tat: number | null }>({ echRetard: 0, anaHorsDelai: 0, tat: null });
+  useEffect(() => {
+    const loadDelais = async () => {
+      const iso = (d: number) => new Date(Date.now() - d * 86400000).toISOString();
+      const [ech, ana, done] = await Promise.all([
+        supabase.from("echantillons").select("id", { count: "exact", head: true })
+          .in("statut", ["recu", "en_attente"]).lt("date_reception", iso(ECH_RETARD_JOURS)),
+        supabase.from("analyses").select("id", { count: "exact", head: true })
+          .in("statut", ["a_faire", "en_cours"]).lt("created_at", iso(ANA_DELAI_JOURS)),
+        supabase.from("analyses").select("date_fin, prelevements(date_reception, date_prelevement)")
+          .not("date_fin", "is", null).limit(500),
+      ]);
+      const durees = (done.data ?? []).map((a: any) => {
+        const start = a.prelevements?.date_reception ?? a.prelevements?.date_prelevement;
+        if (!start) return null;
+        return (new Date(a.date_fin).getTime() - new Date(start).getTime()) / 86400000;
+      }).filter((v): v is number => v !== null && v >= 0);
+      setDelais({
+        echRetard: ech.count ?? 0,
+        anaHorsDelai: ana.count ?? 0,
+        tat: durees.length ? durees.reduce((s, v) => s + v, 0) / durees.length : null,
+      });
+    };
+    loadDelais().catch(console.error);
+  }, []);
+
+  const majorKpis: Kpi[] = [
+    { label: "Analyses en attente", value: String(stats.analysesAttente), delta: `${delais.anaHorsDelai} hors délai (> ${ANA_DELAI_JOURS} j)`, icon: FlaskConical, to: "/analyses", tone: delais.anaHorsDelai > 0 ? "destructive" : "warning", empty: { when: stats.analysesAttente === 0, label: "Réceptionner des échantillons", to: "/reception-scan" } },
+    { label: "Échantillons en retard", value: String(delais.echRetard), delta: `Non analysés après ${ECH_RETARD_JOURS} j · TAT moyen ${delais.tat === null ? "—" : `${delais.tat.toFixed(1)} j`}`, icon: Clock, to: "/echantillons", tone: delais.echRetard > 0 ? "destructive" : "success" },
+    { label: "Factures impayées", value: String(stats.facturesImpayees), delta: `CA encaissé ${formatTND(stats.caFacture)}`, icon: Receipt, to: "/recouvrement", tone: stats.facturesImpayees > 0 ? "destructive" : "success" },
+  ];
+
+  const minorKpis: Kpi[] = [
+    { label: "BC en cours", value: String(stats.bcEnCours), icon: ClipboardList, to: "/bons-commande", empty: { when: stats.bcEnCours === 0, label: "Créer", to: "/devis" } },
+    { label: "BC total", value: String(stats.bcTotal), icon: ClipboardList, to: "/bons-commande" },
+    { label: "Missions planifiées", value: String(stats.missionsPlanifiees), icon: Activity, to: "/missions", empty: { when: stats.missionsPlanifiees === 0, label: "Planifier", to: "/missions" } },
+    { label: "TAT moyen", value: delais.tat === null ? "—" : `${delais.tat.toFixed(1)} j`, icon: Clock, to: "/analyses" },
+    { label: "Clients actifs", value: String(stats.clients), icon: Users, to: "/clients", empty: { when: stats.clients === 0, label: "Ajouter", to: "/clients" } },
     { label: "NC ouvertes", value: String(stats.ncOuvertes), icon: ShieldAlert, to: "/qualite", tone: stats.ncOuvertes > 0 ? "destructive" : "default" },
     { label: "Équip. à étalonner", value: String(stats.equipementsAlerte), icon: Wrench, to: "/equipements", tone: stats.equipementsAlerte > 0 ? "warning" : "default" },
-    { label: "Factures impayées", value: String(stats.facturesImpayees), icon: Receipt, to: "/facturation", tone: stats.facturesImpayees > 0 ? "destructive" : "default" },
+    { label: "CA facturé", value: formatTND(stats.caFacture), icon: TrendingUp, to: "/facturation", tone: "success" },
   ];
 
   return (
