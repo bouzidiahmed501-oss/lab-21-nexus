@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { formatDateTime } from "@/lib/format";
+import { useThemeColors } from "@/lib/chartColors";
 
 export const Route = createFileRoute("/_authenticated/sondes")({
   head: () => ({ meta: [{ title: "Sondes IoT — BALIMS" }] }),
@@ -302,7 +303,10 @@ function ApiKeyDialog({ apiKey, onClose }: { apiKey: string | null; onClose: () 
   );
 }
 
+const SONDE_TOKENS = ["--primary", "--destructive"];
+
 function SondeDetailDialog({ sonde, onClose }: { sonde: Sonde; onClose: () => void }) {
+  const [cPrimary, cDanger] = useThemeColors(SONDE_TOKENS);
   const [range, setRange] = useState<"24h" | "7d" | "30d">("24h");
   const { data: releves = [] } = useQuery({
     queryKey: ["releves_sonde", sonde.id, range],
@@ -347,9 +351,9 @@ function SondeDetailDialog({ sonde, onClose }: { sonde: Sonde; onClose: () => vo
                     <XAxis dataKey="t" tick={{ fontSize: 10 }} />
                     <YAxis tick={{ fontSize: 10 }} unit={sonde.unite} />
                     <Tooltip />
-                    {sonde.seuil_min !== null && <ReferenceLine y={sonde.seuil_min} stroke="#ef4444" strokeDasharray="3 3" />}
-                    {sonde.seuil_max !== null && <ReferenceLine y={sonde.seuil_max} stroke="#ef4444" strokeDasharray="3 3" />}
-                    <Line type="monotone" dataKey="v" stroke="var(--primary)" dot={false} />
+                    {sonde.seuil_min !== null && <ReferenceLine y={sonde.seuil_min} stroke={cDanger} strokeDasharray="3 3" />}
+                    {sonde.seuil_max !== null && <ReferenceLine y={sonde.seuil_max} stroke={cDanger} strokeDasharray="3 3" />}
+                    <Line type="monotone" dataKey="v" stroke={cPrimary} dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
               )}

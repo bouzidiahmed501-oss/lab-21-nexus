@@ -10,6 +10,7 @@ import { StatusBadge, statutTone } from "@/components/lab/StatusBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { formatTND, formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useThemeColors } from "@/lib/chartColors";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles, type AppRole } from "@/hooks/useUserRoles";
 
@@ -106,7 +107,7 @@ function KpiChip({ k }: { k: Kpi }) {
   );
 }
 
-const PIE_COLORS = ["var(--primary)", "var(--warning)", "var(--success)", "var(--destructive)", "var(--chart-1)", "var(--chart-2)", "var(--chart-3)"];
+const PIE_TOKENS = ["--primary", "--warning", "--success", "--destructive", "--chart-1", "--chart-2", "--chart-3"];
 
 interface WorkItem { id: string; label: string; sub: string; }
 
@@ -245,6 +246,7 @@ function RoleWorkbench() {
 
 
 function DashboardPage() {
+  const PIE_COLORS = useThemeColors(PIE_TOKENS);
   const [stats, setStats] = useState({
     bcEnCours: 0, bcTotal: 0, analysesAttente: 0,
     facturesImpayees: 0, caFacture: 0,
@@ -441,7 +443,7 @@ function DashboardPage() {
                   <XAxis dataKey="mois" tick={{ fontSize: 10 }} className="fill-muted-foreground" />
                   <YAxis tick={{ fontSize: 10 }} allowDecimals={false} className="fill-muted-foreground" />
                   <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8 }} />
-                  <Bar dataKey="count" name="BC" fill="var(--primary)" radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="count" name="BC" fill={PIE_COLORS[0]} radius={[3, 3, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
