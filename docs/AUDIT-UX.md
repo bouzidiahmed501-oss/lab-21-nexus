@@ -114,7 +114,7 @@ Le problème n'est pas la couverture fonctionnelle, c'est **la lisibilité du pa
 - [ ] `TRV-24` **P2** — Retours d'action inégaux : certains toasts, d'autres rien.
 
 ### 3.4 Données et démonstration
-- [ ] `TRV-30` **P0** — 33 écrans sur 38 sont vides : ni jeu de démonstration, ni import.
+- [x] `TRV-30` **P0** — 33 écrans sur 38 sont vides : ni jeu de démonstration, ni import. *(Jeu de démonstration complet chargé : chaîne Devis → Règlement, équipements, réactifs, sondes, RH, projets, qualité.)*
 - [ ] `TRV-31` **P1** — Pas d'import CSV (clients, catalogue d'analyses, produits) : reprise de l'existant impossible.
 - [ ] `TRV-32` **P1** — Aucune corbeille / annulation : suppression définitive immédiate.
 
