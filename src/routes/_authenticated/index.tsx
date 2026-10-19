@@ -106,7 +106,7 @@ function KpiChip({ k }: { k: Kpi }) {
   );
 }
 
-const PIE_COLORS = ["hsl(var(--primary))", "hsl(var(--warning))", "hsl(var(--success))", "hsl(var(--destructive))", "#8884d8", "#82ca9d", "#ffc658"];
+const PIE_COLORS = ["var(--primary)", "var(--warning)", "var(--success)", "var(--destructive)", "var(--chart-1)", "var(--chart-2)", "var(--chart-3)"];
 
 interface WorkItem { id: string; label: string; sub: string; }
 
@@ -441,7 +441,7 @@ function DashboardPage() {
                   <XAxis dataKey="mois" tick={{ fontSize: 10 }} className="fill-muted-foreground" />
                   <YAxis tick={{ fontSize: 10 }} allowDecimals={false} className="fill-muted-foreground" />
                   <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8 }} />
-                  <Bar dataKey="count" name="BC" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="count" name="BC" fill="var(--primary)" radius={[3, 3, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}

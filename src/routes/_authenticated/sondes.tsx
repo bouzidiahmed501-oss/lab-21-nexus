@@ -349,7 +349,7 @@ function SondeDetailDialog({ sonde, onClose }: { sonde: Sonde; onClose: () => vo
                     <Tooltip />
                     {sonde.seuil_min !== null && <ReferenceLine y={sonde.seuil_min} stroke="#ef4444" strokeDasharray="3 3" />}
                     {sonde.seuil_max !== null && <ReferenceLine y={sonde.seuil_max} stroke="#ef4444" strokeDasharray="3 3" />}
-                    <Line type="monotone" dataKey="v" stroke="hsl(var(--primary))" dot={false} />
+                    <Line type="monotone" dataKey="v" stroke="var(--primary)" dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
               )}
