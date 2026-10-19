@@ -148,10 +148,10 @@ Le problème n'est pas la couverture fonctionnelle, c'est **la lisibilité du pa
 ### 4.1 Tableau de bord — `DSH`
 Rôle : point d'entrée quotidien.
 - [x] `DSH-01` **P0** — Même écran pour tous les rôles : créer un workbench par rôle (technicien : mes analyses ; chef labo : à valider ; commercial : devis en attente ; comptable : impayés).
-- [ ] `DSH-02` **P1** — 8 KPI de même poids : hiérarchiser (3 majeurs + le reste en bandeau).
-- [ ] `DSH-03` **P1** — Aucun indicateur de délai : ajouter « échantillons en retard », « TAT moyen », « analyses hors délai ».
-- [ ] `DSH-04` **P1** — Les KPI à 0 ne renvoient pas vers une action de création.
-- [ ] `DSH-05` **P2** — Graphique CA vide sur 12 mois : afficher un message plutôt qu'une grille vide.
+- [x] `DSH-02` **P1** — 8 KPI de même poids : hiérarchiser (3 majeurs + le reste en bandeau).
+- [x] `DSH-03` **P1** — Aucun indicateur de délai : ajouter « échantillons en retard », « TAT moyen », « analyses hors délai ».
+- [x] `DSH-04` **P1** — Les KPI à 0 ne renvoient pas vers une action de création.
+- [x] `DSH-05` **P2** — Graphique CA vide sur 12 mois : afficher un message plutôt qu'une grille vide.
 
 ### 4.2 Devis — `DEV`
 - [x] `DEV-01` **P1** — Pas de fiche devis : historique des révisions, relances, motif de refus.

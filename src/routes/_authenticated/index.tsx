@@ -10,6 +10,7 @@ import { StatusBadge, statutTone } from "@/components/lab/StatusBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { formatTND, formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useThemeColors } from "@/lib/chartColors";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles, type AppRole } from "@/hooks/useUserRoles";
 
@@ -23,6 +24,10 @@ export const Route = createFileRoute("/_authenticated/")({
   component: DashboardPage,
 });
 
+/** Seuils de délai (jours) pour les indicateurs DSH-03. */
+const ECH_RETARD_JOURS = 5;
+const ANA_DELAI_JOURS = 7;
+
 interface Kpi {
   label: string;
   value: string;
@@ -30,38 +35,79 @@ interface Kpi {
   icon: React.ComponentType<{ className?: string }>;
   to?: string;
   tone?: "default" | "warning" | "success" | "destructive";
+  /** DSH-04 — action proposée quand l'indicateur est vide. */
+  empty?: { when: boolean; label: string; to: string };
 }
 
+const TONE_ACCENT = {
+  default: "text-primary border-l-primary",
+  warning: "text-warning border-l-warning",
+  success: "text-success border-l-success",
+  destructive: "text-destructive border-l-destructive",
+} as const;
+
+/** DSH-02 — indicateur majeur, mis en avant. */
 function KpiTile({ k }: { k: Kpi }) {
   const Icon = k.icon;
-  const accent = {
-    default: "text-primary border-l-primary",
-    warning: "text-warning border-l-warning",
-    success: "text-success border-l-success",
-    destructive: "text-destructive border-l-destructive",
-  }[k.tone ?? "default"];
+  const accent = TONE_ACCENT[k.tone ?? "default"];
   return (
     <Card className={cn("border-l-4 shadow-none transition-colors hover:bg-muted/30", accent)}>
-      <CardContent className="p-3">
+      <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{k.label}</p>
-            <p className="mt-1 text-xl font-bold leading-none tabular-nums text-foreground">{k.value}</p>
-            {k.delta && <p className="mt-1 text-[11px] text-muted-foreground">{k.delta}</p>}
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{k.label}</p>
+            <p className="mt-1.5 text-3xl font-bold leading-none tabular-nums text-foreground">{k.value}</p>
+            {k.delta && <p className="mt-1.5 text-xs text-muted-foreground">{k.delta}</p>}
           </div>
-          <Icon className={cn("h-4 w-4 opacity-70", accent.split(" ")[0])} />
+          <Icon className={cn("h-5 w-5 opacity-70", accent.split(" ")[0])} />
         </div>
-        {k.to && (
-          <Link to={k.to} className="mt-2 flex items-center gap-1 text-[11px] font-medium text-primary hover:underline">
-            Voir détails <ArrowUpRight className="h-3 w-3" />
-          </Link>
-        )}
+        <KpiLink k={k} />
       </CardContent>
     </Card>
   );
 }
 
-const PIE_COLORS = ["hsl(var(--primary))", "hsl(var(--warning))", "hsl(var(--success))", "hsl(var(--destructive))", "#8884d8", "#82ca9d", "#ffc658"];
+function KpiLink({ k }: { k: Kpi }) {
+  if (k.empty?.when) {
+    return (
+      <Link to={k.empty.to} className="mt-2 flex items-center gap-1 text-[11px] font-medium text-primary hover:underline">
+        + {k.empty.label}
+      </Link>
+    );
+  }
+  if (!k.to) return null;
+  return (
+    <Link to={k.to} className="mt-2 flex items-center gap-1 text-[11px] font-medium text-primary hover:underline">
+      Voir détails <ArrowUpRight className="h-3 w-3" />
+    </Link>
+  );
+}
+
+/** DSH-02 — indicateur secondaire, compact, dans le bandeau. */
+function KpiChip({ k }: { k: Kpi }) {
+  const Icon = k.icon;
+  const accent = TONE_ACCENT[k.tone ?? "default"];
+  const target = k.empty?.when ? k.empty.to : k.to;
+  const body = (
+    <div className="flex items-center gap-2 px-3 py-2">
+      <Icon className={cn("h-3.5 w-3.5 shrink-0 opacity-70", accent.split(" ")[0])} />
+      <div className="min-w-0">
+        <p className="truncate text-[10px] uppercase tracking-wider text-muted-foreground">{k.label}</p>
+        <p className="text-sm font-semibold tabular-nums text-foreground">
+          {k.value}
+          {k.empty?.when && <span className="ml-1.5 text-[10px] font-medium text-primary">+ {k.empty.label}</span>}
+        </p>
+      </div>
+    </div>
+  );
+  return target ? (
+    <Link to={target} className="min-w-0 rounded-md transition-colors hover:bg-muted/40">{body}</Link>
+  ) : (
+    <div className="min-w-0">{body}</div>
+  );
+}
+
+const PIE_TOKENS = ["--primary", "--warning", "--success", "--destructive", "--chart-1", "--chart-2", "--chart-3"];
 
 interface WorkItem { id: string; label: string; sub: string; }
 
@@ -200,6 +246,7 @@ function RoleWorkbench() {
 
 
 function DashboardPage() {
+  const PIE_COLORS = useThemeColors(PIE_TOKENS);
   const [stats, setStats] = useState({
     bcEnCours: 0, bcTotal: 0, analysesAttente: 0,
     facturesImpayees: 0, caFacture: 0,
@@ -221,7 +268,7 @@ function DashboardPage() {
         bcEnCours, bcTotal, analyses, factImpayees, caData, clients, ncOuv, equipAlerte, missions,
         recBC, recAna, ncList, etalProches, allBC, allAnalyses,
       ] = await Promise.all([
-        supabase.from("bons_commande").select("*", { count: "exact", head: true }).in("statut", ["validee", "en_cours"] as any),
+        supabase.from("bons_commande").select("*", { count: "exact", head: true }).in("statut", ["accepte", "en_cours"]),
         supabase.from("bons_commande").select("*", { count: "exact", head: true }),
         supabase.from("analyses").select("*", { count: "exact", head: true }).in("statut", ["a_faire", "en_cours"] as any),
         supabase.from("factures").select("net_a_payer", { count: "exact" }).in("statut", ["emise", "partielle", "impayee"]),
@@ -301,15 +348,48 @@ function DashboardPage() {
     load().catch((e) => { console.error(e); setLoading(false); });
   }, []);
 
-  const kpis: Kpi[] = [
-    { label: "BC en cours", value: String(stats.bcEnCours), delta: `${stats.bcTotal} total`, icon: ClipboardList, to: "/bons-commande" },
-    { label: "Analyses en attente", value: String(stats.analysesAttente), icon: FlaskConical, to: "/analyses", tone: "warning" },
-    { label: "Missions planifiées", value: String(stats.missionsPlanifiees), icon: Activity, to: "/missions" },
-    { label: "CA facturé", value: formatTND(stats.caFacture), icon: TrendingUp, tone: "success" },
-    { label: "Clients actifs", value: String(stats.clients), icon: Users, to: "/clients" },
+  // DSH-03 — indicateurs de délai
+  const [delais, setDelais] = useState<{ echRetard: number; anaHorsDelai: number; tat: number | null }>({ echRetard: 0, anaHorsDelai: 0, tat: null });
+  useEffect(() => {
+    const loadDelais = async () => {
+      const iso = (d: number) => new Date(Date.now() - d * 86400000).toISOString();
+      const [ech, ana, done] = await Promise.all([
+        supabase.from("echantillons").select("id", { count: "exact", head: true })
+          .in("statut", ["recu", "en_attente"]).lt("date_reception", iso(ECH_RETARD_JOURS)),
+        supabase.from("analyses").select("id", { count: "exact", head: true })
+          .in("statut", ["a_faire", "en_cours"]).lt("created_at", iso(ANA_DELAI_JOURS)),
+        supabase.from("analyses").select("date_fin, prelevements(date_reception, date_prelevement)")
+          .not("date_fin", "is", null).limit(500),
+      ]);
+      const durees = (done.data ?? []).map((a: any) => {
+        const start = a.prelevements?.date_reception ?? a.prelevements?.date_prelevement;
+        if (!start) return null;
+        return (new Date(a.date_fin).getTime() - new Date(start).getTime()) / 86400000;
+      }).filter((v): v is number => v !== null && v >= 0);
+      setDelais({
+        echRetard: ech.count ?? 0,
+        anaHorsDelai: ana.count ?? 0,
+        tat: durees.length ? durees.reduce((s, v) => s + v, 0) / durees.length : null,
+      });
+    };
+    loadDelais().catch(console.error);
+  }, []);
+
+  const majorKpis: Kpi[] = [
+    { label: "Analyses en attente", value: String(stats.analysesAttente), delta: `${delais.anaHorsDelai} hors délai (> ${ANA_DELAI_JOURS} j)`, icon: FlaskConical, to: "/analyses", tone: delais.anaHorsDelai > 0 ? "destructive" : "warning", empty: { when: stats.analysesAttente === 0, label: "Réceptionner des échantillons", to: "/reception-scan" } },
+    { label: "Échantillons en retard", value: String(delais.echRetard), delta: `Non analysés après ${ECH_RETARD_JOURS} j · TAT moyen ${delais.tat === null ? "—" : `${delais.tat.toFixed(1)} j`}`, icon: Clock, to: "/echantillons", tone: delais.echRetard > 0 ? "destructive" : "success" },
+    { label: "Factures impayées", value: String(stats.facturesImpayees), delta: `CA encaissé ${formatTND(stats.caFacture)}`, icon: Receipt, to: "/recouvrement", tone: stats.facturesImpayees > 0 ? "destructive" : "success" },
+  ];
+
+  const minorKpis: Kpi[] = [
+    { label: "BC en cours", value: String(stats.bcEnCours), icon: ClipboardList, to: "/bons-commande", empty: { when: stats.bcEnCours === 0, label: "Créer", to: "/devis" } },
+    { label: "BC total", value: String(stats.bcTotal), icon: ClipboardList, to: "/bons-commande" },
+    { label: "Missions planifiées", value: String(stats.missionsPlanifiees), icon: Activity, to: "/missions", empty: { when: stats.missionsPlanifiees === 0, label: "Planifier", to: "/missions" } },
+    { label: "TAT moyen", value: delais.tat === null ? "—" : `${delais.tat.toFixed(1)} j`, icon: Clock, to: "/analyses" },
+    { label: "Clients actifs", value: String(stats.clients), icon: Users, to: "/clients", empty: { when: stats.clients === 0, label: "Ajouter", to: "/clients" } },
     { label: "NC ouvertes", value: String(stats.ncOuvertes), icon: ShieldAlert, to: "/qualite", tone: stats.ncOuvertes > 0 ? "destructive" : "default" },
     { label: "Équip. à étalonner", value: String(stats.equipementsAlerte), icon: Wrench, to: "/equipements", tone: stats.equipementsAlerte > 0 ? "warning" : "default" },
-    { label: "Factures impayées", value: String(stats.facturesImpayees), icon: Receipt, to: "/facturation", tone: stats.facturesImpayees > 0 ? "destructive" : "default" },
+    { label: "CA facturé", value: formatTND(stats.caFacture), icon: TrendingUp, to: "/facturation", tone: "success" },
   ];
 
   return (
@@ -326,9 +406,12 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* KPIs */}
-      <section className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
-        {kpis.map((k) => <KpiTile key={k.label} k={k} />)}
+      {/* KPIs — DSH-02 : 3 majeurs + bandeau secondaire */}
+      <section className="grid gap-3 md:grid-cols-3">
+        {majorKpis.map((k) => <KpiTile key={k.label} k={k} />)}
+      </section>
+      <section className="grid grid-cols-2 gap-1 rounded-md border border-border bg-card sm:grid-cols-4 xl:grid-cols-8">
+        {minorKpis.map((k) => <KpiChip key={k.label} k={k} />)}
       </section>
 
       <RoleWorkbench />
@@ -346,14 +429,21 @@ function DashboardPage() {
           <CardContent className="p-3">
             {loading ? (
               <div className="h-48 flex items-center justify-center text-xs text-muted-foreground">Chargement…</div>
+            ) : bcByMonth.every((m) => m.count === 0) ? (
+              <div className="flex h-48 flex-col items-center justify-center gap-2 text-center">
+                <p className="text-sm text-muted-foreground">Aucun bon de commande cette année.</p>
+                <Button size="sm" variant="outline" asChild className="h-8 text-xs">
+                  <Link to="/devis">Créer un devis</Link>
+                </Button>
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={bcByMonth} margin={{ top: 5, right: 5, bottom: 0, left: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-border/40" />
                   <XAxis dataKey="mois" tick={{ fontSize: 10 }} className="fill-muted-foreground" />
-                  <YAxis tick={{ fontSize: 10 }} className="fill-muted-foreground" />
+                  <YAxis tick={{ fontSize: 10 }} allowDecimals={false} className="fill-muted-foreground" />
                   <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8 }} />
-                  <Bar dataKey="count" name="BC" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="count" name="BC" fill={PIE_COLORS[0]} radius={[3, 3, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
