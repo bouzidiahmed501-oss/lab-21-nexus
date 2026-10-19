@@ -23,6 +23,10 @@ export const Route = createFileRoute("/_authenticated/")({
   component: DashboardPage,
 });
 
+/** Seuils de délai (jours) pour les indicateurs DSH-03. */
+const ECH_RETARD_JOURS = 5;
+const ANA_DELAI_JOURS = 7;
+
 interface Kpi {
   label: string;
   value: string;
@@ -262,7 +266,7 @@ function DashboardPage() {
         bcEnCours, bcTotal, analyses, factImpayees, caData, clients, ncOuv, equipAlerte, missions,
         recBC, recAna, ncList, etalProches, allBC, allAnalyses,
       ] = await Promise.all([
-        supabase.from("bons_commande").select("*", { count: "exact", head: true }).in("statut", ["validee", "en_cours"] as any),
+        supabase.from("bons_commande").select("*", { count: "exact", head: true }).in("statut", ["accepte", "en_cours"]),
         supabase.from("bons_commande").select("*", { count: "exact", head: true }),
         supabase.from("analyses").select("*", { count: "exact", head: true }).in("statut", ["a_faire", "en_cours"] as any),
         supabase.from("factures").select("net_a_payer", { count: "exact" }).in("statut", ["emise", "partielle", "impayee"]),
