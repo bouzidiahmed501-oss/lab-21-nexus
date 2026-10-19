@@ -30,34 +30,75 @@ interface Kpi {
   icon: React.ComponentType<{ className?: string }>;
   to?: string;
   tone?: "default" | "warning" | "success" | "destructive";
+  /** DSH-04 — action proposée quand l'indicateur est vide. */
+  empty?: { when: boolean; label: string; to: string };
 }
 
+const TONE_ACCENT = {
+  default: "text-primary border-l-primary",
+  warning: "text-warning border-l-warning",
+  success: "text-success border-l-success",
+  destructive: "text-destructive border-l-destructive",
+} as const;
+
+/** DSH-02 — indicateur majeur, mis en avant. */
 function KpiTile({ k }: { k: Kpi }) {
   const Icon = k.icon;
-  const accent = {
-    default: "text-primary border-l-primary",
-    warning: "text-warning border-l-warning",
-    success: "text-success border-l-success",
-    destructive: "text-destructive border-l-destructive",
-  }[k.tone ?? "default"];
+  const accent = TONE_ACCENT[k.tone ?? "default"];
   return (
     <Card className={cn("border-l-4 shadow-none transition-colors hover:bg-muted/30", accent)}>
-      <CardContent className="p-3">
+      <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{k.label}</p>
-            <p className="mt-1 text-xl font-bold leading-none tabular-nums text-foreground">{k.value}</p>
-            {k.delta && <p className="mt-1 text-[11px] text-muted-foreground">{k.delta}</p>}
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{k.label}</p>
+            <p className="mt-1.5 text-3xl font-bold leading-none tabular-nums text-foreground">{k.value}</p>
+            {k.delta && <p className="mt-1.5 text-xs text-muted-foreground">{k.delta}</p>}
           </div>
-          <Icon className={cn("h-4 w-4 opacity-70", accent.split(" ")[0])} />
+          <Icon className={cn("h-5 w-5 opacity-70", accent.split(" ")[0])} />
         </div>
-        {k.to && (
-          <Link to={k.to} className="mt-2 flex items-center gap-1 text-[11px] font-medium text-primary hover:underline">
-            Voir détails <ArrowUpRight className="h-3 w-3" />
-          </Link>
-        )}
+        <KpiLink k={k} />
       </CardContent>
     </Card>
+  );
+}
+
+function KpiLink({ k }: { k: Kpi }) {
+  if (k.empty?.when) {
+    return (
+      <Link to={k.empty.to} className="mt-2 flex items-center gap-1 text-[11px] font-medium text-primary hover:underline">
+        + {k.empty.label}
+      </Link>
+    );
+  }
+  if (!k.to) return null;
+  return (
+    <Link to={k.to} className="mt-2 flex items-center gap-1 text-[11px] font-medium text-primary hover:underline">
+      Voir détails <ArrowUpRight className="h-3 w-3" />
+    </Link>
+  );
+}
+
+/** DSH-02 — indicateur secondaire, compact, dans le bandeau. */
+function KpiChip({ k }: { k: Kpi }) {
+  const Icon = k.icon;
+  const accent = TONE_ACCENT[k.tone ?? "default"];
+  const target = k.empty?.when ? k.empty.to : k.to;
+  const body = (
+    <div className="flex items-center gap-2 px-3 py-2">
+      <Icon className={cn("h-3.5 w-3.5 shrink-0 opacity-70", accent.split(" ")[0])} />
+      <div className="min-w-0">
+        <p className="truncate text-[10px] uppercase tracking-wider text-muted-foreground">{k.label}</p>
+        <p className="text-sm font-semibold tabular-nums text-foreground">
+          {k.value}
+          {k.empty?.when && <span className="ml-1.5 text-[10px] font-medium text-primary">+ {k.empty.label}</span>}
+        </p>
+      </div>
+    </div>
+  );
+  return target ? (
+    <Link to={target} className="min-w-0 rounded-md transition-colors hover:bg-muted/40">{body}</Link>
+  ) : (
+    <div className="min-w-0">{body}</div>
   );
 }
 
