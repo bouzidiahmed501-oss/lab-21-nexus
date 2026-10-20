@@ -4,7 +4,7 @@ import type { User } from "@supabase/supabase-js";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { AppSidebar } from "./AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Bell, ChevronRight } from "lucide-react";
+import { ArrowLeft, Bell, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -91,6 +91,23 @@ function Breadcrumbs() {
   );
 }
 
+function BackButton() {
+  const location = useLocation();
+  if (location.pathname === "/") return null;
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-7 w-7"
+      aria-label="Retour"
+      title="Retour"
+      onClick={() => (window.history.length > 1 ? window.history.back() : (window.location.href = "/"))}
+    >
+      <ArrowLeft className="h-4 w-4" />
+    </Button>
+  );
+}
+
 function NotificationsBell({ userId }: { userId: string }) {
   const [count, setCount] = useState(0);
 
@@ -171,6 +188,7 @@ export function AppLayout({ user }: AppLayoutProps) {
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-30 flex h-11 items-center gap-3 border-b border-border bg-card/95 px-3 backdrop-blur">
             <SidebarTrigger className="h-7 w-7" />
+            <BackButton />
             <Breadcrumbs />
             {tenant && (
               <div className="hidden items-center gap-2 border-l border-border/60 pl-3 md:flex">
