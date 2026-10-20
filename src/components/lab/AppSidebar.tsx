@@ -37,6 +37,7 @@ import {
   GraduationCap,
   ChevronDown,
   Search,
+  Star,
 } from "lucide-react";
 import {
   Sidebar,
@@ -125,6 +126,8 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   },
 ];
 
+const ALL_ITEMS: NavItem[] = NAV_GROUPS.flatMap((g) => g.items);
+
 interface AppSidebarProps {
   roles: AppRole[];
   userEmail: string | null;
@@ -150,17 +153,38 @@ export function AppSidebar({ roles, userEmail, primaryRole }: AppSidebarProps) {
   const pathname = location.pathname;
   const [filter, setFilter] = useState("");
   const [closed, setClosed] = useState<string[]>([]);
+  const [pinned, setPinned] = useState<string[]>([]);
+  const [recent, setRecent] = useState<string[]>([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem("balims-nav-closed");
-    if (saved) {
+    const read = (k: string) => {
       try {
-        setClosed(JSON.parse(saved) as string[]);
+        return JSON.parse(localStorage.getItem(k) ?? "[]") as string[];
       } catch {
-        /* ignore */
+        return [];
       }
-    }
+    };
+    setClosed(read("balims-nav-closed"));
+    setPinned(read("balims-nav-pinned"));
+    setRecent(read("balims-nav-recent"));
   }, []);
+
+  useEffect(() => {
+    if (!ALL_ITEMS.some((i) => i.to === pathname) || pathname === "/") return;
+    setRecent((prev) => {
+      const next = [pathname, ...prev.filter((p) => p !== pathname)].slice(0, 5);
+      localStorage.setItem("balims-nav-recent", JSON.stringify(next));
+      return next;
+    });
+  }, [pathname]);
+
+  const togglePin = (to: string) => {
+    setPinned((prev) => {
+      const next = prev.includes(to) ? prev.filter((p) => p !== to) : [...prev, to];
+      localStorage.setItem("balims-nav-pinned", JSON.stringify(next));
+      return next;
+    });
+  };
 
   const toggleGroup = (label: string) => {
     setClosed((prev) => {
@@ -212,7 +236,11 @@ export function AppSidebar({ roles, userEmail, primaryRole }: AppSidebarProps) {
             />
           </div>
         )}
-        {NAV_GROUPS.map((group) => {
+        {[
+          { label: "Favoris", items: pinned.map((p) => ALL_ITEMS.find((i) => i.to === p)).filter(Boolean) as NavItem[] },
+          { label: "Récemment consultés", items: recent.filter((p) => !pinned.includes(p)).map((p) => ALL_ITEMS.find((i) => i.to === p)).filter(Boolean) as NavItem[] },
+          ...NAV_GROUPS,
+        ].map((group) => {
           const q = filter.trim().toLowerCase();
           const visibleItems = group.items
             .filter(canSee)
@@ -244,7 +272,7 @@ export function AppSidebar({ roles, userEmail, primaryRole }: AppSidebarProps) {
                     const Icon = item.icon;
                     const active = isActive(item.to);
                     return (
-                      <SidebarMenuItem key={item.to}>
+                      <SidebarMenuItem key={item.to} className="group/nav">
                         <SidebarMenuButton
                           asChild
                           isActive={active}
@@ -259,6 +287,19 @@ export function AppSidebar({ roles, userEmail, primaryRole }: AppSidebarProps) {
                             <span className="truncate">{item.label}</span>
                           </Link>
                         </SidebarMenuButton>
+                        {!collapsed && (
+                          <button
+                            type="button"
+                            onClick={() => togglePin(item.to)}
+                            aria-label={pinned.includes(item.to) ? "Retirer des favoris" : "Épingler en favori"}
+                            className={cn(
+                              "absolute right-1 top-1/2 -translate-y-1/2 rounded p-1 text-sidebar-foreground/50 hover:text-sidebar-primary",
+                              pinned.includes(item.to) ? "text-sidebar-primary" : "opacity-0 group-hover/nav:opacity-100 focus:opacity-100",
+                            )}
+                          >
+                            <Star className={cn("h-3 w-3", pinned.includes(item.to) && "fill-current")} />
+                          </button>
+                        )}
                       </SidebarMenuItem>
                     );
                   })}
