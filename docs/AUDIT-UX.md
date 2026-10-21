@@ -92,7 +92,7 @@ Le problème n'est pas la couverture fonctionnelle, c'est **la lisibilité du pa
 - [x] `TRV-03` **P1** — Pas de favoris / « épingler un module ».
 - [x] `TRV-04` **P1** — Pas de fil workflow visible (Devis → BC → … → Facture) ni de bouton « étape suivante » sur les fiches.
 - [x] `TRV-05` **P1** — Pas de « récemment consultés ».
-- [ ] `TRV-06` **P2** — Ctrl+K ne cherche que clients / échantillons / factures : étendre aux devis, BC, analyses, rapports, équipements, et aux commandes (« créer un devis »).
+- [x] `TRV-06` **P2** — Ctrl+K ne cherche que clients / échantillons / factures : étendre aux devis, BC, analyses, rapports, équipements, et aux commandes (« créer un devis »).
 - [x] `TRV-07` **P1** — Aucun bouton retour sur les écrans profonds (seuls login et portail en ont un).
 
 ### 3.2 Écrans et tableaux
