@@ -84,16 +84,28 @@ export function CommandPalette() {
     let cancelled = false;
     const t = setTimeout(async () => {
       const like = `%${term}%`;
-      const [clients, echantillons, factures] = await Promise.all([
-        (supabase.from("clients" as never) as any).select("id, raison_sociale, code").ilike("raison_sociale", like).limit(5),
-        (supabase.from("echantillons" as never) as any).select("id, code_barre, designation").or(`code_barre.ilike.${like},designation.ilike.${like}`).limit(5),
-        (supabase.from("factures" as never) as any).select("id, numero").ilike("numero", like).limit(5),
+      const q = (t: string) => supabase.from(t as never) as any;
+      const [clients, echantillons, factures, devis, bcs, analyses, rapports, equips] = await Promise.all([
+        q("clients").select("id, raison_sociale, code").ilike("raison_sociale", like).limit(5),
+        q("echantillons").select("id, code_barre, designation").or(`code_barre.ilike.${like},designation.ilike.${like}`).limit(5),
+        q("factures").select("id, numero").ilike("numero", like).limit(5),
+        q("devis").select("id, numero, objet").or(`numero.ilike.${like},objet.ilike.${like}`).limit(5),
+        q("bons_commande").select("id, numero, objet").or(`numero.ilike.${like},objet.ilike.${like}`).limit(5),
+        q("analyses").select("id, numero").ilike("numero", like).limit(5),
+        q("rapports").select("id, numero").ilike("numero", like).limit(5),
+        q("equipements").select("id, numero, designation").or(`numero.ilike.${like},designation.ilike.${like}`).limit(5),
       ]);
       if (cancelled) return;
+      const rows = (r: any) => (r?.data ?? []) as any[];
       const list: Hit[] = [
-        ...((clients.data ?? []) as any[]).map((c) => ({ id: `c-${c.id}`, label: c.raison_sociale, sub: "Client", to: "/clients" })),
-        ...((echantillons.data ?? []) as any[]).map((s) => ({ id: `e-${s.id}`, label: `${s.code_barre} — ${s.designation ?? ""}`, sub: "Échantillon", to: "/echantillons" })),
-        ...((factures.data ?? []) as any[]).map((f) => ({ id: `f-${f.id}`, label: f.numero, sub: "Facture", to: "/facturation" })),
+        ...rows(clients).map((c) => ({ id: `c-${c.id}`, label: c.raison_sociale, sub: "Client", to: "/clients" })),
+        ...rows(echantillons).map((s) => ({ id: `e-${s.id}`, label: `${s.code_barre} — ${s.designation ?? ""}`, sub: "Échantillon", to: "/echantillons" })),
+        ...rows(factures).map((f) => ({ id: `f-${f.id}`, label: f.numero, sub: "Facture", to: "/facturation" })),
+        ...rows(devis).map((d) => ({ id: `d-${d.id}`, label: `${d.numero}${d.objet ? ` — ${d.objet}` : ""}`, sub: "Devis", to: "/devis" })),
+        ...rows(bcs).map((b) => ({ id: `b-${b.id}`, label: `${b.numero}${b.objet ? ` — ${b.objet}` : ""}`, sub: "Bon de commande", to: "/bons-commande" })),
+        ...rows(analyses).map((a) => ({ id: `a-${a.id}`, label: a.numero, sub: "Analyse", to: "/analyses" })),
+        ...rows(rapports).map((r) => ({ id: `r-${r.id}`, label: r.numero, sub: "Rapport", to: "/rapports" })),
+        ...rows(equips).map((e) => ({ id: `q-${e.id}`, label: `${e.numero} — ${e.designation}`, sub: "Équipement", to: "/equipements" })),
       ];
       setHits(list);
     }, 250);
@@ -128,6 +140,19 @@ export function CommandPalette() {
         <CommandInput placeholder="Rechercher un module, un client, un échantillon, une facture…" value={query} onValueChange={setQuery} />
         <CommandList>
           <CommandEmpty>Aucun résultat.</CommandEmpty>
+          <CommandGroup heading="Actions rapides">
+            {[
+              { label: "Créer un devis", to: "/devis" },
+              { label: "Créer un bon de commande", to: "/bons-commande" },
+              { label: "Scanner une réception", to: "/reception-scan" },
+              { label: "Saisir des résultats (paillasse)", to: "/paillasse" },
+              { label: "Créer une facture", to: "/facturation" },
+            ].map((a) => (
+              <CommandItem key={a.label} value={a.label} onSelect={() => go(a.to)}>
+                {a.label}
+              </CommandItem>
+            ))}
+          </CommandGroup>
           {hits.length > 0 && (
             <CommandGroup heading="Résultats">
               {hits.map((h) => (
