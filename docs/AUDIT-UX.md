@@ -101,10 +101,10 @@ Le problème n'est pas la couverture fonctionnelle, c'est **la lisibilité du pa
 - [x] `TRV-12` **P1** — Contenu bloqué en haut de page : sur un écran 1800 px, 80 % de vide sous le tableau. Pas de hauteur pleine ni d'en-tête de tableau collant.
 - [x] `TRV-13` **P1** — Pas de sélection multiple ni d'actions groupées (imprimer étiquettes, changer statut, exporter la sélection).
 - [x] `TRV-14` **P1** — Filtres non mémorisés : on perd son filtre en revenant sur l'écran.
-- [ ] `TRV-15` **P1** — Pas de choix ni de réordonnancement des colonnes, pas de densité réglable.
-- [ ] `TRV-16` **P2** — Pas de tri secondaire, pas de tri par défaut métier (le plus récent en premier).
-- [ ] `TRV-17` **P2** — L'export CSV exporte la vue et non la sélection ; pas d'export Excel.
-- [ ] `TRV-18` **P1** — Aucun écran n'est vraiment utilisable sous 768 px (tables non repliées en cartes).
+- [x] `TRV-15` **P1** — Pas de choix ni de réordonnancement des colonnes, pas de densité réglable.
+- [x] `TRV-16` **P2** — Pas de tri secondaire, pas de tri par défaut métier (le plus récent en premier).
+- [x] `TRV-17` **P2** — L'export CSV exporte la vue et non la sélection ; pas d'export Excel.
+- [x] `TRV-18` **P1** — Aucun écran n'est vraiment utilisable sous 768 px (tables non repliées en cartes).
 
 ### 3.3 Formulaires et modales
 - [ ] `TRV-20` **P1** — Formulaires longs sans sections ni étapes (BC, facture, équipement, RH).
